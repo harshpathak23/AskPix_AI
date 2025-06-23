@@ -59,29 +59,42 @@ export default function Home() {
         return;
       }
 
+      let stream: MediaStream;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        // First attempt: Request ideal high resolution, which often selects the main camera
+        stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: 'environment',
             width: { ideal: 1920 },
             height: { ideal: 1080 },
           },
         });
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setHasCameraPermission(true);
-        setError(null);
       } catch (error) {
-        console.error('Error accessing camera:', error);
-        setHasCameraPermission(false);
-        if (error instanceof Error && (error.name === 'OverconstrainedError' || error.name === 'NotFoundError')) {
-             setError('Could not open the camera. It might not support the requested resolution. Please check your browser permissions.');
-        } else {
-             setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
+        console.warn('High-resolution camera request failed, falling back.', error);
+        try {
+            // Fallback: Request any environment-facing camera if the first attempt fails
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'environment',
+                },
+            });
+        } catch (fallbackError) {
+            console.error('Error accessing any camera:', fallbackError);
+            setHasCameraPermission(false);
+            if (fallbackError instanceof Error && (fallbackError.name === 'OverconstrainedError' || fallbackError.name === 'NotFoundError')) {
+                 setError('Could not open the camera. It might be in use or not available. Please check your browser permissions.');
+            } else {
+                 setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
+            }
+            return;
         }
       }
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setHasCameraPermission(true);
+      setError(null);
     };
     
     if (appState === 'scanning') {
