@@ -32,7 +32,15 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
-    async function getCameraPermission() {
+    const stopStream = () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    };
+
+    const startStream = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         toast({
           variant: 'destructive',
@@ -49,21 +57,24 @@ export default function Home() {
           videoRef.current.srcObject = stream;
         }
         setHasCameraPermission(true);
+        setError(null);
       } catch (error) {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
         setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
       }
+    };
+
+    if (capturedImage) {
+      stopStream();
+    } else {
+      startStream();
     }
-    getCameraPermission();
-    
+
     return () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const stream = videoRef.current.srcObject as MediaStream;
-            stream.getTracks().forEach(track => track.stop());
-        }
-    }
-  }, [toast]);
+      stopStream();
+    };
+  }, [capturedImage, toast]);
 
   const handleScan = async () => {
     if (videoRef.current && canvasRef.current) {
