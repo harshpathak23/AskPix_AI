@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe } from 'lucide-react';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
@@ -19,11 +19,13 @@ type SolutionState = {
 } | null;
 
 type Subject = 'Mathematics' | 'Physics' | 'Chemistry';
+type Language = 'en' | 'hi';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SolutionState>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
+  const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +79,32 @@ export default function Home() {
     };
   }, [capturedImage, toast]);
 
+  const handleLanguageChange = async (newLang: Language) => {
+    if (!capturedImage) {
+      setError("Cannot change language without a scanned question.");
+      return;
+    }
+    
+    setIsLoading(true);
+    setResult(null); // Clear previous solution
+    setError(null);
+    setLanguage(newLang);
+
+    const response = await getSolution({ 
+      photoDataUri: capturedImage, 
+      language: newLang, 
+      subject 
+    });
+    
+    if (response.error) {
+      setError(response.error);
+    } else if (response.solutionSteps) {
+      setResult({ question: capturedImage, solutionSteps: response.solutionSteps });
+    }
+    
+    setIsLoading(false);
+  };
+
   const handleScan = async () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -92,6 +120,8 @@ export default function Home() {
         setIsLoading(true);
         setResult(null);
         setError(null);
+        setLanguage('en'); // Reset language to English for every new scan
+
         const response = await getSolution({ photoDataUri: dataUri, language: 'en', subject });
         if (response.error) {
           setError(response.error);
@@ -108,6 +138,7 @@ export default function Home() {
     setResult(null);
     setIsLoading(false);
     setError(null);
+    setLanguage('en');
   };
   
   const renderCameraView = () => (
@@ -196,11 +227,22 @@ export default function Home() {
         
         {isLoading && <SolutionSkeleton />}
         
-        {result && (
-          <SolutionDisplay
-            question={result.question}
-            solutionSteps={result.solutionSteps}
-          />
+        {result && !isLoading && (
+          <div className="w-full mt-8 animate-in fade-in-50 duration-500">
+             <div className="flex items-center justify-center gap-4 mb-4">
+               <Globe className="text-muted-foreground" size={20} />
+               <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
+                 <TabsList>
+                   <TabsTrigger value="en">English</TabsTrigger>
+                   <TabsTrigger value="hi">Hindi</TabsTrigger>
+                 </TabsList>
+               </Tabs>
+             </div>
+            <SolutionDisplay
+              question={result.question}
+              solutionSteps={result.solutionSteps}
+            />
+          </div>
         )}
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground z-10 flex items-center gap-2">
