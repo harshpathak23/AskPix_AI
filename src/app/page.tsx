@@ -61,7 +61,13 @@ export default function Home() {
       }
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            } 
+        });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -271,7 +277,7 @@ export default function Home() {
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={(c) => setCrop(c)}
+            onChange={(_, percentCrop) => setCrop(percentCrop)}
             aspect={undefined}
           >
             <Image
@@ -342,7 +348,7 @@ export default function Home() {
 
         <div className="w-full flex flex-col md:flex-row items-start gap-8 mt-4">
           {/* Left Column */}
-          <div className="w-full md:w-1/2 flex-shrink-0">
+          <div className="w-full md:w-3/5 flex-shrink-0">
             <div className="p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl min-h-[400px] flex flex-col justify-center">
               {!capturedImage ? (
                 renderCameraView()
@@ -355,7 +361,7 @@ export default function Home() {
           </div>
           
           {/* Right Column */}
-          <div className="w-full md:w-1/2 flex-shrink-0">
+          <div className="w-full md:w-2/5 flex-shrink-0">
               {isLoading ? (
                 <SolutionSkeleton />
               ) : result ? (
