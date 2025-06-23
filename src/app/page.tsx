@@ -60,13 +60,38 @@ export default function Home() {
       }
 
       try {
+        // Enumerate devices to find the main back camera.
+        // Note: Labels are only available after permission has been granted.
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+        // Heuristic to find the main back camera: prioritize non-wide, non-telephoto lenses.
+        let mainBackCamera = videoDevices.find(device => 
+            device.label.toLowerCase().includes('back') && 
+            !device.label.toLowerCase().includes('wide') &&
+            !device.label.toLowerCase().includes('telephoto')
+        );
+        
+        // Fallback to the first available back camera if a "main" one isn't found.
+        if (!mainBackCamera) {
+          mainBackCamera = videoDevices.find(device => device.label.toLowerCase().includes('back'));
+        }
+
+        const videoConstraints: MediaTrackConstraints = {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+        };
+
+        if (mainBackCamera) {
+          videoConstraints.deviceId = { exact: mainBackCamera.deviceId };
+        } else {
+          videoConstraints.facingMode = 'environment';
+        }
+        
         const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: 'environment',
-                width: { ideal: 1920 },
-                height: { ideal: 1080 }
-            } 
+            video: videoConstraints
         });
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -75,7 +100,11 @@ export default function Home() {
       } catch (error) {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
-        setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
+        if (error instanceof Error && (error.name === 'OverconstrainedError' || error.name === 'NotFoundError')) {
+             setError('Could not open the main camera. It might not support the requested resolution. Please check your browser permissions.');
+        } else {
+             setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
+        }
       }
     };
     
@@ -95,8 +124,13 @@ export default function Home() {
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
     
-    canvas.width = Math.floor(crop.width * scaleX);
-    canvas.height = Math.floor(crop.height * scaleY);
+    const cropX = crop.x * scaleX;
+    const cropY = crop.y * scaleY;
+    const cropWidth = crop.width * scaleX;
+    const cropHeight = crop.height * scaleY;
+
+    canvas.width = Math.floor(cropWidth);
+    canvas.height = Math.floor(cropHeight);
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -107,10 +141,10 @@ export default function Home() {
   
     ctx.drawImage(
       image,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
       0,
       0,
       canvas.width,
@@ -190,7 +224,7 @@ export default function Home() {
     
     if (response.error) {
       setError(response.error);
-      setSolutionSteps(null); // Clear previous solution on error
+      // Keep previous solution steps visible on translation error
     } else if (response.solutionSteps) {
       setSolutionSteps(response.solutionSteps);
     }
@@ -233,8 +267,8 @@ export default function Home() {
     const crop = centerCrop(
       makeAspectCrop(
         {
-          unit: '%',
-          width: 90,
+          unit: 'px', // Use pixels for more reliable cropping
+          width: width * 0.9,
         },
         16 / 9,
         width,
@@ -294,7 +328,7 @@ export default function Home() {
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
             <Button
               onClick={handleScan}
-              size="lg"
+              size="icon"
               className="h-16 w-16 rounded-full animate-pulse-glow"
               disabled={hasCameraPermission !== true}
             >
