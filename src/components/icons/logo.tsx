@@ -14,13 +14,8 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
         strokeLinecap="round"
         strokeLinejoin="round"
         {...props}>
-        <circle cx="12" cy="12" r="2" />
-        <path d="M21.17 8H12" />
-        <path d="M3.62 7.78 12 12" />
-        <path d="M12 21.17V12" />
-        <path d="M20.38 16.22 12 12" />
-        <path d="M3.83 16H12" />
-        <path d="M11.62 3.62 12 12" />
+      <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.084a1 1 0 0 0-.019 1.838L12 14.496l9.42-3.574Z" />
+      <path d="M14 14.496v4.504L12 20l-2-1v-4.504" />
     </svg>
   );
 }
