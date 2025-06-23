@@ -19,23 +19,19 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
 
-type SolutionState = {
-  question: string;
-  solutionSteps: string[];
-} | null;
-
 type Subject = 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology';
 type Language = 'en' | 'hi';
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('welcome');
-  const [result, setResult] = useState<SolutionState>(null);
+  const [solutionSteps, setSolutionSteps] = useState<string[] | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [crop, setCrop] = useState<Crop>();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -134,7 +130,7 @@ export default function Home() {
   const handleStartScanning = () => {
     setCapturedImage(null);
     setCroppedImage(null);
-    setResult(null);
+    setSolutionSteps(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -164,7 +160,7 @@ export default function Home() {
         setError(response.error);
         setAppState('cropping');
       } else if (response.solutionSteps) {
-        setResult({ question: croppedDataUri, solutionSteps: response.solutionSteps });
+        setSolutionSteps(response.solutionSteps);
         setAppState('result');
       }
     } catch (e) {
@@ -180,8 +176,7 @@ export default function Home() {
       return;
     }
     
-    setAppState('solving');
-    setResult(null); 
+    setIsTranslating(true);
     setError(null);
     setLanguage(newLang);
 
@@ -193,13 +188,12 @@ export default function Home() {
     
     if (response.error) {
       setError(response.error);
-      setAppState('result'); // Show error on result screen
+      setSolutionSteps(null); // Clear previous solution on error
     } else if (response.solutionSteps) {
-      setResult({ question: croppedImage, solutionSteps: response.solutionSteps });
-      setAppState('result');
-    } else {
-        setAppState('result');
+      setSolutionSteps(response.solutionSteps);
     }
+    
+    setIsTranslating(false);
   };
 
   const handleScan = () => {
@@ -214,7 +208,7 @@ export default function Home() {
         const dataUri = canvas.toDataURL('image/png');
         setCapturedImage(dataUri);
         setCroppedImage(null);
-        setResult(null);
+        setSolutionSteps(null);
         setError(null);
         setLanguage('en');
         setAppState('cropping');
@@ -225,7 +219,7 @@ export default function Home() {
   const handleRetake = () => {
     setCapturedImage(null);
     setCroppedImage(null);
-    setResult(null);
+    setSolutionSteps(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -327,7 +321,7 @@ export default function Home() {
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={(c) => setCrop(c)}
+            onChange={(c, percentCrop) => setCrop(c)}
             aspect={undefined}
           >
             <Image
@@ -371,7 +365,7 @@ export default function Home() {
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500">
         <div className="w-full aspect-video bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
-            {result?.question && <Image src={result.question} alt="Cropped question" fill className="object-contain" />}
+            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         
         {error && (
@@ -382,28 +376,30 @@ export default function Home() {
             </Alert>
         )}
         
-        {result ? (
-          <div className="w-full">
+        <div className="w-full">
             <div className="flex items-center justify-center gap-4 mb-4">
-              <Globe className="text-muted-foreground" size={20} />
-              <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
+                <Globe className="text-muted-foreground" size={20} />
+                <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
                 <TabsList>
-                  <TabsTrigger value="en">English</TabsTrigger>
-                  <TabsTrigger value="hi">Hindi</TabsTrigger>
+                    <TabsTrigger value="en" disabled={isTranslating}>English</TabsTrigger>
+                    <TabsTrigger value="hi" disabled={isTranslating}>Hindi</TabsTrigger>
                 </TabsList>
-              </Tabs>
+                </Tabs>
             </div>
-            <SolutionDisplay
-              solutionSteps={result.solutionSteps}
-            />
-          </div>
-        ) : !error && (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[200px]">
-            <Bot size={48} className="mb-4 text-primary" />
-            <h3 className="text-xl font-semibold">Processing Error</h3>
-            <p className="text-muted-foreground">Could not generate a solution. Please try scanning again.</p>
-          </div>
-        )}
+            {isTranslating ? (
+              <SolutionSkeleton />
+            ) : solutionSteps ? (
+              <SolutionDisplay
+                solutionSteps={solutionSteps}
+              />
+            ) : !error ? (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[200px]">
+                    <Bot size={48} className="mb-4 text-primary" />
+                    <h3 className="text-xl font-semibold">Processing Error</h3>
+                    <p className="text-muted-foreground">Could not generate a solution. Please try scanning again.</p>
+                </div>
+            ) : null}
+        </div>
 
         <Button onClick={handleStartScanning} variant="outline" className="w-full text-lg py-6">
             <RefreshCw className="mr-2 h-5 w-5" />
