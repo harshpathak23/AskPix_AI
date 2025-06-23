@@ -4,33 +4,15 @@
  * @fileOverview An AI agent that solves math, physics, and chemistry questions from an image.
  *
  * - solveQuestion - A function that handles the question-solving process.
- * - SolveQuestionInput - The input type for the solveQuestion function.
- * - SolveQuestionOutput - The return type for the solveQuestion function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const SolveQuestionInputSchema = z.object({
-  photoDataUri: z
-    .string()
-    .describe(
-      "A photo of a question, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-  subject: z
-    .string()
-    .describe('The subject of the question (e.g., Mathematics, Physics, Chemistry, Biology).'),
-  language: z
-    .string()
-    .describe('The language in which the solution should be provided. Options: en (English), hi (Hindi).')
-    .default('en'),
-});
-export type SolveQuestionInput = z.infer<typeof SolveQuestionInputSchema>;
-
-const SolveQuestionOutputSchema = z.object({
-  solutionSteps: z.array(z.string()).describe('An array of strings, where each string is a step in the solution.'),
-});
-export type SolveQuestionOutput = z.infer<typeof SolveQuestionOutputSchema>;
+import {
+  SolveQuestionInputSchema,
+  type SolveQuestionInput,
+  SolveQuestionOutputSchema,
+  type SolveQuestionOutput,
+} from '@/ai/schemas';
 
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
   const result = await solveQuestionFlow(input);

@@ -4,23 +4,15 @@
  * @fileOverview A question processor AI agent.
  *
  * - processQuestionText - A function that handles the question processing and subject determination.
- * - ProcessQuestionTextInput - The input type for the processQuestionText function.
- * - ProcessQuestionTextOutput - The return type for the processQuestionText function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const ProcessQuestionTextInputSchema = z.object({
-  questionText: z.string().describe('The text of the question to be processed.'),
-  language: z.string().describe('The language in which the question is written.'),
-});
-export type ProcessQuestionTextInput = z.infer<typeof ProcessQuestionTextInputSchema>;
-
-const ProcessQuestionTextOutputSchema = z.object({
-  subject: z.string().describe('The subject of the question (e.g., Mathematics, Physics, Chemistry, Biology, General).'),
-});
-export type ProcessQuestionTextOutput = z.infer<typeof ProcessQuestionTextOutputSchema>;
+import {
+  ProcessQuestionTextInputSchema,
+  type ProcessQuestionTextInput,
+  ProcessQuestionTextOutputSchema,
+  type ProcessQuestionTextOutput,
+} from '@/ai/schemas';
 
 export async function processQuestionText(input: ProcessQuestionTextInput): Promise<ProcessQuestionTextOutput> {
   return processQuestionTextFlow(input);

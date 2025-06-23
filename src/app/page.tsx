@@ -155,6 +155,13 @@ export default function Home() {
         setError(response.error);
         setAppState('cropping');
       } else if (response.solutionSteps) {
+        if (response.detectedSubject && response.detectedSubject !== subject) {
+            setSubject(response.detectedSubject as Subject);
+            toast({
+                title: "Subject Auto-Corrected",
+                description: `We detected this is a ${response.detectedSubject} question and switched the subject for you.`,
+            });
+        }
         setSolutionSteps(response.solutionSteps);
         setAppState('result');
       }
@@ -315,7 +322,7 @@ export default function Home() {
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={(c) => setCrop(c)}
+            onChange={(c, percentCrop) => setCrop(c)}
             aspect={undefined}
           >
             <Image
