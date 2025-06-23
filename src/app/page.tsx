@@ -74,10 +74,10 @@ export default function Home() {
       }
     };
 
-    if (capturedImage) {
-      stopStream();
-    } else {
+    if (!capturedImage) {
       startStream();
+    } else {
+      stopStream();
     }
 
     return () => {
@@ -90,7 +90,6 @@ export default function Home() {
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
     
-    // Set canvas dimensions to the precise crop size
     canvas.width = Math.floor(crop.width * scaleX);
     canvas.height = Math.floor(crop.height * scaleY);
 
@@ -137,6 +136,7 @@ export default function Home() {
       
       if (response.error) {
         setError(response.error);
+        setResult(null);
       } else if (response.solutionSteps) {
         setResult({ question: croppedDataUri, solutionSteps: response.solutionSteps });
       }
@@ -211,7 +211,7 @@ export default function Home() {
           unit: '%',
           width: 90,
         },
-        width / height, // Lock aspect ratio initially
+        16 / 9,
         width,
         height
       ),
@@ -224,7 +224,7 @@ export default function Home() {
   const renderCameraView = () => (
     <div className="w-full space-y-6 flex flex-col items-center">
       <div className="w-full aspect-video bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
-        <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+        <video ref={videoRef} className="w-full h-full object-cover transform scale-150" autoPlay muted playsInline />
         <div className="absolute inset-0 bg-black/20" />
         {hasCameraPermission === false && !error && (
            <Alert variant="destructive" className="w-11/12">
@@ -272,7 +272,7 @@ export default function Home() {
           <ReactCrop
             crop={crop}
             onChange={(c) => setCrop(c)}
-            aspect={undefined} // Allow free-form crop
+            aspect={undefined}
           >
             <Image
               ref={imgRef}
@@ -299,7 +299,7 @@ export default function Home() {
     </div>
   );
   
-  const renderResultView = () => (
+  const renderResultImageView = () => (
     <div className="w-full space-y-6">
         <div className="w-full aspect-video bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
@@ -318,7 +318,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background dark selection:bg-primary/40">
-      <main className="container mx-auto flex max-w-5xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
+      <main className="container mx-auto flex max-w-7xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         <header className="flex flex-col items-center text-center mb-8">
            <div className="p-3 mb-4 bg-primary/20 rounded-full border-8 border-background/50 shadow-lg">
              <Logo className="h-10 w-10 text-accent" />
@@ -332,38 +332,56 @@ export default function Home() {
           </p>
         </header>
 
-        <div className="w-full p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl">
-          {error && !isLoading && (
-            <Alert variant="destructive" className="mb-4">
+        {error && !isLoading && (
+            <Alert variant="destructive" className="mb-4 w-full">
               <XCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-          )}
-
-          { !capturedImage && !isLoading && renderCameraView() }
-          { capturedImage && !croppedImage && !isLoading && renderCroppingView() }
-          { croppedImage && !isLoading && renderResultView() }
-        </div>
-        
-        {isLoading && <SolutionSkeleton />}
-        
-        {result && !isLoading && (
-          <div className="w-full mt-8 animate-in fade-in-50 duration-500">
-             <div className="flex items-center justify-center gap-4 mb-4">
-               <Globe className="text-muted-foreground" size={20} />
-               <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                 <TabsList>
-                   <TabsTrigger value="en">English</TabsTrigger>
-                   <TabsTrigger value="hi">Hindi</TabsTrigger>
-                 </TabsList>
-               </Tabs>
-             </div>
-            <SolutionDisplay
-              solutionSteps={result.solutionSteps}
-            />
-          </div>
         )}
+
+        <div className="w-full flex flex-col md:flex-row items-start gap-8 mt-4">
+          {/* Left Column */}
+          <div className="w-full md:w-1/2 flex-shrink-0">
+            <div className="p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl min-h-[400px] flex flex-col justify-center">
+              {!capturedImage ? (
+                renderCameraView()
+              ) : !croppedImage ? (
+                renderCroppingView()
+              ) : (
+                renderResultImageView()
+              )}
+            </div>
+          </div>
+          
+          {/* Right Column */}
+          <div className="w-full md:w-1/2 flex-shrink-0">
+              {isLoading ? (
+                <SolutionSkeleton />
+              ) : result ? (
+                <div className="w-full animate-in fade-in-50 duration-500">
+                  <div className="flex items-center justify-center gap-4 mb-4">
+                    <Globe className="text-muted-foreground" size={20} />
+                    <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
+                      <TabsList>
+                        <TabsTrigger value="en">English</TabsTrigger>
+                        <TabsTrigger value="hi">Hindi</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                  <SolutionDisplay
+                    solutionSteps={result.solutionSteps}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card/50 backdrop-blur-sm border shadow-lg text-muted-foreground min-h-[400px]">
+                  <Bot size={48} className="mb-4 text-primary" />
+                  <h3 className="text-xl font-semibold text-primary-foreground">Solution Awaits</h3>
+                  <p>Scan a problem, and the step-by-step solution will appear here.</p>
+                </div>
+              )}
+          </div>
+        </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground z-10 flex items-center gap-2">
         <Bot size={16} /> Powered by Generative AI.
