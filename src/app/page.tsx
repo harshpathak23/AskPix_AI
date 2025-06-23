@@ -60,36 +60,12 @@ export default function Home() {
       }
 
       try {
-        // Enumerate devices to find the main back camera.
-        // Note: Labels are only available after permission has been granted.
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
-        // Heuristic to find the main back camera: prioritize non-wide, non-telephoto lenses.
-        let mainBackCamera = videoDevices.find(device => 
-            device.label.toLowerCase().includes('back') && 
-            !device.label.toLowerCase().includes('wide') &&
-            !device.label.toLowerCase().includes('telephoto')
-        );
-        
-        // Fallback to the first available back camera if a "main" one isn't found.
-        if (!mainBackCamera) {
-          mainBackCamera = videoDevices.find(device => device.label.toLowerCase().includes('back'));
-        }
-
-        const videoConstraints: MediaTrackConstraints = {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment',
             width: { ideal: 1920 },
             height: { ideal: 1080 },
-        };
-
-        if (mainBackCamera) {
-          videoConstraints.deviceId = { exact: mainBackCamera.deviceId };
-        } else {
-          videoConstraints.facingMode = 'environment';
-        }
-        
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: videoConstraints
+          },
         });
 
         if (videoRef.current) {
@@ -101,7 +77,7 @@ export default function Home() {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
         if (error instanceof Error && (error.name === 'OverconstrainedError' || error.name === 'NotFoundError')) {
-             setError('Could not open the main camera. It might not support the requested resolution. Please check your browser permissions.');
+             setError('Could not open the camera. It might not support the requested resolution. Please check your browser permissions.');
         } else {
              setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
         }
