@@ -16,6 +16,9 @@ import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+// Define the states for our app's screen flow
+type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
+
 type SolutionState = {
   question: string;
   solutionSteps: string[];
@@ -25,7 +28,7 @@ type Subject = 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology';
 type Language = 'en' | 'hi';
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [appState, setAppState] = useState<AppState>('welcome');
   const [result, setResult] = useState<SolutionState>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [language, setLanguage] = useState<Language>('en');
@@ -79,8 +82,8 @@ export default function Home() {
         setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
       }
     };
-
-    if (!capturedImage) {
+    
+    if (appState === 'scanning') {
       startStream();
     } else {
       stopStream();
@@ -89,7 +92,7 @@ export default function Home() {
     return () => {
       stopStream();
     };
-  }, [capturedImage, toast]);
+  }, [appState, toast]);
 
   function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<string> {
     const canvas = document.createElement('canvas');
@@ -103,6 +106,13 @@ export default function Home() {
     if (!ctx) {
       return Promise.reject(new Error('Failed to get canvas context'));
     }
+  
+    const pixelRatio = window.devicePixelRatio || 1;
+    canvas.width = crop.width * pixelRatio * scaleX;
+    canvas.height = crop.height * pixelRatio * scaleY;
+    
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    ctx.imageSmoothingQuality = 'high';
   
     ctx.drawImage(
       image,
@@ -121,13 +131,23 @@ export default function Home() {
     });
   }
 
+  const handleStartScanning = () => {
+    setCapturedImage(null);
+    setCroppedImage(null);
+    setResult(null);
+    setError(null);
+    setLanguage('en');
+    setCrop(undefined);
+    setAppState('scanning');
+  };
+  
   const handleGetSolution = async () => {
     if (!crop || !imgRef.current || !crop.width || !crop.height) {
       setError("Please select an area to crop before getting a solution.");
       return;
     }
 
-    setIsLoading(true);
+    setAppState('solving');
     setError(null);
     
     try {
@@ -142,15 +162,15 @@ export default function Home() {
       
       if (response.error) {
         setError(response.error);
-        setResult(null);
+        setAppState('cropping');
       } else if (response.solutionSteps) {
         setResult({ question: croppedDataUri, solutionSteps: response.solutionSteps });
+        setAppState('result');
       }
     } catch (e) {
       console.error("Cropping or solving failed", e);
       setError("Failed to process the image. Please try again.");
-    } finally {
-      setIsLoading(false);
+      setAppState('cropping');
     }
   };
 
@@ -160,7 +180,7 @@ export default function Home() {
       return;
     }
     
-    setIsLoading(true);
+    setAppState('solving');
     setResult(null); 
     setError(null);
     setLanguage(newLang);
@@ -173,11 +193,13 @@ export default function Home() {
     
     if (response.error) {
       setError(response.error);
+      setAppState('result'); // Show error on result screen
     } else if (response.solutionSteps) {
       setResult({ question: croppedImage, solutionSteps: response.solutionSteps });
+      setAppState('result');
+    } else {
+        setAppState('result');
     }
-    
-    setIsLoading(false);
   };
 
   const handleScan = () => {
@@ -195,6 +217,7 @@ export default function Home() {
         setResult(null);
         setError(null);
         setLanguage('en');
+        setAppState('cropping');
       }
     }
   };
@@ -203,10 +226,10 @@ export default function Home() {
     setCapturedImage(null);
     setCroppedImage(null);
     setResult(null);
-    setIsLoading(false);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
+    setAppState('scanning');
   };
   
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
@@ -227,7 +250,26 @@ export default function Home() {
     setCrop(crop);
   }
 
-  const renderCameraView = () => (
+  const renderWelcomeScreen = () => (
+    <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in-50 duration-500">
+      <div className="p-4 mb-6 bg-card rounded-full border-8 border-background shadow-lg">
+        <Logo className="h-16 w-16 text-primary" />
+      </div>
+      <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">Welcome to ScanSolve</h2>
+      <p className="mt-4 max-w-xl text-lg text-muted-foreground">
+        Get instant, step-by-step solutions for Math, Physics, Chemistry, and Biology problems.
+      </p>
+      <p className="mt-2 max-w-xl text-muted-foreground">
+        Just point your camera, scan a question, and let our AI do the rest.
+      </p>
+      <Button onClick={handleStartScanning} size="lg" className="mt-8 text-lg py-7 px-8 animate-pulse-glow">
+        <Camera className="mr-3 h-6 w-6" />
+        Start Scanning
+      </Button>
+    </div>
+  );
+  
+  const renderScanningScreen = () => (
     <div className="w-full h-full flex flex-col">
       <div className="w-full text-center mb-4">
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full inline-block max-w-sm">
@@ -259,7 +301,7 @@ export default function Home() {
                 onClick={handleScan}
                 size="lg"
                 className="h-16 w-16 rounded-full animate-pulse-glow"
-                disabled={isLoading || hasCameraPermission !== true}
+                disabled={hasCameraPermission !== true}
             >
                 <ScanLine className="h-8 w-8" />
             </Button>
@@ -268,8 +310,15 @@ export default function Home() {
     </div>
   );
 
-  const renderCroppingView = () => (
+  const renderCroppingScreen = () => (
     <div className="w-full h-full flex flex-col items-center">
+       {error && (
+          <Alert variant="destructive" className="mb-4 w-full">
+            <XCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+       )}
       <div className="text-center mb-4">
         <h2 className="text-2xl font-bold">Crop Your Question</h2>
         <p className="text-muted-foreground">Drag to select the area with the question you want to solve.</p>
@@ -278,7 +327,7 @@ export default function Home() {
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={(_, percentCrop) => setCrop(percentCrop)}
+            onChange={(pixelCrop, percentCrop) => setCrop(percentCrop)}
             aspect={undefined}
           >
             <Image
@@ -294,11 +343,11 @@ export default function Home() {
         )}
       </div>
       <div className="flex w-full gap-4 mt-4">
-        <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6" disabled={isLoading}>
+        <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6">
           <RefreshCw className="mr-2 h-5 w-5" />
           Retake
         </Button>
-        <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={isLoading || !crop?.width || !crop?.height}>
+        <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
           <Bot className="mr-2 h-5 w-5" />
           Get Solution
         </Button>
@@ -306,90 +355,90 @@ export default function Home() {
     </div>
   );
   
-  const renderResultImageView = () => (
-    <div className="w-full space-y-6">
-        <div className="w-full aspect-video bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
-            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
-        </div>
-        <Button
-            onClick={handleRetake}
-            variant="outline"
-            className="w-full text-lg py-6"
-            disabled={isLoading}
-        >
-            <RefreshCw className="mr-2 h-5 w-5" />
-            Scan Another Question
-        </Button>
+  const renderSolvingScreen = () => (
+    <div className="w-full h-full flex flex-col items-center justify-center text-center p-8">
+      <Bot size={64} className="mb-6 text-primary animate-bounce" />
+      <h2 className="font-headline text-3xl font-bold tracking-tight">Solving your question...</h2>
+      <p className="mt-2 max-w-md text-lg text-muted-foreground">
+        Our AI tutor is analyzing the image. Please wait a few moments.
+      </p>
+      <div className='w-full max-w-lg mt-8'>
+        <SolutionSkeleton />
+      </div>
     </div>
   );
-
-  return (
-    <div className="flex min-h-screen w-full flex-col items-center">
-      <main className="container mx-auto flex max-w-7xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
-        <header className="flex flex-col items-center text-center mb-8">
-           <div className="p-3 mb-4 bg-card rounded-full border-8 border-background shadow-lg">
-             <Logo className="h-10 w-10 text-primary" />
-          </div>
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
-            ScanSolve
-          </h1>
-          <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-            Stuck on a problem? Scan any Math, Physics, or Chemistry
-            question and get a detailed, step-by-step solution in seconds.
-          </p>
-        </header>
-
-        {error && !isLoading && (
-            <Alert variant="destructive" className="mb-4 w-full">
+  
+  const renderResultScreen = () => (
+    <div className="w-full space-y-6 animate-in fade-in-50 duration-500">
+        <div className="w-full aspect-video bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
+            {result?.question && <Image src={result.question} alt="Cropped question" fill className="object-contain" />}
+        </div>
+        
+        {error && (
+            <Alert variant="destructive" className="w-full">
               <XCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
         )}
-
-        <div className="w-full flex flex-1 flex-col items-stretch gap-8 mt-4">
-          {/* Main Interaction Area for Camera, Cropping, and Result Image */}
-          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm">
-            {!capturedImage ? (
-              renderCameraView()
-            ) : !croppedImage ? (
-              renderCroppingView()
-            ) : (
-              renderResultImageView()
-            )}
-          </div>
-          
-          {/* Solution Area (conditionally rendered) */}
-          {croppedImage && (
-            <div className="w-full">
-                {isLoading ? (
-                  <SolutionSkeleton />
-                ) : result ? (
-                  <div className="w-full animate-in fade-in-50 duration-500">
-                    <div className="flex items-center justify-center gap-4 mb-4">
-                      <Globe className="text-muted-foreground" size={20} />
-                      <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                        <TabsList>
-                          <TabsTrigger value="en">English</TabsTrigger>
-                          <TabsTrigger value="hi">Hindi</TabsTrigger>
-                        </TabsList>
-                      </Tabs>
-                    </div>
-                    <SolutionDisplay
-                      solutionSteps={result.solutionSteps}
-                    />
-                  </div>
-                ) : (
-                  !isLoading && (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[300px]">
-                      <Bot size={48} className="mb-4 text-primary" />
-                      <h3 className="text-xl font-semibold">Solution Awaits</h3>
-                      <p className="text-muted-foreground">Your step-by-step solution will appear here after processing.</p>
-                    </div>
-                  )
-                )}
+        
+        {result ? (
+          <div className="w-full">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <Globe className="text-muted-foreground" size={20} />
+              <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
+                <TabsList>
+                  <TabsTrigger value="en">English</TabsTrigger>
+                  <TabsTrigger value="hi">Hindi</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
-          )}
+            <SolutionDisplay
+              solutionSteps={result.solutionSteps}
+            />
+          </div>
+        ) : !error && (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[200px]">
+            <Bot size={48} className="mb-4 text-primary" />
+            <h3 className="text-xl font-semibold">Processing Error</h3>
+            <p className="text-muted-foreground">Could not generate a solution. Please try scanning again.</p>
+          </div>
+        )}
+
+        <Button onClick={handleStartScanning} variant="outline" className="w-full text-lg py-6">
+            <RefreshCw className="mr-2 h-5 w-5" />
+            Scan Another Question
+        </Button>
+    </div>
+  );
+  
+
+  return (
+    <div className="flex min-h-screen w-full flex-col items-center">
+      <main className="container mx-auto flex max-w-7xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
+        {appState !== 'welcome' && (
+          <header className="flex flex-col items-center text-center mb-8">
+            <div className="p-3 mb-4 bg-card rounded-full border-8 border-background shadow-lg">
+              <Logo className="h-10 w-10 text-primary" />
+            </div>
+            <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
+              ScanSolve
+            </h1>
+            <p className="mt-4 max-w-xl text-lg text-muted-foreground">
+              Stuck on a problem? Scan any Math, Physics, Chemistry, or Biology
+              question and get a detailed, step-by-step solution in seconds.
+            </p>
+          </header>
+        )}
+
+        <div className="w-full flex flex-1 flex-col items-stretch mt-4">
+          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[60vh] justify-center">
+            {appState === 'welcome' && renderWelcomeScreen()}
+            {appState === 'scanning' && renderScanningScreen()}
+            {appState === 'cropping' && renderCroppingScreen()}
+            {appState === 'solving' && renderSolvingScreen()}
+            {appState === 'result' && renderResultScreen()}
+          </div>
         </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground z-10 flex items-center gap-2">
