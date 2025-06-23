@@ -61,18 +61,20 @@ export default function Home() {
 
       let stream: MediaStream;
       try {
-        // First attempt: Request ideal high resolution, which often selects the main camera
+        // We're making a more specific request now. By requiring a MINIMUM resolution,
+        // we can encourage the browser to select the main camera, as wide-angle or
+        // secondary lenses often don't support these higher resolutions.
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: 'environment',
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { min: 1280, ideal: 1920 },
+            height: { min: 720, ideal: 1080 },
           },
         });
       } catch (error) {
         console.warn('High-resolution camera request failed, falling back.', error);
         try {
-            // Fallback: Request any environment-facing camera if the first attempt fails
+            // Fallback: If the high-res request fails, request any environment-facing camera.
             stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: 'environment',
@@ -81,10 +83,11 @@ export default function Home() {
         } catch (fallbackError) {
             console.error('Error accessing any camera:', fallbackError);
             setHasCameraPermission(false);
-            if (fallbackError instanceof Error && (fallbackError.name === 'OverconstrainedError' || fallbackError.name === 'NotFoundError')) {
-                 setError('Could not open the camera. It might be in use or not available. Please check your browser permissions.');
-            } else {
+            // Provide a more specific error message based on the error type.
+            if (fallbackError instanceof Error && (fallbackError.name === 'NotAllowedError' || fallbackError.name === 'PermissionDeniedError')) {
                  setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
+            } else {
+                 setError('Could not open the camera. It might be in use, not available, or your device may not support the required camera settings.');
             }
             return;
         }
