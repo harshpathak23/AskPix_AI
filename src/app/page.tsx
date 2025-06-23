@@ -271,7 +271,7 @@ export default function Home() {
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={(_, percentCrop) => setCrop(percentCrop)}
+            onChange={(c) => setCrop(c)}
             aspect={undefined} // Allow free-form crop
           >
             <Image
