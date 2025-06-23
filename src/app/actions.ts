@@ -4,7 +4,7 @@ import { solveQuestion } from '@/ai/flows/solve-question';
 import { z } from 'zod';
 
 const QuestionSchema = z.object({
-  question: z.string().min(10, { message: "Question must be at least 10 characters long." }),
+  photoDataUri: z.string().startsWith('data:image/', { message: "Invalid image format." }),
   language: z.enum(['en', 'hi']),
 });
 
@@ -13,11 +13,11 @@ interface ActionState {
   solution?: string | null;
 }
 
-export async function getSolution(data: { question: string, language: 'en' | 'hi' }): Promise<ActionState> {
+export async function getSolution(data: { photoDataUri: string, language: 'en' | 'hi' }): Promise<ActionState> {
   const validatedFields = QuestionSchema.safeParse(data);
 
   if (!validatedFields.success) {
-    const firstError = validatedFields.error.flatten().fieldErrors.question?.[0] 
+    const firstError = validatedFields.error.flatten().fieldErrors.photoDataUri?.[0] 
       || validatedFields.error.flatten().fieldErrors.language?.[0]
       || 'Invalid input.';
     return {
@@ -27,7 +27,7 @@ export async function getSolution(data: { question: string, language: 'en' | 'hi
 
   try {
     const result = await solveQuestion({
-      questionText: validatedFields.data.question,
+      photoDataUri: validatedFields.data.photoDataUri,
       language: validatedFields.data.language,
     });
     

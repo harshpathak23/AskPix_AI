@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview An AI agent that solves math, physics, and chemistry questions.
+ * @fileOverview An AI agent that solves math, physics, and chemistry questions from an image.
  *
  * - solveQuestion - A function that handles the question-solving process.
  * - SolveQuestionInput - The input type for the solveQuestion function.
@@ -12,7 +12,11 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SolveQuestionInputSchema = z.object({
-  questionText: z.string().describe('The text of the question to be solved.'),
+  photoDataUri: z
+    .string()
+    .describe(
+      "A photo of a question, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
   language: z
     .string()
     .describe('The language in which the solution should be provided. Options: en (English), hi (Hindi).')
@@ -34,16 +38,17 @@ const prompt = ai.definePrompt({
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
   prompt: `You are an expert tutor specializing in Mathematics, Physics, and Chemistry.
-Please solve the following question step by step with detailed explanations.
+Your task is to solve the question provided in the image.
 
-Question: {{{questionText}}}
+Image of the question: {{media url=photoDataUri}}
 
 Instructions:
-1. Identify the subject (Math/Physics/Chemistry)
-2. Provide a clear, step-by-step solution
-3. Show all calculations and reasoning
-4. Include the final answer
-5. {{#eq language "hi"}}कृपया हिंदी में उत्तर दें।{{else}}Please answer in English.{{/eq}}
+1. First, accurately transcribe the question from the image.
+2. Identify the subject (Math/Physics/Chemistry).
+3. Provide a clear, step-by-step solution to the transcribed question.
+4. Show all calculations and reasoning.
+5. Include the final answer.
+6. {{#eq language "hi"}}कृपया हिंदी में उत्तर दें।{{else}}Please answer in English.{{/eq}}
 
 Please format your response clearly with proper mathematical notation where applicable.`,
 });

@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
 
 interface SolutionDisplayProps {
   question: string;
@@ -6,6 +7,8 @@ interface SolutionDisplayProps {
 }
 
 export function SolutionDisplay({ question, solution }: SolutionDisplayProps) {
+  const isDataUri = question.startsWith('data:image');
+
   return (
     <div className="space-y-6 mt-8 w-full animate-in fade-in-50 duration-500">
       <Card>
@@ -13,9 +16,15 @@ export function SolutionDisplay({ question, solution }: SolutionDisplayProps) {
           <CardTitle>Your Question</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="whitespace-pre-wrap font-sans text-base">
-            {question}
-          </p>
+          {isDataUri ? (
+            <div className="relative aspect-video">
+              <Image src={question} alt="Scanned question" fill className="object-contain rounded-md" />
+            </div>
+          ) : (
+            <p className="whitespace-pre-wrap font-sans text-base">
+              {question}
+            </p>
+          )}
         </CardContent>
       </Card>
       <Card>
