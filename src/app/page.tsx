@@ -214,8 +214,8 @@ export default function Home() {
     const crop = centerCrop(
       makeAspectCrop(
         {
-          unit: '%',
-          width: 90,
+          unit: 'px',
+          width: width * 0.9,
         },
         16 / 9,
         width,
@@ -229,8 +229,18 @@ export default function Home() {
 
   const renderCameraView = () => (
     <div className="w-full space-y-6 flex flex-col items-center">
+      <div className="w-full text-center">
+        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full inline-block max-w-sm">
+          <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-sm">
+            <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
+            <TabsTrigger value="Physics"><Atom className="mr-2" />Physics</TabsTrigger>
+            <TabsTrigger value="Chemistry"><TestTube className="mr-2" />Chem</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
       <div className="w-full aspect-video bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
-        <video ref={videoRef} className="w-full h-full object-cover transform scale-150" autoPlay muted playsInline />
+        <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
         <div className="absolute inset-0 bg-black/20" />
         {hasCameraPermission === false && !error && (
            <Alert variant="destructive" className="w-11/12">
@@ -244,18 +254,6 @@ export default function Home() {
         <canvas ref={canvasRef} className="hidden" />
       </div>
 
-       <div className="space-y-4 text-center">
-          <label className="text-lg font-semibold text-primary-foreground">
-            Select Subject
-          </label>
-          <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-sm">
-              <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
-              <TabsTrigger value="Physics"><Atom className="mr-2" />Physics</TabsTrigger>
-              <TabsTrigger value="Chemistry"><TestTube className="mr-2" />Chem</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
       <Button
         onClick={handleScan}
         size="lg"
@@ -277,7 +275,7 @@ export default function Home() {
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={(_, percentCrop) => setCrop(percentCrop)}
+            onChange={c => setCrop(c)}
             aspect={undefined}
           >
             <Image
