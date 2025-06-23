@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe } from 'lucide-react';
 import Image from 'next/image';
+import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -28,10 +31,13 @@ export default function Home() {
   const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+  const [crop, setCrop] = useState<Crop>();
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -79,19 +85,82 @@ export default function Home() {
     };
   }, [capturedImage, toast]);
 
+  function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<string> {
+    const canvas = document.createElement('canvas');
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    
+    // Set canvas dimensions to the precise crop size
+    canvas.width = Math.floor(crop.width * scaleX);
+    canvas.height = Math.floor(crop.height * scaleY);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return Promise.reject(new Error('Failed to get canvas context'));
+    }
+  
+    ctx.drawImage(
+      image,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      crop.width * scaleX,
+      crop.height * scaleY,
+      0,
+      0,
+      crop.width * scaleX,
+      crop.height * scaleY
+    );
+  
+    return new Promise((resolve) => {
+      resolve(canvas.toDataURL('image/png'));
+    });
+  }
+
+  const handleGetSolution = async () => {
+    if (!crop || !imgRef.current || !crop.width || !crop.height) {
+      setError("Please select an area to crop before getting a solution.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const croppedDataUri = await getCroppedImg(imgRef.current, crop);
+      setCroppedImage(croppedDataUri);
+
+      const response = await getSolution({ 
+        photoDataUri: croppedDataUri, 
+        language,
+        subject 
+      });
+      
+      if (response.error) {
+        setError(response.error);
+      } else if (response.solutionSteps) {
+        setResult({ question: croppedDataUri, solutionSteps: response.solutionSteps });
+      }
+    } catch (e) {
+      console.error("Cropping or solving failed", e);
+      setError("Failed to process the image. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleLanguageChange = async (newLang: Language) => {
-    if (!capturedImage) {
-      setError("Cannot change language without a scanned question.");
+    if (!croppedImage) {
+      setError("Cannot change language without a solved question.");
       return;
     }
     
     setIsLoading(true);
-    setResult(null); // Clear previous solution
+    setResult(null); 
     setError(null);
     setLanguage(newLang);
 
     const response = await getSolution({ 
-      photoDataUri: capturedImage, 
+      photoDataUri: croppedImage, 
       language: newLang, 
       subject 
     });
@@ -99,13 +168,13 @@ export default function Home() {
     if (response.error) {
       setError(response.error);
     } else if (response.solutionSteps) {
-      setResult({ question: capturedImage, solutionSteps: response.solutionSteps });
+      setResult({ question: croppedImage, solutionSteps: response.solutionSteps });
     }
     
     setIsLoading(false);
   };
 
-  const handleScan = async () => {
+  const handleScan = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -116,31 +185,42 @@ export default function Home() {
         context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
         const dataUri = canvas.toDataURL('image/png');
         setCapturedImage(dataUri);
-        
-        setIsLoading(true);
+        setCroppedImage(null);
         setResult(null);
         setError(null);
-        setLanguage('en'); // Reset language to English for every new scan
-
-        const response = await getSolution({ photoDataUri: dataUri, language: 'en', subject });
-        if (response.error) {
-          setError(response.error);
-        } else if (response.solutionSteps) {
-          setResult({ question: dataUri, solutionSteps: response.solutionSteps });
-        }
-        setIsLoading(false);
+        setLanguage('en');
       }
     }
   };
   
   const handleRetake = () => {
     setCapturedImage(null);
+    setCroppedImage(null);
     setResult(null);
     setIsLoading(false);
     setError(null);
     setLanguage('en');
+    setCrop(undefined);
   };
   
+  function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    const { width, height } = e.currentTarget;
+    const crop = centerCrop(
+      makeAspectCrop(
+        {
+          unit: '%',
+          width: 90,
+        },
+        width / height, // Lock aspect ratio initially
+        width,
+        height
+      ),
+      width,
+      height
+    );
+    setCrop(crop);
+  }
+
   const renderCameraView = () => (
     <div className="w-full space-y-6 flex flex-col items-center">
       <div className="w-full aspect-video bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
@@ -180,11 +260,49 @@ export default function Home() {
       </Button>
     </div>
   );
+
+  const renderCroppingView = () => (
+    <div className="w-full space-y-6 flex flex-col items-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-primary-foreground">Crop Your Question</h2>
+        <p className="text-muted-foreground">Drag to select the area with the question you want to solve.</p>
+      </div>
+      <div className="w-full bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
+        {capturedImage && (
+          <ReactCrop
+            crop={crop}
+            onChange={(_, percentCrop) => setCrop(percentCrop)}
+            aspect={undefined} // Allow free-form crop
+          >
+            <Image
+              ref={imgRef}
+              src={capturedImage}
+              alt="Captured question to crop"
+              width={1200}
+              height={675}
+              onLoad={onImageLoad}
+              className="w-full h-auto"
+            />
+          </ReactCrop>
+        )}
+      </div>
+      <div className="flex w-full gap-4">
+        <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6" disabled={isLoading}>
+          <RefreshCw className="mr-2 h-5 w-5" />
+          Retake
+        </Button>
+        <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={isLoading || !crop?.width || !crop?.height}>
+          <Bot className="mr-2 h-5 w-5" />
+          Get Solution
+        </Button>
+      </div>
+    </div>
+  );
   
-  const renderImageView = () => (
+  const renderResultView = () => (
     <div className="w-full space-y-6">
         <div className="w-full aspect-video bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
-            {capturedImage && <Image src={capturedImage} alt="Captured question" fill className="object-contain" />}
+            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         <Button
             onClick={handleRetake}
@@ -200,7 +318,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-background dark selection:bg-primary/40">
-      <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
+      <main className="container mx-auto flex max-w-5xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         <header className="flex flex-col items-center text-center mb-8">
            <div className="p-3 mb-4 bg-primary/20 rounded-full border-8 border-background/50 shadow-lg">
              <Logo className="h-10 w-10 text-accent" />
@@ -222,7 +340,10 @@ export default function Home() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          {capturedImage ? renderImageView() : renderCameraView()}
+
+          { !capturedImage && !isLoading && renderCameraView() }
+          { capturedImage && !croppedImage && !isLoading && renderCroppingView() }
+          { croppedImage && !isLoading && renderResultView() }
         </div>
         
         {isLoading && <SolutionSkeleton />}
@@ -239,7 +360,6 @@ export default function Home() {
                </Tabs>
              </div>
             <SolutionDisplay
-              question={result.question}
               solutionSteps={result.solutionSteps}
             />
           </div>

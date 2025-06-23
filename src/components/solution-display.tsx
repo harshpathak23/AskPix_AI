@@ -9,7 +9,6 @@ import { MathRenderer } from "./math-renderer";
 
 
 interface SolutionDisplayProps {
-  question: string;
   solutionSteps: string[];
 }
 
