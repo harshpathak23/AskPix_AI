@@ -231,7 +231,7 @@ export default function Home() {
     <div className="w-full h-full flex flex-col">
       <div className="w-full text-center mb-4">
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full inline-block max-w-sm">
-          <TabsList className="grid w-full grid-cols-3 bg-card/10 border border-primary/20">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
             <TabsTrigger value="Physics"><Atom className="mr-2" />Physics</TabsTrigger>
             <TabsTrigger value="Chemistry"><TestTube className="mr-2" />Chem</TabsTrigger>
@@ -239,9 +239,8 @@ export default function Home() {
         </Tabs>
       </div>
 
-      <div className="w-full flex-1 bg-black rounded-lg overflow-hidden relative flex items-center justify-center">
+      <div className="w-full flex-1 bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
         <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
-        <div className="absolute inset-0 bg-black/20" />
         {hasCameraPermission === false && !error && (
             <div className="absolute inset-0 flex items-center justify-center p-4">
                <Alert variant="destructive" className="w-11/12">
@@ -258,7 +257,7 @@ export default function Home() {
             <Button
                 onClick={handleScan}
                 size="lg"
-                className="h-20 w-20 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-2xl shadow-primary/40 animate-pulse-glow"
+                className="h-16 w-16 rounded-full"
                 disabled={isLoading || hasCameraPermission !== true}
             >
                 <ScanLine className="h-8 w-8" />
@@ -274,7 +273,7 @@ export default function Home() {
         <h2 className="text-2xl font-bold">Crop Your Question</h2>
         <p className="text-muted-foreground">Drag to select the area with the question you want to solve.</p>
       </div>
-      <div className="w-full flex-1 bg-black border rounded-lg overflow-hidden relative flex items-center justify-center">
+      <div className="w-full flex-1 bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
         {capturedImage && (
           <ReactCrop
             crop={crop}
@@ -308,7 +307,7 @@ export default function Home() {
   
   const renderResultImageView = () => (
     <div className="w-full space-y-6">
-        <div className="w-full aspect-video bg-card/10 border border-primary/20 rounded-lg overflow-hidden relative flex items-center justify-center">
+        <div className="w-full aspect-video bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         <Button
@@ -324,16 +323,16 @@ export default function Home() {
   );
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-gray-950 text-gray-50 selection:bg-primary/40">
+    <div className="flex min-h-screen w-full flex-col items-center">
       <main className="container mx-auto flex max-w-7xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         <header className="flex flex-col items-center text-center mb-8">
-           <div className="p-3 mb-4 bg-primary/20 rounded-full border-8 border-gray-900 shadow-lg">
-             <Logo className="h-10 w-10 text-accent" />
+           <div className="p-3 mb-4 bg-muted rounded-full border-8 border-background shadow-lg">
+             <Logo className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl bg-clip-text text-transparent bg-gradient-to-br from-gray-200 to-gray-400">
+          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
             ScanSolve
           </h1>
-          <p className="mt-4 max-w-xl text-lg text-gray-400">
+          <p className="mt-4 max-w-xl text-lg text-muted-foreground">
             Stuck on a problem? Scan any Math, Physics, or Chemistry
             question and get a detailed, step-by-step solution in seconds.
           </p>
@@ -349,7 +348,7 @@ export default function Home() {
 
         <div className="w-full flex flex-1 flex-col items-stretch gap-8 mt-4">
           {/* Main Interaction Area for Camera, Cropping, and Result Image */}
-          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/5 border border-primary/10 shadow-2xl shadow-primary/10">
+          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card border shadow-sm">
             {!capturedImage ? (
               renderCameraView()
             ) : !croppedImage ? (
@@ -367,9 +366,9 @@ export default function Home() {
                 ) : result ? (
                   <div className="w-full animate-in fade-in-50 duration-500">
                     <div className="flex items-center justify-center gap-4 mb-4">
-                      <Globe className="text-gray-400" size={20} />
+                      <Globe className="text-muted-foreground" size={20} />
                       <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                        <TabsList className="bg-card/10 border border-primary/20">
+                        <TabsList>
                           <TabsTrigger value="en">English</TabsTrigger>
                           <TabsTrigger value="hi">Hindi</TabsTrigger>
                         </TabsList>
@@ -381,10 +380,10 @@ export default function Home() {
                   </div>
                 ) : (
                   !isLoading && (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card/5 border border-primary/10 shadow-lg text-gray-500 min-h-[300px]">
+                    <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[300px]">
                       <Bot size={48} className="mb-4 text-primary" />
-                      <h3 className="text-xl font-semibold text-gray-200">Solution Awaits</h3>
-                      <p>Your step-by-step solution will appear here after processing.</p>
+                      <h3 className="text-xl font-semibold">Solution Awaits</h3>
+                      <p className="text-muted-foreground">Your step-by-step solution will appear here after processing.</p>
                     </div>
                   )
                 )}
@@ -392,7 +391,7 @@ export default function Home() {
           )}
         </div>
       </main>
-      <footer className="py-6 text-center text-sm text-gray-500 z-10 flex items-center gap-2">
+      <footer className="py-6 text-center text-sm text-muted-foreground z-10 flex items-center gap-2">
         <Bot size={16} /> Powered by Generative AI.
       </footer>
     </div>
