@@ -103,11 +103,6 @@ export default function Home() {
       return Promise.reject(new Error('Failed to get canvas context'));
     }
   
-    const pixelRatio = window.devicePixelRatio || 1;
-    canvas.width = crop.width * pixelRatio * scaleX;
-    canvas.height = crop.height * pixelRatio * scaleY;
-    
-    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     ctx.imageSmoothingQuality = 'high';
   
     ctx.drawImage(
@@ -118,8 +113,8 @@ export default function Home() {
       crop.height * scaleY,
       0,
       0,
-      crop.width * scaleX,
-      crop.height * scaleY
+      canvas.width,
+      canvas.height
     );
   
     return new Promise((resolve) => {
@@ -231,8 +226,8 @@ export default function Home() {
     const crop = centerCrop(
       makeAspectCrop(
         {
-          unit: 'px',
-          width: width * 0.9,
+          unit: '%',
+          width: 90,
         },
         16 / 9,
         width,
@@ -265,7 +260,7 @@ export default function Home() {
   
   const renderScanningScreen = () => (
     <div className="w-full h-full flex flex-col">
-      <div className="w-full text-center mb-4">
+       <div className="w-full text-center mb-4">
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full inline-block max-w-sm">
           <TabsList className="grid w-full grid-cols-4 bg-card/80 backdrop-blur-sm border">
             <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
@@ -275,7 +270,6 @@ export default function Home() {
           </TabsList>
         </Tabs>
       </div>
-
       <div className="w-full flex-1 bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
         <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
         {hasCameraPermission === false && !error && (
@@ -290,16 +284,16 @@ export default function Home() {
             </div>
         )}
         <canvas ref={canvasRef} className="hidden" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-center items-center">
-            <Button
-                onClick={handleScan}
-                size="lg"
-                className="h-16 w-16 rounded-full animate-pulse-glow"
-                disabled={hasCameraPermission !== true}
-            >
-                <ScanLine className="h-8 w-8" />
-            </Button>
-        </div>
+      </div>
+      <div className="w-full pt-6 flex justify-center items-center">
+        <Button
+          onClick={handleScan}
+          size="lg"
+          className="h-16 w-16 rounded-full animate-pulse-glow"
+          disabled={hasCameraPermission !== true}
+        >
+          <ScanLine className="h-8 w-8" />
+        </Button>
       </div>
     </div>
   );
@@ -321,7 +315,7 @@ export default function Home() {
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={(c, percentCrop) => setCrop(c)}
+            onChange={(c) => setCrop(c)}
             aspect={undefined}
           >
             <Image
@@ -411,7 +405,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center">
-      <main className="container mx-auto flex max-w-7xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
+      <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         {appState !== 'welcome' && (
           <header className="flex flex-col items-center text-center mb-8">
             <div className="p-3 mb-4 bg-card rounded-full border-8 border-background shadow-lg">
@@ -428,7 +422,7 @@ export default function Home() {
         )}
 
         <div className="w-full flex flex-1 flex-col items-stretch mt-4">
-          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[60vh] justify-center">
+          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh] justify-center">
             {appState === 'welcome' && renderWelcomeScreen()}
             {appState === 'scanning' && renderScanningScreen()}
             {appState === 'cropping' && renderCroppingScreen()}
