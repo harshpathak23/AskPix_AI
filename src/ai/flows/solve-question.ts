@@ -44,14 +44,19 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert {{subject}} tutor. The user has provided a cropped image focusing on a specific question.
 Your task is to analyze this image and provide a clear, step-by-step solution to the question shown.
 
-- The solution should be broken down into logical steps.
-- Each step must be a separate string in the 'solutionSteps' array.
-- Use LaTeX for all mathematical formulas. Enclose inline math in $...$ and display math (for block equations) in $$...$$.
-- Provide the solution in the specified language: {{language}} ('en' for English, 'hi' for Hindi).
+**IMPORTANT INSTRUCTIONS:**
+1. You MUST provide the entire solution in the language specified by the 'language' code.
+   - 'en' means English.
+   - 'hi' means Hindi.
+2. The solution must be broken down into logical steps. Each step must be a separate string in the 'solutionSteps' array.
+3. Use LaTeX for all mathematical formulas. Enclose inline math in $...$ and display math (for block equations) in $$...$$. Mathematical formulas and symbols should NOT be translated and should remain in standard mathematical notation.
+4. The output must be in JSON format.
+
+**TARGET LANGUAGE: {{language}}**
 
 Image: {{media url=photoDataUri}}
 
-Directly output the solution steps in the required JSON format.`,
+Provide the solution now.`,
 });
 
 const solveQuestionFlow = ai.defineFlow(
