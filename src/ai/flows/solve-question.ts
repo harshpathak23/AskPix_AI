@@ -37,20 +37,14 @@ const prompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
-  prompt: `You are an expert tutor specializing in Mathematics, Physics, and Chemistry.
-Your task is to solve the question provided in the image.
+  prompt: `You are an expert math tutor. Your task is to solve the question in the provided image.
+Provide a clear, step-by-step solution.
+The language for the solution should be: {{language}}. Use 'en' for English and 'hi' for Hindi.
 
-Image of the question: {{media url=photoDataUri}}
+Image: {{media url=photoDataUri}}
 
-Instructions:
-1. First, accurately transcribe the question from the image.
-2. Identify the subject (Math/Physics/Chemistry).
-3. Provide a clear, step-by-step solution to the transcribed question.
-4. Show all calculations and reasoning.
-5. Include the final answer.
-6. {{#eq language "hi"}}कृपया हिंदी में उत्तर दें।{{else}}Please answer in English.{{/eq}}
-
-Please format your response clearly with proper mathematical notation where applicable.`,
+Please format your response clearly with proper mathematical notation where applicable.
+Your entire response should be the solution text.`,
 });
 
 const solveQuestionFlow = ai.defineFlow(
