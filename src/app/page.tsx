@@ -231,7 +231,7 @@ export default function Home() {
     <div className="w-full h-full flex flex-col">
       <div className="w-full text-center mb-4">
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full inline-block max-w-sm">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-sm border">
             <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
             <TabsTrigger value="Physics"><Atom className="mr-2" />Physics</TabsTrigger>
             <TabsTrigger value="Chemistry"><TestTube className="mr-2" />Chem</TabsTrigger>
@@ -257,7 +257,7 @@ export default function Home() {
             <Button
                 onClick={handleScan}
                 size="lg"
-                className="h-16 w-16 rounded-full"
+                className="h-16 w-16 rounded-full animate-pulse-glow"
                 disabled={isLoading || hasCameraPermission !== true}
             >
                 <ScanLine className="h-8 w-8" />
@@ -277,7 +277,7 @@ export default function Home() {
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={(c) => setCrop(c)}
+            onChange={(_, percentCrop) => setCrop(percentCrop)}
             aspect={undefined}
           >
             <Image
@@ -326,7 +326,7 @@ export default function Home() {
     <div className="flex min-h-screen w-full flex-col items-center">
       <main className="container mx-auto flex max-w-7xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         <header className="flex flex-col items-center text-center mb-8">
-           <div className="p-3 mb-4 bg-muted rounded-full border-8 border-background shadow-lg">
+           <div className="p-3 mb-4 bg-card rounded-full border-8 border-background shadow-lg">
              <Logo className="h-10 w-10 text-primary" />
           </div>
           <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
@@ -348,7 +348,7 @@ export default function Home() {
 
         <div className="w-full flex flex-1 flex-col items-stretch gap-8 mt-4">
           {/* Main Interaction Area for Camera, Cropping, and Result Image */}
-          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card border shadow-sm">
+          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm">
             {!capturedImage ? (
               renderCameraView()
             ) : !croppedImage ? (
