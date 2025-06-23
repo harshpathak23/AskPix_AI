@@ -228,10 +228,10 @@ export default function Home() {
   }
 
   const renderCameraView = () => (
-    <div className="w-full space-y-6 flex flex-col items-center">
-      <div className="w-full text-center">
+    <div className="w-full h-full flex flex-col">
+      <div className="w-full text-center mb-4">
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full inline-block max-w-sm">
-          <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-3 bg-muted">
             <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
             <TabsTrigger value="Physics"><Atom className="mr-2" />Physics</TabsTrigger>
             <TabsTrigger value="Chemistry"><TestTube className="mr-2" />Chem</TabsTrigger>
@@ -239,43 +239,46 @@ export default function Home() {
         </Tabs>
       </div>
 
-      <div className="w-full aspect-video bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
+      <div className="w-full flex-1 bg-black border rounded-lg overflow-hidden relative flex items-center justify-center">
         <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
         <div className="absolute inset-0 bg-black/20" />
         {hasCameraPermission === false && !error && (
-           <Alert variant="destructive" className="w-11/12">
-              <Camera className="h-4 w-4" />
-              <AlertTitle>Camera Access Required</AlertTitle>
-              <AlertDescription>
-                Please allow camera access in your browser to use this feature.
-              </AlertDescription>
-            </Alert>
+            <div className="absolute inset-0 flex items-center justify-center p-4">
+               <Alert variant="destructive" className="w-11/12">
+                  <Camera className="h-4 w-4" />
+                  <AlertTitle>Camera Access Required</AlertTitle>
+                  <AlertDescription>
+                    Please allow camera access in your browser to use this feature.
+                  </AlertDescription>
+                </Alert>
+            </div>
         )}
         <canvas ref={canvasRef} className="hidden" />
+        <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-center items-center">
+            <Button
+                onClick={handleScan}
+                size="lg"
+                className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-2xl shadow-primary/40"
+                disabled={isLoading || hasCameraPermission !== true}
+            >
+                <ScanLine className="h-10 w-10" />
+            </Button>
+        </div>
       </div>
-
-      <Button
-        onClick={handleScan}
-        size="lg"
-        className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-2xl shadow-primary/40 animate-pulse-glow"
-        disabled={isLoading || hasCameraPermission !== true}
-      >
-        <ScanLine className="h-10 w-10" />
-      </Button>
     </div>
   );
 
   const renderCroppingView = () => (
-    <div className="w-full space-y-6 flex flex-col items-center">
-      <div className="text-center">
+    <div className="w-full h-full flex flex-col items-center">
+      <div className="text-center mb-4">
         <h2 className="text-2xl font-bold text-primary-foreground">Crop Your Question</h2>
         <p className="text-muted-foreground">Drag to select the area with the question you want to solve.</p>
       </div>
-      <div className="w-full bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
+      <div className="w-full flex-1 bg-black border rounded-lg overflow-hidden relative flex items-center justify-center">
         {capturedImage && (
           <ReactCrop
             crop={crop}
-            onChange={c => setCrop(c)}
+            onChange={(c, percentCrop) => setCrop(percentCrop)}
             aspect={undefined}
           >
             <Image
@@ -285,12 +288,12 @@ export default function Home() {
               width={1200}
               height={675}
               onLoad={onImageLoad}
-              className="w-full h-auto"
+              className="w-full h-auto max-h-[70vh] object-contain"
             />
           </ReactCrop>
         )}
       </div>
-      <div className="flex w-full gap-4">
+      <div className="flex w-full gap-4 mt-4">
         <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6" disabled={isLoading}>
           <RefreshCw className="mr-2 h-5 w-5" />
           Retake
@@ -344,9 +347,9 @@ export default function Home() {
             </Alert>
         )}
 
-        <div className="w-full flex flex-col items-stretch gap-8 mt-4">
+        <div className="w-full flex flex-1 flex-col items-stretch gap-8 mt-4">
           {/* Main Interaction Area for Camera, Cropping, and Result Image */}
-          <div className="p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl min-h-[500px] flex flex-col justify-center">
+          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card border shadow-2xl">
             {!capturedImage ? (
               renderCameraView()
             ) : !croppedImage ? (
