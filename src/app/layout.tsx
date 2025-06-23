@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'ScanSolve',
-  description: 'Scan any Math, Physics, or Chemistry question and get instant solutions!',
+  title: 'TutorAI',
+  description: 'Your personal AI Tutor. Scan any Math, Physics, Chemistry, or Biology question and get instant solutions!',
 };
 
 export default function RootLayout({
