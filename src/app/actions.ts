@@ -6,7 +6,7 @@ import { z } from 'zod';
 const QuestionSchema = z.object({
   photoDataUri: z.string().startsWith('data:image/', { message: "Invalid image format." }),
   language: z.enum(['en', 'hi']),
-  subject: z.enum(['Mathematics', 'Physics', 'Chemistry']),
+  subject: z.enum(['Mathematics', 'Physics', 'Chemistry', 'Biology']),
 });
 
 interface ActionState {
@@ -14,7 +14,7 @@ interface ActionState {
   solutionSteps?: string[] | null;
 }
 
-export async function getSolution(data: { photoDataUri: string, language: 'en' | 'hi', subject: 'Mathematics' | 'Physics' | 'Chemistry' }): Promise<ActionState> {
+export async function getSolution(data: { photoDataUri: string, language: 'en' | 'hi', subject: 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' }): Promise<ActionState> {
   const validatedFields = QuestionSchema.safeParse(data);
 
   if (!validatedFields.success) {

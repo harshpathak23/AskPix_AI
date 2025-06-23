@@ -19,7 +19,7 @@ const SolveQuestionInputSchema = z.object({
     ),
   subject: z
     .string()
-    .describe('The subject of the question (e.g., Mathematics, Physics, Chemistry).'),
+    .describe('The subject of the question (e.g., Mathematics, Physics, Chemistry, Biology).'),
   language: z
     .string()
     .describe('The language in which the solution should be provided. Options: en (English), hi (Hindi).')

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe, Dna } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -21,7 +21,7 @@ type SolutionState = {
   solutionSteps: string[];
 } | null;
 
-type Subject = 'Mathematics' | 'Physics' | 'Chemistry';
+type Subject = 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology';
 type Language = 'en' | 'hi';
 
 export default function Home() {
@@ -231,10 +231,11 @@ export default function Home() {
     <div className="w-full h-full flex flex-col">
       <div className="w-full text-center mb-4">
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full inline-block max-w-sm">
-          <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-sm border">
+          <TabsList className="grid w-full grid-cols-4 bg-card/80 backdrop-blur-sm border">
             <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
             <TabsTrigger value="Physics"><Atom className="mr-2" />Physics</TabsTrigger>
             <TabsTrigger value="Chemistry"><TestTube className="mr-2" />Chem</TabsTrigger>
+            <TabsTrigger value="Biology"><Dna className="mr-2" />Biology</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>

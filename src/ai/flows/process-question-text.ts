@@ -18,7 +18,7 @@ const ProcessQuestionTextInputSchema = z.object({
 export type ProcessQuestionTextInput = z.infer<typeof ProcessQuestionTextInputSchema>;
 
 const ProcessQuestionTextOutputSchema = z.object({
-  subject: z.string().describe('The subject of the question (e.g., Mathematics, Physics, Chemistry, General).'),
+  subject: z.string().describe('The subject of the question (e.g., Mathematics, Physics, Chemistry, Biology, General).'),
 });
 export type ProcessQuestionTextOutput = z.infer<typeof ProcessQuestionTextOutputSchema>;
 
@@ -30,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'processQuestionTextPrompt',
   input: {schema: ProcessQuestionTextInputSchema},
   output: {schema: ProcessQuestionTextOutputSchema},
-  prompt: `You are an expert tutor specializing in Mathematics, Physics, and Chemistry.
+  prompt: `You are an expert tutor specializing in Mathematics, Physics, Chemistry, and Biology.
   Your task is to determine the subject of a given question.
 
   Question: {{{questionText}}}
@@ -38,7 +38,7 @@ const prompt = ai.definePrompt({
 
   Instructions:
   1. Analyze the question text to identify the subject.
-  2. Determine the most appropriate subject from the following options: Mathematics, Physics, Chemistry, General.
+  2. Determine the most appropriate subject from the following options: Mathematics, Physics, Chemistry, Biology, General.
   3. Return the subject in the output.
   `,
 });
