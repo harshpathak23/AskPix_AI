@@ -348,8 +348,8 @@ export default function Home() {
 
         <div className="w-full flex flex-col md:flex-row items-start gap-8 mt-4">
           {/* Left Column */}
-          <div className="w-full md:w-3/5 flex-shrink-0">
-            <div className="p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl min-h-[400px] flex flex-col justify-center">
+          <div className="w-full md:w-2/3 flex-shrink-0">
+            <div className="p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl min-h-[500px] flex flex-col justify-center">
               {!capturedImage ? (
                 renderCameraView()
               ) : !croppedImage ? (
@@ -361,7 +361,7 @@ export default function Home() {
           </div>
           
           {/* Right Column */}
-          <div className="w-full md:w-2/5 flex-shrink-0">
+          <div className="w-full md:w-1/3 flex-shrink-0">
               {isLoading ? (
                 <SolutionSkeleton />
               ) : result ? (
@@ -380,7 +380,7 @@ export default function Home() {
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card/50 backdrop-blur-sm border shadow-lg text-muted-foreground min-h-[400px]">
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card/50 backdrop-blur-sm border shadow-lg text-muted-foreground min-h-[500px]">
                   <Bot size={48} className="mb-4 text-primary" />
                   <h3 className="text-xl font-semibold text-primary-foreground">Solution Awaits</h3>
                   <p>Scan a problem, and the step-by-step solution will appear here.</p>
