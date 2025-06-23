@@ -1,28 +1,29 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube } from 'lucide-react';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { getSolution } from './actions';
 import { Logo } from '@/components/icons/logo';
 import { SolutionSkeleton } from '@/components/solution-skeleton';
 import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type SolutionState = {
-  question: string; // Will hold the image data URI
-  solution: string;
+  question: string;
+  solutionSteps: string[];
 } | null;
+
+type Subject = 'Mathematics' | 'Physics' | 'Chemistry';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SolutionState>(null);
-  const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [subject, setSubject] = useState<Subject>('Mathematics');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -91,11 +92,11 @@ export default function Home() {
         setIsLoading(true);
         setResult(null);
         setError(null);
-        const response = await getSolution({ photoDataUri: dataUri, language });
+        const response = await getSolution({ photoDataUri: dataUri, language: 'en', subject });
         if (response.error) {
           setError(response.error);
-        } else if (response.solution) {
-          setResult({ question: dataUri, solution: response.solution });
+        } else if (response.solutionSteps) {
+          setResult({ question: dataUri, solutionSteps: response.solutionSteps });
         }
         setIsLoading(false);
       }
@@ -110,9 +111,10 @@ export default function Home() {
   };
   
   const renderCameraView = () => (
-    <div className="w-full space-y-6">
-      <div className="w-full aspect-video bg-card border rounded-lg overflow-hidden relative flex items-center justify-center">
+    <div className="w-full space-y-6 flex flex-col items-center">
+      <div className="w-full aspect-video bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
         <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+        <div className="absolute inset-0 bg-black/20" />
         {hasCameraPermission === false && !error && (
            <Alert variant="destructive" className="w-11/12">
               <Camera className="h-4 w-4" />
@@ -125,40 +127,32 @@ export default function Home() {
         <canvas ref={canvasRef} className="hidden" />
       </div>
 
-       <div className="space-y-3">
-          <Label className="text-lg font-semibold">
-            Solution Language
-          </Label>
-          <RadioGroup
-            onValueChange={(value: 'en' | 'hi') => setLanguage(value)}
-            defaultValue={language}
-            className="flex space-x-4"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="en" id="en" />
-              <Label htmlFor="en" className="font-normal">English</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="hi" id="hi" />
-              <Label htmlFor="hi" className="font-normal">हिंदी (Hindi)</Label>
-            </div>
-          </RadioGroup>
+       <div className="space-y-4 text-center">
+          <label className="text-lg font-semibold text-primary-foreground">
+            Select Subject
+          </label>
+          <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-sm">
+              <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
+              <TabsTrigger value="Physics"><Atom className="mr-2" />Physics</TabsTrigger>
+              <TabsTrigger value="Chemistry"><TestTube className="mr-2" />Chem</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
-
       <Button
         onClick={handleScan}
-        className="w-full text-lg py-6 bg-primary hover:bg-primary/90"
+        size="lg"
+        className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-2xl shadow-primary/40 animate-pulse-glow"
         disabled={isLoading || hasCameraPermission !== true}
       >
-        <ScanLine className="mr-2 h-5 w-5" />
-        Scan Question
+        <ScanLine className="h-10 w-10" />
       </Button>
     </div>
   );
   
   const renderImageView = () => (
     <div className="w-full space-y-6">
-        <div className="w-full aspect-video bg-card border rounded-lg overflow-hidden relative flex items-center justify-center">
+        <div className="w-full aspect-video bg-card/50 backdrop-blur-sm border rounded-lg overflow-hidden relative flex items-center justify-center">
             {capturedImage && <Image src={capturedImage} alt="Captured question" fill className="object-contain" />}
         </div>
         <Button
@@ -174,14 +168,13 @@ export default function Home() {
   );
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background dark:bg-grid-white/[0.05] bg-grid-black/[0.02] relative">
-      <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-background [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+    <div className="flex min-h-screen w-full flex-col items-center bg-background dark selection:bg-primary/40">
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         <header className="flex flex-col items-center text-center mb-8">
-          <div className="p-3 mb-4 bg-primary/10 rounded-full border-8 border-background">
-            <Logo className="h-10 w-10 text-primary" />
+           <div className="p-3 mb-4 bg-primary/20 rounded-full border-8 border-background/50 shadow-lg">
+             <Logo className="h-10 w-10 text-accent" />
           </div>
-          <h1 className="font-headline text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="font-headline text-4xl font-bold tracking-tight text-primary-foreground sm:text-5xl bg-clip-text text-transparent bg-gradient-to-br from-gray-200 to-gray-400">
             ScanSolve
           </h1>
           <p className="mt-4 max-w-xl text-lg text-muted-foreground">
@@ -190,7 +183,7 @@ export default function Home() {
           </p>
         </header>
 
-        <div className="w-full">
+        <div className="w-full p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl">
           {error && !isLoading && (
             <Alert variant="destructive" className="mb-4">
               <XCircle className="h-4 w-4" />
@@ -206,12 +199,12 @@ export default function Home() {
         {result && (
           <SolutionDisplay
             question={result.question}
-            solution={result.solution}
+            solutionSteps={result.solutionSteps}
           />
         )}
       </main>
-      <footer className="py-6 text-center text-sm text-muted-foreground z-10">
-        Powered by AI. Solutions may not always be perfect.
+      <footer className="py-6 text-center text-sm text-muted-foreground z-10 flex items-center gap-2">
+        <Bot size={16} /> Powered by Generative AI.
       </footer>
     </div>
   );

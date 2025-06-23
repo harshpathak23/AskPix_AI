@@ -17,6 +17,9 @@ const SolveQuestionInputSchema = z.object({
     .describe(
       "A photo of a question, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  subject: z
+    .string()
+    .describe('The subject of the question (e.g., Mathematics, Physics, Chemistry).'),
   language: z
     .string()
     .describe('The language in which the solution should be provided. Options: en (English), hi (Hindi).')
@@ -25,26 +28,27 @@ const SolveQuestionInputSchema = z.object({
 export type SolveQuestionInput = z.infer<typeof SolveQuestionInputSchema>;
 
 const SolveQuestionOutputSchema = z.object({
-  solution: z.string().describe('The step-by-step solution to the question.'),
+  solutionSteps: z.array(z.string()).describe('An array of strings, where each string is a step in the solution.'),
 });
 export type SolveQuestionOutput = z.infer<typeof SolveQuestionOutputSchema>;
 
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  return solveQuestionFlow(input);
+  const result = await solveQuestionFlow(input);
+  return { solutionSteps: result.solutionSteps || [] };
 }
 
 const prompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
-  prompt: `You are an expert math tutor. Your task is to solve the question in the provided image.
-Provide a clear, step-by-step solution.
+  prompt: `You are an expert {{subject}} tutor. Your task is to solve the question in the provided image.
+Provide a clear, step-by-step solution. Each step in the solution should be a separate string in the solutionSteps array.
+Use LaTeX for all mathematical formulas, enclosing inline math in $...$ and display math in $$...$$.
 The language for the solution should be: {{language}}. Use 'en' for English and 'hi' for Hindi.
 
 Image: {{media url=photoDataUri}}
 
-Please format your response clearly with proper mathematical notation where applicable.
-Your entire response should be the solution text.`,
+Please format your response clearly. Your entire response should be the array of solution steps.`,
 });
 
 const solveQuestionFlow = ai.defineFlow(
