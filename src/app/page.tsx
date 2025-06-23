@@ -344,47 +344,49 @@ export default function Home() {
             </Alert>
         )}
 
-        <div className="w-full flex flex-col md:flex-row items-start gap-8 mt-4">
-          {/* Left Column */}
-          <div className="w-full md:w-2/3 flex-shrink-0">
-            <div className="p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl min-h-[500px] flex flex-col justify-center">
-              {!capturedImage ? (
-                renderCameraView()
-              ) : !croppedImage ? (
-                renderCroppingView()
-              ) : (
-                renderResultImageView()
-              )}
-            </div>
+        <div className="w-full flex flex-col items-stretch gap-8 mt-4">
+          {/* Main Interaction Area for Camera, Cropping, and Result Image */}
+          <div className="p-4 md:p-6 rounded-xl bg-card/50 backdrop-blur-sm border shadow-2xl min-h-[500px] flex flex-col justify-center">
+            {!capturedImage ? (
+              renderCameraView()
+            ) : !croppedImage ? (
+              renderCroppingView()
+            ) : (
+              renderResultImageView()
+            )}
           </div>
           
-          {/* Right Column */}
-          <div className="w-full md:w-1/3 flex-shrink-0">
-              {isLoading ? (
-                <SolutionSkeleton />
-              ) : result ? (
-                <div className="w-full animate-in fade-in-50 duration-500">
-                  <div className="flex items-center justify-center gap-4 mb-4">
-                    <Globe className="text-muted-foreground" size={20} />
-                    <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                      <TabsList>
-                        <TabsTrigger value="en">English</TabsTrigger>
-                        <TabsTrigger value="hi">Hindi</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
+          {/* Solution Area (conditionally rendered) */}
+          {croppedImage && (
+            <div className="w-full">
+                {isLoading ? (
+                  <SolutionSkeleton />
+                ) : result ? (
+                  <div className="w-full animate-in fade-in-50 duration-500">
+                    <div className="flex items-center justify-center gap-4 mb-4">
+                      <Globe className="text-muted-foreground" size={20} />
+                      <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
+                        <TabsList>
+                          <TabsTrigger value="en">English</TabsTrigger>
+                          <TabsTrigger value="hi">Hindi</TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    </div>
+                    <SolutionDisplay
+                      solutionSteps={result.solutionSteps}
+                    />
                   </div>
-                  <SolutionDisplay
-                    solutionSteps={result.solutionSteps}
-                  />
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card/50 backdrop-blur-sm border shadow-lg text-muted-foreground min-h-[500px]">
-                  <Bot size={48} className="mb-4 text-primary" />
-                  <h3 className="text-xl font-semibold text-primary-foreground">Solution Awaits</h3>
-                  <p>Scan a problem, and the step-by-step solution will appear here.</p>
-                </div>
-              )}
-          </div>
+                ) : (
+                  !isLoading && (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card/50 backdrop-blur-sm border shadow-lg text-muted-foreground min-h-[500px]">
+                      <Bot size={48} className="mb-4 text-primary" />
+                      <h3 className="text-xl font-semibold text-primary-foreground">Solution Awaits</h3>
+                      <p>Your step-by-step solution will appear here after processing.</p>
+                    </div>
+                  )
+                )}
+            </div>
+          )}
         </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground z-10 flex items-center gap-2">
