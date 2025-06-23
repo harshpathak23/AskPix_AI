@@ -291,16 +291,16 @@ export default function Home() {
             </div>
         )}
         <canvas ref={canvasRef} className="hidden" />
-      </div>
-      <div className="w-full pt-6 flex justify-center items-center">
-        <Button
-          onClick={handleScan}
-          size="lg"
-          className="h-16 w-16 rounded-full animate-pulse-glow"
-          disabled={hasCameraPermission !== true}
-        >
-          <ScanLine className="h-8 w-8" />
-        </Button>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+            <Button
+              onClick={handleScan}
+              size="lg"
+              className="h-16 w-16 rounded-full animate-pulse-glow"
+              disabled={hasCameraPermission !== true}
+            >
+              <ScanLine className="h-8 w-8" />
+            </Button>
+        </div>
       </div>
     </div>
   );
