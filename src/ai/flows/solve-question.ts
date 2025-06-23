@@ -41,14 +41,17 @@ const prompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
-  prompt: `You are an expert {{subject}} tutor. Your task is to solve the question in the provided image.
-Provide a clear, step-by-step solution. Each step in the solution should be a separate string in the solutionSteps array.
-Use LaTeX for all mathematical formulas, enclosing inline math in $...$ and display math in $$...$$.
-The language for the solution should be: {{language}}. Use 'en' for English and 'hi' for Hindi.
+  prompt: `You are an expert {{subject}} tutor. The user has provided a cropped image focusing on a specific question.
+Your task is to analyze this image and provide a clear, step-by-step solution to the question shown.
+
+- The solution should be broken down into logical steps.
+- Each step must be a separate string in the 'solutionSteps' array.
+- Use LaTeX for all mathematical formulas. Enclose inline math in $...$ and display math (for block equations) in $$...$$.
+- Provide the solution in the specified language: {{language}} ('en' for English, 'hi' for Hindi).
 
 Image: {{media url=photoDataUri}}
 
-Please format your response clearly. Your entire response should be the array of solution steps.`,
+Directly output the solution steps in the required JSON format.`,
 });
 
 const solveQuestionFlow = ai.defineFlow(
