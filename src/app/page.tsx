@@ -61,14 +61,14 @@ export default function Home() {
 
       let stream: MediaStream;
       try {
-        // We're making a more specific request now. By requiring a MINIMUM resolution,
-        // we can encourage the browser to select the main camera, as wide-angle or
-        // secondary lenses often don't support these higher resolutions.
+        // We'll aim for a 4K resolution (approx. 8.3MP) to encourage the browser to
+        // select the main camera, as wide-angle or secondary lenses often don't
+        // support these higher video resolutions.
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: 'environment',
-            width: { min: 1280, ideal: 1920 },
-            height: { min: 720, ideal: 1080 },
+            width: { ideal: 3840 },
+            height: { ideal: 2160 },
           },
         });
       } catch (error) {
