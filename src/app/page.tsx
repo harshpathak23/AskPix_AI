@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Loader2, RefreshCw, ScanLine } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle } from 'lucide-react';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ export default function Home() {
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -51,11 +52,7 @@ export default function Home() {
       } catch (error) {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
-        toast({
-          variant: 'destructive',
-          title: 'Camera Access Denied',
-          description: 'Please enable camera permissions in your browser settings to use this app.',
-        });
+        setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
       }
     }
     getCameraPermission();
@@ -82,14 +79,10 @@ export default function Home() {
         
         setIsLoading(true);
         setResult(null);
+        setError(null);
         const response = await getSolution({ photoDataUri: dataUri, language });
         if (response.error) {
-          toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: response.error,
-          });
-          setCapturedImage(null);
+          setError(response.error);
         } else if (response.solution) {
           setResult({ question: dataUri, solution: response.solution });
         }
@@ -102,13 +95,14 @@ export default function Home() {
     setCapturedImage(null);
     setResult(null);
     setIsLoading(false);
+    setError(null);
   };
   
   const renderCameraView = () => (
     <div className="w-full space-y-6">
       <div className="w-full aspect-video bg-card border rounded-lg overflow-hidden relative flex items-center justify-center">
         <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
-        {hasCameraPermission === false && (
+        {hasCameraPermission === false && !error && (
            <Alert variant="destructive" className="w-11/12">
               <Camera className="h-4 w-4" />
               <AlertTitle>Camera Access Required</AlertTitle>
@@ -186,6 +180,13 @@ export default function Home() {
         </header>
 
         <div className="w-full">
+          {error && !isLoading && (
+            <Alert variant="destructive" className="mb-4">
+              <XCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           {capturedImage ? renderImageView() : renderCameraView()}
         </div>
         
