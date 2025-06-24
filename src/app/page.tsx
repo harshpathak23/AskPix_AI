@@ -312,14 +312,12 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col items-center justify-between text-center p-4 sm:p-8 animate-in fade-in-50 duration-500">
+    <div className="w-full h-full flex flex-col items-center justify-center text-center p-4 sm:p-8 animate-in fade-in-50 duration-500 space-y-12">
       {/* Top section: Logo */}
-      <div className="w-full">
-        <Logo className="h-48 w-96 mx-auto" />
-      </div>
+      <Logo className="h-56 w-[28rem] mx-auto" />
 
       {/* Middle section: Subject selection */}
-      <div className="w-full max-w-md my-8">
+      <div className="w-full max-w-md">
         <p className="mb-4 text-xl font-medium">Choose a subject</p>
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
           <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
@@ -531,7 +529,7 @@ export default function Home() {
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         {appState !== 'welcome' && (
           <header className="flex flex-col items-center text-center mb-8">
-            <Logo className="h-16 w-32" />
+            <Logo className="h-20 w-40" />
           </header>
         )}
 
