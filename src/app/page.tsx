@@ -36,7 +36,6 @@ export default function Home() {
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
-  const [isStartingCamera, setIsStartingCamera] = useState(false);
   const [crop, setCrop] = useState<Crop>();
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [isFlashAvailable, setIsFlashAvailable] = useState(false);
@@ -50,120 +49,98 @@ export default function Home() {
 
   useEffect(() => {
     let stream: MediaStream | null = null;
-    let isComponentActive = true;
-
-    const stopStream = () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-        stream = null;
-      }
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
-      setIsFlashAvailable(false);
-      setZoomRange(null);
-    };
-
-    const startStream = async () => {
-      stopStream();
-
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setError("Camera access is not supported by your browser.");
-        setHasCameraPermission(false);
-        setIsStartingCamera(false);
-        return;
-      }
-
-      const idealConstraints: MediaStreamConstraints = {
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          // @ts-ignore
-          torch: true,
-        },
-      };
-
-      try {
-        stream = await navigator.mediaDevices.getUserMedia(idealConstraints);
-      } catch (err) {
-        console.warn("Ideal camera request failed, trying without torch/resolution:", err);
-        const fallbackConstraints: MediaStreamConstraints = {
-          video: { facingMode: 'environment' },
-        };
-        try {
-          stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-        } catch (finalErr) {
-          if (!isComponentActive) return;
-          console.error("All camera requests failed:", finalErr);
-          setHasCameraPermission(false);
-          if (finalErr instanceof Error && (finalErr.name === 'NotAllowedError' || finalErr.name === 'PermissionDeniedError')) {
-            setError('Camera access was denied. Please enable camera permissions in your browser settings.');
-          } else {
-            setError('Could not access any back camera. It may be in use or not available.');
-          }
-          setIsStartingCamera(false);
-          return;
-        }
-      }
-
-      if (!isComponentActive || !stream) {
-        stopStream();
-        setIsStartingCamera(false);
-        return;
-      }
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setHasCameraPermission(true);
-      setError(null);
-      setIsStartingCamera(false); // Unblock UI as soon as video appears
-
-      const videoTrack = stream.getVideoTracks()?.[0];
-      if (videoTrack) {
-        setTimeout(() => {
-          if (!isComponentActive) return;
-          try {
-            const capabilities = videoTrack.getCapabilities();
-            const settings = videoTrack.getSettings();
-            // @ts-ignore
-            if (capabilities.torch) {
-              setIsFlashAvailable(true);
-              // @ts-ignore
-              setIsFlashOn(!!settings.torch);
-            } else {
-              setIsFlashAvailable(false);
-            }
-            
-            // @ts-ignore
-            if (capabilities.zoom) {
-              // @ts-ignore
-              const { min, max, step } = capabilities.zoom;
-              setZoomRange({ min, max, step });
-              // @ts-ignore
-              setZoom(settings.zoom || min);
-            } else {
-              setZoomRange(null);
-            }
-          } catch(e) {
-            console.error("Error reading camera capabilities:", e);
-          }
-        }, 500); // Delay allows capabilities to stabilize on some devices
-      }
-    };
     
+    const getCameraPermission = async () => {
+        // Reset states for new stream attempt
+        setIsFlashAvailable(false);
+        setIsFlashOn(false);
+        setZoom(1);
+        setZoomRange(null);
+        
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setError("Camera access is not supported by your browser.");
+            setHasCameraPermission(false);
+            return;
+        }
+
+        try {
+            const idealConstraints: MediaStreamConstraints = {
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    // @ts-ignore
+                    torch: true,
+                },
+            };
+            stream = await navigator.mediaDevices.getUserMedia(idealConstraints);
+        } catch (err) {
+            console.warn("Ideal camera request failed, trying without advanced features:", err);
+            try {
+                const fallbackConstraints: MediaStreamConstraints = {
+                    video: { facingMode: 'environment' },
+                };
+                stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+            } catch (finalErr) {
+                console.error("All camera requests failed:", finalErr);
+                setHasCameraPermission(false);
+                if (finalErr instanceof Error && (finalErr.name === 'NotAllowedError' || finalErr.name === 'PermissionDeniedError')) {
+                    setError('Camera access was denied. Please enable camera permissions in your browser settings.');
+                } else {
+                    setError('Could not access the back camera. It may be in use or not available.');
+                }
+                return;
+            }
+        }
+        
+        if (videoRef.current && stream) {
+            videoRef.current.srcObject = stream;
+            setHasCameraPermission(true);
+            setError(null);
+
+            // Get capabilities after a short delay for stabilization
+            const videoTrack = stream.getVideoTracks()?.[0];
+            if (videoTrack) {
+                setTimeout(() => {
+                    if (appState !== 'scanning') return; // Prevent updates if user navigates away
+                    try {
+                        const capabilities = videoTrack.getCapabilities();
+                        const settings = videoTrack.getSettings();
+                        // @ts-ignore
+                        if (capabilities.torch) {
+                          setIsFlashAvailable(true);
+                          // @ts-ignore
+                          setIsFlashOn(!!settings.torch);
+                        }
+                        // @ts-ignore
+                        if (capabilities.zoom) {
+                            // @ts-ignore
+                            const { min, max, step } = capabilities.zoom;
+                            setZoomRange({ min, max, step });
+                            // @ts-ignore
+                            setZoom(settings.zoom || min);
+                        }
+                    } catch (e) {
+                        console.error("Error reading camera capabilities:", e);
+                    }
+                }, 500);
+            }
+        }
+    };
+
     if (appState === 'scanning') {
-      startStream();
-    } else {
-      stopStream();
+        getCameraPermission();
     }
 
     return () => {
-      isComponentActive = false;
-      stopStream();
+        if (videoRef.current && videoRef.current.srcObject) {
+            const currentStream = videoRef.current.srcObject as MediaStream;
+            currentStream.getTracks().forEach((track) => track.stop());
+            videoRef.current.srcObject = null;
+        }
     };
   }, [appState]);
+
 
   useEffect(() => {
     if (appState !== 'scanning' || !videoRef.current?.srcObject || !zoomRange) return;
@@ -242,7 +219,6 @@ export default function Home() {
   }
 
   const handleStartScanning = () => {
-    setIsStartingCamera(true);
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
@@ -250,10 +226,7 @@ export default function Home() {
     setError(null);
     setLanguage('en');
     setCrop(undefined);
-    setIsFlashAvailable(false);
-    setIsFlashOn(false);
-    setZoom(1);
-    setZoomRange(null);
+    setHasCameraPermission(null);
     setAppState('scanning');
   };
   
@@ -340,7 +313,6 @@ export default function Home() {
   };
   
   const handleRetake = () => {
-    setIsStartingCamera(true);
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
@@ -348,6 +320,7 @@ export default function Home() {
     setError(null);
     setLanguage('en');
     setCrop(undefined);
+    setHasCameraPermission(null);
     setAppState('scanning');
   };
   
@@ -381,9 +354,9 @@ export default function Home() {
       <p className="mt-2 max-w-xl text-muted-foreground">
         Just point your camera, scan a question, and let our AI do the rest.
       </p>
-      <Button onClick={handleStartScanning} size="lg" className="mt-8 text-lg py-7 px-8 animate-pulse-glow" disabled={isStartingCamera}>
+      <Button onClick={handleStartScanning} size="lg" className="mt-8 text-lg py-7 px-8 animate-pulse-glow">
         <Camera className="mr-3 h-6 w-6" />
-        {isStartingCamera ? 'Starting Camera...' : 'Start Scanning'}
+        Start Scanning
       </Button>
     </div>
   );
@@ -401,7 +374,7 @@ export default function Home() {
         </Tabs>
       </div>
       <div className="w-full flex-1 overflow-hidden relative flex items-center justify-center bg-black">
-        {isStartingCamera && (
+        {hasCameraPermission === null && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-white bg-black/50">
             <Camera className="h-16 w-16 mb-4 animate-pulse" />
             <p className="text-xl font-medium">Initializing Camera...</p>
@@ -409,9 +382,9 @@ export default function Home() {
           </div>
         )}
         
-        <video ref={videoRef} className={cn("w-full h-full object-contain", (isStartingCamera || hasCameraPermission === false) && "opacity-0")} autoPlay muted playsInline />
+        <video ref={videoRef} className={cn("w-full h-full object-contain", hasCameraPermission !== true && "opacity-0")} autoPlay muted playsInline />
         
-        {!isStartingCamera && zoomRange && (
+        {hasCameraPermission === true && zoomRange && (
             <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 h-1/2 w-10 flex flex-col items-center justify-center bg-black/30 rounded-full p-2 backdrop-blur-sm">
                 <Slider
                     value={[zoom]}
@@ -425,7 +398,7 @@ export default function Home() {
             </div>
         )}
 
-        {!isStartingCamera && isFlashAvailable && (
+        {hasCameraPermission === true && isFlashAvailable && (
           <div className="absolute top-4 right-4 z-10">
             <Button
               onClick={handleToggleFlash}
@@ -438,7 +411,7 @@ export default function Home() {
           </div>
         )}
 
-        {hasCameraPermission === false && !isStartingCamera && (
+        {hasCameraPermission === false && (
             <div className="absolute inset-0 flex items-center justify-center p-4">
                <Alert variant="destructive" className="w-11/12">
                   <Camera className="h-4 w-4" />
@@ -455,7 +428,7 @@ export default function Home() {
               onClick={handleScan}
               size="icon"
               className="h-16 w-16 rounded-full animate-pulse-glow"
-              disabled={hasCameraPermission !== true || isStartingCamera}
+              disabled={hasCameraPermission !== true}
             >
               <ScanLine className="h-8 w-8" />
             </Button>
@@ -497,9 +470,9 @@ export default function Home() {
         )}
       </div>
       <div className="flex w-full gap-4 mt-4">
-        <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6" disabled={isStartingCamera}>
+        <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6">
           <RefreshCw className="mr-2 h-5 w-5" />
-          {isStartingCamera ? 'Opening Camera...' : 'Retake'}
+          Retake
         </Button>
         <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
           <Bot className="mr-2 h-5 w-5" />
