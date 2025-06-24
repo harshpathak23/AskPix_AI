@@ -312,7 +312,7 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col items-center text-center animate-in fade-in-50 duration-500">
+    <div className="w-full h-full flex flex-col text-center animate-in fade-in-50 duration-500">
       {/* Top section: Logo and Slogan */}
       <div className="flex flex-col items-center w-full">
         <Logo className="w-full max-w-md aspect-video" />
@@ -535,11 +535,9 @@ export default function Home() {
         <div className="w-full flex flex-1 flex-col items-stretch">
           <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
             
-            {appState !== 'welcome' && (
-              <header className="flex flex-col items-center text-center mb-8">
-                <Logo className="w-full max-w-md aspect-video" />
-              </header>
-            )}
+            <header className="flex flex-col items-center text-center mb-8">
+              <Logo className="w-full max-w-md aspect-video" />
+            </header>
 
             <div className="w-full flex-1 flex flex-col">
               {appState === 'welcome' && renderWelcomeScreen()}
