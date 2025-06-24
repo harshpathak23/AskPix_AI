@@ -410,13 +410,13 @@ export default function Home() {
           </div>
         )}
 
-        {hasCameraPermission === false && !error && (
+        {hasCameraPermission === false && (
             <div className="absolute inset-0 flex items-center justify-center p-4">
                <Alert variant="destructive" className="w-11/12">
                   <Camera className="h-4 w-4" />
                   <AlertTitle>Camera Access Required</AlertTitle>
                   <AlertDescription>
-                    Please allow camera access in your browser to use this feature.
+                    {error ? error : "Please allow camera access in your browser to use this feature."}
                   </AlertDescription>
                 </Alert>
             </div>
