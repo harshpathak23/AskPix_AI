@@ -320,11 +320,16 @@ export default function Home() {
   );
 
   const renderWelcomeScreen = () => (
-    <div className="w-full flex-1 flex flex-col justify-between items-center text-center">
-      <ScrollArea className="w-full">
-        <div className="w-full flex flex-col items-center">
-          <p className="mb-4 text-xl font-medium">Choose a subject</p>
-          <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
+    <div className="w-full flex-1 flex flex-col justify-between text-center">
+      {/* Top section */}
+      <div>
+        <div className="w-full max-w-xs mx-auto">
+          <AppHeader />
+        </div>
+        <ScrollArea className="w-full px-4">
+          <div className="w-full flex flex-col items-center pt-8">
+            <p className="mb-4 text-xl font-medium">Choose a subject</p>
+            <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
                   <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
                       <FunctionSquare className="h-8 w-8" />
@@ -343,12 +348,13 @@ export default function Home() {
                       <span>Biology</span>
                   </TabsTrigger>
               </TabsList>
-          </Tabs>
-        </div>
-      </ScrollArea>
+            </Tabs>
+          </div>
+        </ScrollArea>
+      </div>
       
       {/* Bottom section: Button */}
-      <div className="w-full max-w-sm self-center py-4 shrink-0 mt-auto">
+      <div className="w-full max-w-sm self-center py-4 px-4 shrink-0">
           <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
               <Camera className="mr-3 h-6 w-6" />
               Start Scanning
@@ -534,7 +540,6 @@ export default function Home() {
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         <div className="w-full flex flex-1 flex-col items-stretch">
           <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
-            <AppHeader />
             <div className="w-full flex-1 flex flex-col mt-4">
               {appState === 'welcome' && renderWelcomeScreen()}
               {appState === 'scanning' && renderScanningScreen()}
