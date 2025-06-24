@@ -1,21 +1,19 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe, Dna, Zap } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe, Dna } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
 
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { getSolution } from './actions';
 import { Logo } from '@/components/icons/logo';
 import { SolutionSkeleton } from '@/components/solution-skeleton';
 import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
 import type { GraphData } from '@/ai/schemas';
 import { cn } from '@/lib/utils';
 
@@ -37,15 +35,10 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [crop, setCrop] = useState<Crop>();
-  const [isFlashOn, setIsFlashOn] = useState(false);
-  const [isFlashAvailable, setIsFlashAvailable] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [zoomRange, setZoomRange] = useState<{ min: number; max: number; step: number } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const { toast } = useToast();
 
   // This effect now ONLY handles cleaning up the camera stream when leaving the scanning screen.
   useEffect(() => {
@@ -57,32 +50,11 @@ export default function Home() {
     }
   }, [appState]);
 
-  // This effect handles applying zoom changes.
-  useEffect(() => {
-    if (appState !== 'scanning' || !videoRef.current?.srcObject || !zoomRange) return;
-
-    const stream = videoRef.current.srcObject as MediaStream;
-    const videoTrack = stream.getVideoTracks()?.[0];
-
-    if (videoTrack) {
-        // @ts-ignore
-        videoTrack.applyConstraints({
-            advanced: [{ zoom: zoom }]
-        }).catch(e => {
-            console.error("Failed to apply zoom", e);
-        });
-    }
-  }, [zoom, appState, zoomRange]);
-
   const startCamera = async () => {
     // Immediately switch to scanning view to show loading state
     setAppState('scanning');
     
     // Reset states for a new camera session
-    setIsFlashAvailable(false);
-    setIsFlashOn(false);
-    setZoom(1);
-    setZoomRange(null);
     setHasCameraPermission(null);
     setError(null);
 
@@ -129,29 +101,6 @@ export default function Home() {
         // This is the robust way to wait for the camera to be ready.
         video.onloadedmetadata = () => {
             setHasCameraPermission(true);
-            const videoTrack = stream.getVideoTracks()?.[0];
-            if (videoTrack) {
-                try {
-                    const capabilities = videoTrack.getCapabilities();
-                    const settings = videoTrack.getSettings();
-                    // @ts-ignore
-                    if (capabilities.torch) {
-                      setIsFlashAvailable(true);
-                      // @ts-ignore
-                      setIsFlashOn(!!settings.torch);
-                    }
-                    // @ts-ignore
-                    if (capabilities.zoom) {
-                        // @ts-ignore
-                        const { min, max, step } = capabilities.zoom;
-                        setZoomRange({ min, max, step });
-                        // @ts-ignore
-                        setZoom(settings.zoom || min);
-                    }
-                } catch (e) {
-                    console.error("Error reading camera capabilities:", e);
-                }
-            }
         };
     }
   };
@@ -170,29 +119,6 @@ export default function Home() {
 
   const handleRetake = async () => {
     await handleStartScanning();
-  };
-
-  const handleToggleFlash = async () => {
-    if (!videoRef.current?.srcObject) return;
-    const stream = videoRef.current.srcObject as MediaStream;
-    const videoTrack = stream.getVideoTracks()?.[0];
-
-    if (videoTrack && isFlashAvailable) {
-      try {
-        await videoTrack.applyConstraints({
-          // @ts-ignore
-          advanced: [{ torch: !isFlashOn }],
-        });
-        setIsFlashOn(!isFlashOn);
-      } catch (e) {
-        console.error("Failed to toggle flash", e);
-        toast({
-          variant: "destructive",
-          title: "Flash Error",
-          description: "Could not toggle the flashlight.",
-        });
-      }
-    }
   };
 
   function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<string> {
@@ -343,10 +269,20 @@ export default function Home() {
       <p className="mt-8 max-w-xl text-lg text-muted-foreground">
         Get instant, step-by-step solutions for Math, Physics, Chemistry, and Biology problems.
       </p>
-      <p className="mt-2 max-w-xl text-muted-foreground">
-        Just point your camera, scan a question, and let our AI do the rest.
-      </p>
-      <Button onClick={handleStartScanning} size="lg" className="mt-8 text-lg py-7 px-8 animate-pulse-glow">
+
+      <div className="mt-8 mb-6 w-full max-w-sm">
+        <p className="mb-3 text-lg font-medium">Choose a subject</p>
+        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="Mathematics" className="flex-1"><FunctionSquare className="mr-2" />Math</TabsTrigger>
+            <TabsTrigger value="Physics" className="flex-1"><Atom className="mr-2" />Physics</TabsTrigger>
+            <TabsTrigger value="Chemistry" className="flex-1"><TestTube className="mr-2" />Chem</TabsTrigger>
+            <TabsTrigger value="Biology" className="flex-1"><Dna className="mr-2" />Biology</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+      
+      <Button onClick={handleStartScanning} size="lg" className="text-lg py-7 px-8 animate-pulse-glow">
         <Camera className="mr-3 h-6 w-6" />
         Start Scanning
       </Button>
@@ -354,18 +290,8 @@ export default function Home() {
   );
   
   const renderScanningScreen = () => (
-    <div className="w-full h-full flex flex-col">
-       <div className="w-full text-center mb-4">
-        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full inline-block max-w-sm">
-          <TabsList className="grid w-full grid-cols-4 bg-card/80 backdrop-blur-sm border">
-            <TabsTrigger value="Mathematics"><FunctionSquare className="mr-2" />Math</TabsTrigger>
-            <TabsTrigger value="Physics"><Atom className="mr-2" />Physics</TabsTrigger>
-            <TabsTrigger value="Chemistry"><TestTube className="mr-2" />Chem</TabsTrigger>
-            <TabsTrigger value="Biology"><Dna className="mr-2" />Biology</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-      <div className="w-full flex-1 overflow-hidden relative flex items-center justify-center bg-black">
+    <div className="w-full h-full flex flex-col items-center justify-center">
+      <div className="w-full h-full overflow-hidden relative flex items-center justify-center bg-black rounded-lg">
         {hasCameraPermission === null && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-white bg-black/50">
             <Camera className="h-16 w-16 mb-4 animate-pulse" />
@@ -374,33 +300,10 @@ export default function Home() {
           </div>
         )}
         
-        <video ref={videoRef} className={cn("w-full h-full object-contain", hasCameraPermission !== true && "opacity-0")} autoPlay muted playsInline />
+        <video ref={videoRef} className={cn("w-full h-full object-cover", hasCameraPermission !== true && "opacity-0")} autoPlay muted playsInline />
         
-        {hasCameraPermission === true && zoomRange && (
-            <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 h-1/2 w-10 flex flex-col items-center justify-center bg-black/30 rounded-full p-2 backdrop-blur-sm">
-                <Slider
-                    value={[zoom]}
-                    onValueChange={(value) => setZoom(value[0])}
-                    min={zoomRange.min}
-                    max={zoomRange.max}
-                    step={zoomRange.step}
-                    orientation="vertical"
-                    className="h-full"
-                />
-            </div>
-        )}
-
-        {hasCameraPermission === true && isFlashAvailable && (
-          <div className="absolute top-4 right-4 z-10">
-            <Button
-              onClick={handleToggleFlash}
-              size="icon"
-              variant={isFlashOn ? "default" : "secondary"}
-              className="rounded-full h-12 w-12 text-yellow-300"
-            >
-              <Zap className="h-6 w-6" />
-            </Button>
-          </div>
+        {hasCameraPermission === true && (
+          <div className="absolute top-0 left-0 w-full h-1 bg-primary/70 shadow-[0_0_20px_5px_hsl(var(--primary))] animate-scan-line pointer-events-none" />
         )}
 
         {hasCameraPermission === false && (
@@ -419,7 +322,7 @@ export default function Home() {
             <Button
               onClick={handleScan}
               size="icon"
-              className="h-16 w-16 rounded-full animate-pulse-glow"
+              className="h-16 w-16 rounded-full animate-pulse-glow border-4 border-white/50"
               disabled={hasCameraPermission !== true}
             >
               <ScanLine className="h-8 w-8" />
