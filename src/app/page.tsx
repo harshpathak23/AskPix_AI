@@ -314,10 +314,8 @@ export default function Home() {
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col items-center justify-between text-center animate-in fade-in-50 duration-500">
       {/* Top section: Logo and Slogan */}
-      <div className="flex flex-col items-center">
-        <div className="w-80 h-80">
-          <Logo className="w-full h-full" />
-        </div>
+      <div className="flex flex-col items-center w-full">
+        <Logo className="w-full max-w-md aspect-video" />
         <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
       </div>
 
@@ -534,13 +532,13 @@ export default function Home() {
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         <div className="w-full flex flex-1 flex-col items-stretch mt-4">
           <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
-            <div className="w-full flex-1 flex flex-col justify-center">
+            <div className="w-full flex-1 flex flex-col">
               {appState === 'welcome' && renderWelcomeScreen()}
               
               {appState !== 'welcome' && (
                 <>
                   <header className="flex flex-col items-center text-center mb-8">
-                    <Logo className="w-80 h-80" />
+                    <Logo className="w-full max-w-md aspect-video" />
                   </header>
                   <div className="w-full flex-1 flex flex-col">
                     {appState === 'scanning' && renderScanningScreen()}
