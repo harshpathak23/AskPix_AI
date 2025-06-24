@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe, Dna } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -262,14 +262,11 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in-50 duration-500">
-      <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl flex items-center gap-4">
-        <Logo className="h-16 w-16" />
-        ScanSolve
-      </h2>
+      <Logo className="h-20 w-40" />
       <p className="mt-8 max-w-xl text-lg text-muted-foreground">
-        Get instant, step-by-step solutions for Math, Physics, Chemistry, and Biology problems.
+        Get instant, step-by-step solutions for your homework problems.
       </p>
-
+      
       <div className="mt-8 mb-6 w-full max-w-sm">
         <p className="mb-3 text-lg font-medium">Choose a subject</p>
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
@@ -406,7 +403,7 @@ export default function Home() {
         
         <div className="w-full">
             <div className="flex items-center justify-center gap-4 mb-4">
-                <Globe className="text-muted-foreground" size={20} />
+                <p className="text-muted-foreground">Language:</p>
                 <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
                 <TabsList>
                     <TabsTrigger value="en" disabled={isTranslating}>English</TabsTrigger>
@@ -443,16 +440,7 @@ export default function Home() {
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         {appState !== 'welcome' && (
           <header className="flex flex-col items-center text-center mb-8">
-            <div className="p-3 mb-4 bg-card rounded-full border-8 border-background shadow-lg">
-              <Logo className="h-10 w-10" />
-            </div>
-            <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
-              ScanSolve
-            </h1>
-            <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-              Stuck on a problem? Scan any Math, Physics, Chemistry, or Biology
-              question and get a detailed, step-by-step solution in seconds.
-            </p>
+            <Logo className="h-12 w-24" />
           </header>
         )}
 
