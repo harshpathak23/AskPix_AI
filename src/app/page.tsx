@@ -372,7 +372,7 @@ export default function Home() {
       <div className="p-4 mb-6 bg-card rounded-full border-8 border-background shadow-lg">
         <Logo className="h-16 w-16 text-primary" />
       </div>
-      <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">Welcome to TutorAI</h2>
+      <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">Welcome to AskPix AI</h2>
       <p className="mt-4 max-w-xl text-lg text-muted-foreground">
         Get instant, step-by-step solutions for Math, Physics, Chemistry, and Biology problems.
       </p>
@@ -569,7 +569,7 @@ export default function Home() {
               <Logo className="h-10 w-10 text-primary" />
             </div>
             <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
-              TutorAI
+              AskPix AI
             </h1>
             <p className="mt-4 max-w-xl text-lg text-muted-foreground">
               Stuck on a problem? Scan any Math, Physics, Chemistry, or Biology
