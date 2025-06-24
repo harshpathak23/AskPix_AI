@@ -321,19 +321,19 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top section: Button */}
-      <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0">
-        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
-            <Camera className="mr-3 h-6 w-6" />
-            Start Scanning
-        </Button>
+      {/* Top section: Logo */}
+      <div className="w-full max-w-xs self-center px-4 pt-4 shrink-0">
+        <AppHeader />
       </div>
 
       {/* Middle section (scrollable content) */}
       <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto py-4">
-        {/* Logo, now inside scrollable area */}
-        <div className="w-full max-w-xs self-center px-4">
-          <AppHeader />
+        {/* Button, now inside scrollable area */}
+        <div className="w-full max-w-sm self-center px-4">
+            <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
+                <Camera className="mr-3 h-6 w-6" />
+                Start Scanning
+            </Button>
         </div>
         
         <ScrollArea className="w-full px-4">
