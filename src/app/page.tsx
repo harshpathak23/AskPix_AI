@@ -320,9 +320,9 @@ export default function Home() {
   );
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col justify-between text-center pt-0">
+    <div className="w-full h-full flex flex-col justify-between text-center">
       {/* Top section */}
-      <div className="w-full flex-1 flex flex-col items-center justify-start pt-0">
+      <div className="w-full flex-1 flex flex-col items-center justify-start">
         <div className="w-full max-w-xs mx-auto">
           <AppHeader />
         </div>
@@ -537,10 +537,10 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-start">
-      <main className="container mx-auto flex max-w-3xl flex-1 flex-col px-4 z-10 pt-0">
-        <div className="w-full flex flex-1 flex-col items-stretch">
-          <div className="w-full flex-1 flex flex-col px-4 pb-0 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh] pt-0">
-            <div className="w-full flex-1 flex flex-col pt-0">
+      <main className="container mx-auto max-w-3xl w-full flex-col px-4 z-10 pt-4">
+        <div className="w-full">
+          <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm p-4">
+            <div>
               {appState === 'welcome' && renderWelcomeScreen()}
               {appState === 'scanning' && renderScanningScreen()}
               {appState === 'cropping' && renderCroppingScreen()}
