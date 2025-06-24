@@ -311,8 +311,15 @@ export default function Home() {
     setCrop(crop);
   }
 
+  const AppHeader = () => (
+    <header className="text-center py-4">
+      <Logo className="w-[320px] aspect-[16/9] mx-auto" />
+      <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
+    </header>
+  );
+
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col justify-between text-center">
+    <div className="w-full h-full flex flex-col justify-between items-center text-center">
       {/* Top section: Subject Selection */}
       <div className="w-full max-w-md mx-auto">
         <p className="mb-4 text-xl font-medium">Choose a subject</p>
@@ -517,13 +524,6 @@ export default function Home() {
             <RefreshCw className="mr-2 h-5 w-5" />
             Scan Another Question
         </Button>
-    </div>
-  );
-  
-  const AppHeader = () => (
-    <div className="text-center py-4">
-      <Logo className="w-full max-w-sm aspect-[4/1] mx-auto" />
-      <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
     </div>
   );
 
