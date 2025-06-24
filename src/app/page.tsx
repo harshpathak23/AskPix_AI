@@ -35,6 +35,7 @@ export default function Home() {
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
   const [crop, setCrop] = useState<Crop>();
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [isFlashAvailable, setIsFlashAvailable] = useState(false);
@@ -68,14 +69,15 @@ export default function Home() {
       if (!navigator.mediaDevices?.getUserMedia) {
         setError("Camera access is not supported by your browser.");
         setHasCameraPermission(false);
+        setIsStartingCamera(false);
         return;
       }
 
       const idealConstraints: MediaStreamConstraints = {
         video: {
           facingMode: 'environment',
-          width: { ideal: 3840 },
-          height: { ideal: 2160 },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
           // @ts-ignore
           torch: true,
         },
@@ -99,12 +101,14 @@ export default function Home() {
           } else {
             setError('Could not access any back camera. It may be in use or not available.');
           }
+          setIsStartingCamera(false);
           return;
         }
       }
 
       if (!isComponentActive || !stream) {
         stopStream();
+        setIsStartingCamera(false);
         return;
       }
 
@@ -113,6 +117,7 @@ export default function Home() {
       }
       setHasCameraPermission(true);
       setError(null);
+      setIsStartingCamera(false); // Unblock UI as soon as video appears
 
       const videoTrack = stream.getVideoTracks()?.[0];
       if (videoTrack) {
@@ -236,6 +241,7 @@ export default function Home() {
   }
 
   const handleStartScanning = () => {
+    setIsStartingCamera(true);
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
@@ -333,6 +339,7 @@ export default function Home() {
   };
   
   const handleRetake = () => {
+    setIsStartingCamera(true);
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
@@ -373,9 +380,9 @@ export default function Home() {
       <p className="mt-2 max-w-xl text-muted-foreground">
         Just point your camera, scan a question, and let our AI do the rest.
       </p>
-      <Button onClick={handleStartScanning} size="lg" className="mt-8 text-lg py-7 px-8 animate-pulse-glow">
+      <Button onClick={handleStartScanning} size="lg" className="mt-8 text-lg py-7 px-8 animate-pulse-glow" disabled={isStartingCamera}>
         <Camera className="mr-3 h-6 w-6" />
-        Start Scanning
+        {isStartingCamera ? 'Starting Camera...' : 'Start Scanning'}
       </Button>
     </div>
   );
@@ -481,9 +488,9 @@ export default function Home() {
         )}
       </div>
       <div className="flex w-full gap-4 mt-4">
-        <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6">
+        <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6" disabled={isStartingCamera}>
           <RefreshCw className="mr-2 h-5 w-5" />
-          Retake
+          {isStartingCamera ? 'Opening Camera...' : 'Retake'}
         </Button>
         <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
           <Bot className="mr-2 h-5 w-5" />
