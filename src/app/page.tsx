@@ -217,7 +217,7 @@ export default function Home() {
     );
   
     return new Promise((resolve) => {
-      resolve(canvas.toDataURL('image/png'));
+      resolve(canvas.toDataURL('image/jpeg', 1.0));
     });
   }
 
@@ -310,7 +310,7 @@ export default function Home() {
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        const dataUri = canvas.toDataURL('image/png');
+        const dataUri = canvas.toDataURL('image/jpeg', 1.0);
         setCapturedImage(dataUri);
         setCroppedImage(null);
         setSolutionSteps(null);
