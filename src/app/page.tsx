@@ -314,25 +314,26 @@ export default function Home() {
 
   const AppHeader = () => (
     <header className="text-center">
-      <Logo className="w-full aspect-[1/1] mx-auto" />
+      <Logo className="w-full aspect-square mx-auto max-w-xs" />
       <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
     </header>
   );
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top Button Section */}
-      <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0">
-        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
-            <Camera className="mr-3 h-6 w-6" />
-            Start Scanning
-        </Button>
+      {/* Top Logo Section */}
+      <div className="w-full max-w-xs self-center px-4 pt-4 shrink-0">
+        <AppHeader />
       </div>
 
       {/* Middle section (scrollable content) */}
       <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto py-4">
-        <div className="w-full max-w-xs mx-auto">
-          <AppHeader />
+        {/* Top button, now inside scrollable area */}
+        <div className='w-full max-w-sm px-4 pb-4'>
+            <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
+                <Camera className="mr-3 h-6 w-6" />
+                Start Scanning
+            </Button>
         </div>
         <ScrollArea className="w-full px-4">
           <div className="w-full flex flex-col items-center pt-4">
@@ -544,7 +545,7 @@ export default function Home() {
   );
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-start">
+    <div className="flex min-h-screen w-full flex-col justify-start items-center">
       <main className="container mx-auto max-w-3xl w-full flex-col z-10 rounded-xl bg-card/80 backdrop-blur-sm shadow-sm pt-0">
         <div className="h-full">
           {appState === 'welcome' && renderWelcomeScreen()}
