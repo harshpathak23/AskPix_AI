@@ -123,14 +123,14 @@ export default function Home() {
       return;
     }
     
-    if (videoRef.current && stream) {
-        videoRef.current.srcObject = stream;
-        setHasCameraPermission(true);
-
-        const videoTrack = stream.getVideoTracks()?.[0];
-        if (videoTrack) {
-            // Use a short delay to allow the stream to stabilize before getting capabilities
-            setTimeout(() => {
+    const video = videoRef.current;
+    if (video) {
+        video.srcObject = stream;
+        // This is the robust way to wait for the camera to be ready.
+        video.onloadedmetadata = () => {
+            setHasCameraPermission(true);
+            const videoTrack = stream.getVideoTracks()?.[0];
+            if (videoTrack) {
                 try {
                     const capabilities = videoTrack.getCapabilities();
                     const settings = videoTrack.getSettings();
@@ -151,8 +151,8 @@ export default function Home() {
                 } catch (e) {
                     console.error("Error reading camera capabilities:", e);
                 }
-            }, 500);
-        }
+            }
+        };
     }
   };
 
