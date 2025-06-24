@@ -370,7 +370,7 @@ export default function Home() {
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in-50 duration-500">
       <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl flex items-center gap-4">
-        <Logo className="h-16 w-16 text-primary" />
+        <Logo className="h-16 w-16" />
         AskPix AI
       </h2>
       <p className="mt-8 max-w-xl text-lg text-muted-foreground">
@@ -566,7 +566,7 @@ export default function Home() {
         {appState !== 'welcome' && (
           <header className="flex flex-col items-center text-center mb-8">
             <div className="p-3 mb-4 bg-card rounded-full border-8 border-background shadow-lg">
-              <Logo className="h-10 w-10 text-primary" />
+              <Logo className="h-10 w-10" />
             </div>
             <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
               AskPix AI
