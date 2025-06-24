@@ -264,7 +264,7 @@ export default function Home() {
     <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in-50 duration-500">
       <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl flex items-center gap-4">
         <Logo className="h-16 w-16" />
-        AskPix AI
+        ScanSolve
       </h2>
       <p className="mt-8 max-w-xl text-lg text-muted-foreground">
         Get instant, step-by-step solutions for Math, Physics, Chemistry, and Biology problems.
@@ -447,7 +447,7 @@ export default function Home() {
               <Logo className="h-10 w-10" />
             </div>
             <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
-              AskPix AI
+              ScanSolve
             </h1>
             <p className="mt-4 max-w-xl text-lg text-muted-foreground">
               Stuck on a problem? Scan any Math, Physics, Chemistry, or Biology
