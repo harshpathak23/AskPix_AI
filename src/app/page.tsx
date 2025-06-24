@@ -15,6 +15,7 @@ import { SolutionSkeleton } from '@/components/solution-skeleton';
 import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
@@ -35,6 +36,8 @@ export default function Home() {
   const [crop, setCrop] = useState<Crop>();
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [isFlashAvailable, setIsFlashAvailable] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [zoomRange, setZoomRange] = useState<{ min: number; max: number; step: number } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,6 +56,7 @@ export default function Home() {
         }
         setIsFlashAvailable(false);
         setIsFlashOn(false);
+        setZoomRange(null);
       }
     };
 
@@ -103,7 +107,7 @@ export default function Home() {
       setHasCameraPermission(true);
       setError(null);
 
-      // After stream is acquired, check and activate flash
+      // After stream is acquired, check and activate flash/zoom
       const videoTrack = stream.getVideoTracks()?.[0];
       if (videoTrack) {
         const capabilities = videoTrack.getCapabilities();
@@ -119,6 +123,16 @@ export default function Home() {
         } else {
           setIsFlashAvailable(false);
         }
+        
+        // @ts-ignore - zoom may not be in all TypeScript lib definitions yet
+        if (capabilities.zoom) {
+            // @ts-ignore
+            const { min, max, step } = capabilities.zoom;
+            setZoomRange({ min, max, step });
+            setZoom(min);
+        } else {
+            setZoomRange(null);
+        }
       }
     };
     
@@ -132,6 +146,21 @@ export default function Home() {
       stopStream();
     };
   }, [appState, toast]);
+
+  useEffect(() => {
+    if (appState !== 'scanning' || !videoRef.current?.srcObject || !zoomRange) return;
+
+    const stream = videoRef.current.srcObject as MediaStream;
+    const videoTrack = stream.getVideoTracks()?.[0];
+
+    if (videoTrack) {
+        videoTrack.applyConstraints({
+            advanced: [{ zoom: zoom }]
+        }).catch(e => {
+            console.error("Failed to apply zoom", e);
+        });
+    }
+  }, [zoom, appState, zoomRange]);
 
   const handleToggleFlash = async () => {
     if (!videoRef.current?.srcObject) return;
@@ -201,6 +230,8 @@ export default function Home() {
     setCrop(undefined);
     setIsFlashAvailable(false);
     setIsFlashOn(false);
+    setZoom(1);
+    setZoomRange(null);
     setAppState('scanning');
   };
   
@@ -352,6 +383,20 @@ export default function Home() {
       <div className="w-full flex-1 bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
         <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
         
+        {zoomRange && (
+            <div className="absolute left-2 md:left-4 top-1/4 z-10 h-1/2 w-10 flex flex-col items-center justify-center bg-black/30 rounded-full p-2 backdrop-blur-sm">
+                <Slider
+                    value={[zoom]}
+                    onValueChange={(value) => setZoom(value[0])}
+                    min={zoomRange.min}
+                    max={zoomRange.max}
+                    step={zoomRange.step}
+                    orientation="vertical"
+                    className="h-full"
+                />
+            </div>
+        )}
+
         {isFlashAvailable && (
           <div className="absolute top-4 right-4 z-10">
             <Button
