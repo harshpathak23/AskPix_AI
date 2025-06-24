@@ -312,10 +312,13 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col items-center justify-center text-center p-4 sm:p-8 animate-in fade-in-50 duration-500 space-y-12">
-      {/* Top section: Logo */}
-      <div className="w-80 h-80">
-        <Logo className="w-full h-full" />
+    <div className="w-full h-full flex flex-col items-center justify-between text-center p-4 sm:p-8 animate-in fade-in-50 duration-500">
+      {/* Top section: Logo and Slogan */}
+      <div className="flex flex-col items-center">
+        <div className="w-80 h-80">
+          <Logo className="w-full h-full" />
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
       </div>
 
       {/* Middle section: Subject selection */}
@@ -531,7 +534,7 @@ export default function Home() {
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         {appState !== 'welcome' && (
           <header className="flex flex-col items-center text-center mb-8">
-            <Logo className="h-20 w-40" />
+            <Logo className="h-32 w-32" />
           </header>
         )}
 
