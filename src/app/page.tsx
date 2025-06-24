@@ -17,6 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import type { GraphData } from '@/ai/schemas';
+import { cn } from '@/lib/utils';
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
@@ -400,9 +401,17 @@ export default function Home() {
         </Tabs>
       </div>
       <div className="w-full flex-1 overflow-hidden relative flex items-center justify-center bg-black">
-        <video ref={videoRef} className="w-full h-full object-contain" autoPlay muted playsInline />
+        {isStartingCamera && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-white bg-black/50">
+            <Camera className="h-16 w-16 mb-4 animate-pulse" />
+            <p className="text-xl font-medium">Initializing Camera...</p>
+            <p className="text-sm text-muted-foreground mt-2">Please allow camera permissions if prompted.</p>
+          </div>
+        )}
         
-        {zoomRange && (
+        <video ref={videoRef} className={cn("w-full h-full object-contain", (isStartingCamera || hasCameraPermission === false) && "opacity-0")} autoPlay muted playsInline />
+        
+        {!isStartingCamera && zoomRange && (
             <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 h-1/2 w-10 flex flex-col items-center justify-center bg-black/30 rounded-full p-2 backdrop-blur-sm">
                 <Slider
                     value={[zoom]}
@@ -416,7 +425,7 @@ export default function Home() {
             </div>
         )}
 
-        {isFlashAvailable && (
+        {!isStartingCamera && isFlashAvailable && (
           <div className="absolute top-4 right-4 z-10">
             <Button
               onClick={handleToggleFlash}
@@ -429,7 +438,7 @@ export default function Home() {
           </div>
         )}
 
-        {hasCameraPermission === false && (
+        {hasCameraPermission === false && !isStartingCamera && (
             <div className="absolute inset-0 flex items-center justify-center p-4">
                <Alert variant="destructive" className="w-11/12">
                   <Camera className="h-4 w-4" />
@@ -446,7 +455,7 @@ export default function Home() {
               onClick={handleScan}
               size="icon"
               className="h-16 w-16 rounded-full animate-pulse-glow"
-              disabled={hasCameraPermission !== true}
+              disabled={hasCameraPermission !== true || isStartingCamera}
             >
               <ScanLine className="h-8 w-8" />
             </Button>
