@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { GraphData } from '@/ai/schemas';
 import { cn } from '@/lib/utils';
+import { Slider } from '@/components/ui/slider';
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
@@ -35,6 +36,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [crop, setCrop] = useState<Crop>();
+  const [flashSupported, setFlashSupported] = useState(false);
+  const [zoomSupported, setZoomSupported] = useState(false);
+  const [isFlashOn, setIsFlashOn] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -57,6 +63,11 @@ export default function Home() {
     // Reset states for a new camera session
     setHasCameraPermission(null);
     setError(null);
+    setFlashSupported(false);
+    setZoomSupported(false);
+    setIsFlashOn(false);
+    setZoomLevel(1);
+
 
     if (!navigator.mediaDevices?.getUserMedia) {
         setError("Camera access is not supported by your browser.");
@@ -101,6 +112,15 @@ export default function Home() {
         // This is the robust way to wait for the camera to be ready.
         video.onloadedmetadata = () => {
             setHasCameraPermission(true);
+            const [track] = stream!.getVideoTracks();
+            const capabilities = track.getCapabilities();
+
+            if (capabilities.torch) {
+              setFlashSupported(true);
+            }
+            if (capabilities.zoom) {
+              setZoomSupported(true);
+            }
         };
     }
   };
@@ -241,6 +261,37 @@ export default function Home() {
       }
     }
   };
+
+  const toggleFlash = async () => {
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const [track] = stream.getVideoTracks();
+      if (track) {
+        await track.applyConstraints({
+          advanced: [{ torch: !isFlashOn }],
+        });
+        setIsFlashOn(!isFlashOn);
+      }
+    }
+  };
+
+  const handleZoomChange = async (value: number[]) => {
+    const newZoom = value[0];
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const [track] = stream.getVideoTracks();
+      const capabilities = track.getCapabilities();
+      if (capabilities.zoom) {
+        const minZoom = capabilities.zoom.min!;
+        const maxZoom = capabilities.zoom.max!;
+        const scaledZoom = minZoom + (maxZoom - minZoom) * ((newZoom - 1) / 9);
+        await track.applyConstraints({
+          advanced: [{ zoom: scaledZoom }],
+        });
+        setZoomLevel(newZoom);
+      }
+    }
+  };
   
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
@@ -262,7 +313,7 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in-50 duration-500">
-      <Logo className="h-20 w-40" />
+      <Logo className="h-40 w-80" />
       <p className="mt-8 max-w-xl text-lg text-muted-foreground">
         Get instant, step-by-step solutions for your homework problems.
       </p>
@@ -300,7 +351,31 @@ export default function Home() {
         <video ref={videoRef} className={cn("w-full h-full object-cover", hasCameraPermission !== true && "opacity-0")} autoPlay muted playsInline />
         
         {hasCameraPermission === true && (
-          <div className="absolute top-0 left-0 w-full h-1 bg-primary/70 shadow-[0_0_20px_5px_hsl(var(--primary))] animate-scan-line pointer-events-none" />
+          <>
+            <div className="absolute top-0 left-0 w-full h-1 bg-primary/70 shadow-[0_0_20px_5px_hsl(var(--primary))] animate-scan-line pointer-events-none" />
+
+            <div className="absolute top-4 right-4 z-10 space-y-3">
+              {flashSupported && (
+                <Button onClick={toggleFlash} size="icon" variant={isFlashOn ? 'secondary' : 'ghost'} className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/20 hover:bg-black/40 text-white">
+                  <Zap className={cn(isFlashOn && "fill-yellow-300 text-yellow-300")} />
+                </Button>
+              )}
+            </div>
+             {zoomSupported && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-1/2 max-h-64 flex flex-col items-center space-y-2">
+                <ZoomIn className="text-white/80"/>
+                <Slider
+                  defaultValue={[1]}
+                  min={1}
+                  max={10}
+                  step={0.5}
+                  onValueChange={handleZoomChange}
+                  className="w-auto"
+                  orientation="vertical"
+                />
+              </div>
+            )}
+          </>
         )}
 
         {hasCameraPermission === false && (
@@ -440,7 +515,7 @@ export default function Home() {
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         {appState !== 'welcome' && (
           <header className="flex flex-col items-center text-center mb-8">
-            <Logo className="h-12 w-24" />
+            <Logo className="h-16 w-32" />
           </header>
         )}
 
