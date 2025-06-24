@@ -314,8 +314,8 @@ export default function Home() {
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col items-center justify-center text-center p-4 sm:p-8 animate-in fade-in-50 duration-500 space-y-12">
       {/* Top section: Logo */}
-      <div className="w-full max-w-sm">
-        <Logo className="w-full aspect-[16/9]" />
+      <div className="w-80 h-80">
+        <Logo className="w-full h-full" />
       </div>
 
       {/* Middle section: Subject selection */}
