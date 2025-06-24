@@ -534,7 +534,7 @@ export default function Home() {
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         {appState !== 'welcome' && (
           <header className="flex flex-col items-center text-center mb-8">
-            <Logo className="h-32 w-32" />
+            <Logo className="w-80 h-80" />
           </header>
         )}
 
