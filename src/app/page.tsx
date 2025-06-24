@@ -532,19 +532,21 @@ export default function Home() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center">
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
-        {appState !== 'welcome' && (
-          <header className="flex flex-col items-center text-center mb-8">
-            <Logo className="w-80 h-80" />
-          </header>
-        )}
-
         <div className="w-full flex flex-1 flex-col items-stretch mt-4">
-          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh] justify-center">
-            {appState === 'welcome' && renderWelcomeScreen()}
-            {appState === 'scanning' && renderScanningScreen()}
-            {appState === 'cropping' && renderCroppingScreen()}
-            {appState === 'solving' && renderSolvingScreen()}
-            {appState === 'result' && renderResultScreen()}
+          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
+            {appState !== 'welcome' && (
+              <header className="flex flex-col items-center text-center mb-8">
+                <Logo className="w-80 h-80" />
+              </header>
+            )}
+            
+            <div className="w-full flex-1 flex flex-col justify-center">
+                {appState === 'welcome' && renderWelcomeScreen()}
+                {appState === 'scanning' && renderScanningScreen()}
+                {appState === 'cropping' && renderCroppingScreen()}
+                {appState === 'solving' && renderSolvingScreen()}
+                {appState === 'result' && renderResultScreen()}
+            </div>
           </div>
         </div>
       </main>
