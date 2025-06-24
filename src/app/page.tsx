@@ -314,8 +314,8 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top section: Logo */}
-      <div className="w-full shrink-0 px-4 pt-0 pb-2 text-center">
+      {/* Top section: Header bar containing the logo */}
+      <div className="w-full shrink-0 pt-4">
           <Logo className="w-80 h-80 mx-auto" />
       </div>
 
@@ -532,7 +532,7 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex flex-col items-center p-0 min-h-screen">
+    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen p-0">
       <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-col flex-1">
         {appState === 'welcome' && renderWelcomeScreen()}
         {appState === 'scanning' && renderScanningScreen()}
