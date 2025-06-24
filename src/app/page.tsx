@@ -323,7 +323,7 @@ export default function Home() {
     <div className="w-full h-full flex flex-col justify-between text-center">
       {/* Top section */}
       <div className="w-full flex-1 flex flex-col items-center justify-start">
-        <div className="w-full max-w-xs mx-auto">
+        <div className="w-full max-w-xs mx-auto pt-4">
           <AppHeader />
         </div>
         <ScrollArea className="w-full px-4">
@@ -431,7 +431,7 @@ export default function Home() {
   );
 
   const renderCroppingScreen = () => (
-    <div className="w-full h-full flex flex-col items-center">
+    <div className="w-full h-full flex flex-col items-center p-4">
        {error && (
           <Alert variant="destructive" className="mb-4 w-full">
             <XCircle className="h-4 w-4" />
@@ -489,7 +489,7 @@ export default function Home() {
   );
   
   const renderResultScreen = () => (
-    <div className="w-full space-y-6 animate-in fade-in-50 duration-500">
+    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4">
         <div className="w-full aspect-video bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
@@ -537,17 +537,13 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-start">
-      <main className="container mx-auto max-w-3xl w-full flex-col px-4 z-10">
-        <div className="w-full">
-          <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm px-4 pb-4">
-            <div>
-              {appState === 'welcome' && renderWelcomeScreen()}
-              {appState === 'scanning' && renderScanningScreen()}
-              {appState === 'cropping' && renderCroppingScreen()}
-              {appState === 'solving' && renderSolvingScreen()}
-              {appState === 'result' && renderResultScreen()}
-            </div>
-          </div>
+      <main className="container mx-auto max-w-3xl w-full flex-col z-10 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm p-4 pt-0">
+        <div>
+          {appState === 'welcome' && renderWelcomeScreen()}
+          {appState === 'scanning' && renderScanningScreen()}
+          {appState === 'cropping' && renderCroppingScreen()}
+          {appState === 'solving' && renderSolvingScreen()}
+          {appState === 'result' && renderResultScreen()}
         </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground z-10 flex items-center gap-2">
