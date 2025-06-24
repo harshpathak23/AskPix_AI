@@ -537,9 +537,9 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-start">
-      <main className="container mx-auto max-w-3xl w-full flex-col px-4 z-10 pt-4">
+      <main className="container mx-auto max-w-3xl w-full flex-col px-4 z-10">
         <div className="w-full">
-          <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm p-4">
+          <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm px-4 pb-4">
             <div>
               {appState === 'welcome' && renderWelcomeScreen()}
               {appState === 'scanning' && renderScanningScreen()}
