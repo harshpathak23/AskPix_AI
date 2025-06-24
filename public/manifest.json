@@ -1,0 +1,21 @@
+{
+  "name": "TutorAI",
+  "short_name": "TutorAI",
+  "description": "Your personal AI problem solver. Scan any Math, Physics, Chemistry, or Biology question and get instant solutions!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08011E",
+  "theme_color": "#08011E",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
