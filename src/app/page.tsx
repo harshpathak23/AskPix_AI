@@ -315,7 +315,7 @@ export default function Home() {
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
       {/* Top section: Header bar containing the logo */}
-      <div className="w-full shrink-0 pt-4">
+      <div className="w-full shrink-0">
           <Logo className="w-80 h-80 mx-auto" />
       </div>
 
