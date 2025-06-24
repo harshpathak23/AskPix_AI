@@ -314,7 +314,7 @@ export default function Home() {
 
   const AppHeader = () => (
     <header className="text-center py-4">
-      <Logo className="w-full aspect-[16/9] mx-auto" />
+      <Logo className="w-full aspect-square mx-auto" />
       <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
     </header>
   );
