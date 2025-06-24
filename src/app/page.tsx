@@ -313,8 +313,8 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center animate-in fade-in-50 duration-500">
-      {/* Middle section: This will now grow and center its content */}
-      <div className="w-full max-w-md flex-grow flex flex-col justify-center self-center">
+      {/* Middle section: This will now grow and be positioned at the top */}
+      <div className="w-full max-w-md flex-grow flex flex-col justify-start pt-8 self-center">
         <div>
           <p className="mb-4 text-xl font-medium">Choose a subject</p>
           <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
