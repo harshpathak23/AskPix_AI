@@ -312,7 +312,7 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col text-center">
+    <div className="w-full h-full flex flex-col text-center justify-between">
       {/* Top section: Subject Selection */}
       <div className="pt-8 pb-4">
         <div className="w-full max-w-md mx-auto">
@@ -339,9 +339,6 @@ export default function Home() {
           </Tabs>
         </div>
       </div>
-
-      {/* This spacer div will grow to push the button to the bottom */}
-      <div className="flex-grow" />
 
       {/* Bottom section: Button */}
       <div className="w-full max-w-sm self-center py-4 shrink-0">
@@ -526,8 +523,8 @@ export default function Home() {
   );
   
   const AppHeader = () => (
-    <div className="text-center">
-      <Logo className="w-full max-w-sm aspect-video mx-auto" />
+    <div className="text-center py-4">
+      <Logo className="w-full max-w-sm aspect-[4/1] mx-auto" />
       <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
     </div>
   );
@@ -537,9 +534,7 @@ export default function Home() {
       <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
         <div className="w-full flex flex-1 flex-col items-stretch">
           <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
-            
             <AppHeader />
-
             <div className="w-full flex-1 flex flex-col mt-4">
               {appState === 'welcome' && renderWelcomeScreen()}
               {appState === 'scanning' && renderScanningScreen()}
