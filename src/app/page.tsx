@@ -391,11 +391,11 @@ export default function Home() {
           </TabsList>
         </Tabs>
       </div>
-      <div className="w-full flex-1 bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
+      <div className="w-full flex-1 overflow-hidden relative flex items-center justify-center">
         <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
         
         {zoomRange && (
-            <div className="absolute left-2 md:left-4 top-1/4 z-10 h-1/2 w-10 flex flex-col items-center justify-center bg-black/30 rounded-full p-2 backdrop-blur-sm">
+            <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 h-1/2 w-10 flex flex-col items-center justify-center bg-black/30 rounded-full p-2 backdrop-blur-sm">
                 <Slider
                     value={[zoom]}
                     onValueChange={(value) => setZoom(value[0])}
