@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { GraphData } from '@/ai/schemas';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
@@ -313,47 +314,50 @@ export default function Home() {
 
   const AppHeader = () => (
     <header className="text-center py-4">
-      <Logo className="w-[320px] aspect-[16/9] mx-auto" />
+      <Logo className="w-full max-w-[640px] aspect-[16/9] mx-auto" />
       <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
     </header>
   );
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col justify-between items-center text-center">
-      {/* Top section: Subject Selection */}
-      <div className="w-full max-w-md mx-auto">
-        <p className="mb-4 text-xl font-medium">Choose a subject</p>
-        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
-            <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                <FunctionSquare className="h-8 w-8" />
-                <span>Math</span>
-            </TabsTrigger>
-            <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                <Atom className="h-8 w-8" />
-                <span>Physics</span>
-            </TabsTrigger>
-            <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                <TestTube className="h-8 w-8" />
-                <span>Chemistry</span>
-            </TabsTrigger>
-            <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                <Dna className="h-8 w-8" />
-                <span>Biology</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+    <div className="w-full flex-1 flex flex-col justify-between items-center text-center">
+        {/* This div will grow and push the button to the bottom */}
+        <div className="w-full flex flex-col items-center">
+            <p className="mb-4 text-xl font-medium">Choose a subject</p>
+            <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
+                <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
+                    <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                        <FunctionSquare className="h-8 w-8" />
+                        <span>Math</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                        <Atom className="h-8 w-8" />
+                        <span>Physics</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                        <TestTube className="h-8 w-8" />
+                        <span>Chemistry</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                        <Dna className="h-8 w-8" />
+                        <span>Biology</span>
+                    </TabsTrigger>
+                </TabsList>
+            </Tabs>
+        </div>
+        
+        {/* Spacer div to push button to the bottom */}
+        <div className="flex-grow"></div>
 
-      {/* Bottom section: Button */}
-      <div className="w-full max-w-sm self-center py-4 shrink-0">
-        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
-          <Camera className="mr-3 h-6 w-6" />
-          Start Scanning
-        </Button>
-      </div>
+        {/* Bottom section: Button */}
+        <div className="w-full max-w-sm self-center py-4 shrink-0">
+            <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
+                <Camera className="mr-3 h-6 w-6" />
+                Start Scanning
+            </Button>
+        </div>
     </div>
-  );
+);
   
   const renderScanningScreen = () => (
     <div className="w-full h-full flex flex-col items-center justify-center">
