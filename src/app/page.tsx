@@ -313,8 +313,8 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* This wrapper will grow and center its content */}
-      <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto py-4">
+      {/* This wrapper will grow and position its content */}
+      <div className="flex-1 flex flex-col items-center justify-start overflow-y-auto pt-8 pb-4">
         <div className="w-full max-w-md">
           <p className="mb-4 text-xl font-medium">Choose a subject</p>
           <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
