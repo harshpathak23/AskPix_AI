@@ -312,32 +312,30 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col text-center justify-between">
+    <div className="w-full h-full flex flex-col justify-between text-center">
       {/* Top section: Subject Selection */}
-      <div className="pt-8 pb-4">
-        <div className="w-full max-w-md mx-auto">
-          <p className="mb-4 text-xl font-medium">Choose a subject</p>
-          <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                  <FunctionSquare className="h-8 w-8" />
-                  <span>Math</span>
-              </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                  <Atom className="h-8 w-8" />
-                  <span>Physics</span>
-              </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                  <TestTube className="h-8 w-8" />
-                  <span>Chemistry</span>
-              </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                  <Dna className="h-8 w-8" />
-                  <span>Biology</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+      <div className="w-full max-w-md mx-auto">
+        <p className="mb-4 text-xl font-medium">Choose a subject</p>
+        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
+            <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <FunctionSquare className="h-8 w-8" />
+                <span>Math</span>
+            </TabsTrigger>
+            <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <Atom className="h-8 w-8" />
+                <span>Physics</span>
+            </TabsTrigger>
+            <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <TestTube className="h-8 w-8" />
+                <span>Chemistry</span>
+            </TabsTrigger>
+            <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <Dna className="h-8 w-8" />
+                <span>Biology</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Bottom section: Button */}
