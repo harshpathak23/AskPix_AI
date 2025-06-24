@@ -16,6 +16,7 @@ import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
+import type { GraphData } from '@/ai/schemas';
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
@@ -25,7 +26,8 @@ type Language = 'en' | 'hi';
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('welcome');
-  const [solutionSteps, setSolutionSteps] = useState<string[] | null>(null);
+  const [solution, setSolution] = useState<string | null>(null);
+  const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -235,7 +237,8 @@ export default function Home() {
   const handleStartScanning = () => {
     setCapturedImage(null);
     setCroppedImage(null);
-    setSolutionSteps(null);
+    setSolution(null);
+    setGraphData(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -268,7 +271,7 @@ export default function Home() {
       if (response.error) {
         setError(response.error);
         setAppState('cropping');
-      } else if (response.solutionSteps) {
+      } else if (response.solution) {
         if (response.detectedSubject && response.detectedSubject !== subject) {
             setSubject(response.detectedSubject as Subject);
             toast({
@@ -276,7 +279,8 @@ export default function Home() {
                 description: `We detected this is a ${response.detectedSubject} question and switched the subject for you.`,
             });
         }
-        setSolutionSteps(response.solutionSteps);
+        setSolution(response.solution);
+        setGraphData(response.graphData || null);
         setAppState('result');
       }
     } catch (e) {
@@ -305,8 +309,9 @@ export default function Home() {
     if (response.error) {
       setError(response.error);
       // Keep previous solution steps visible on translation error
-    } else if (response.solutionSteps) {
-      setSolutionSteps(response.solutionSteps);
+    } else if (response.solution) {
+      setSolution(response.solution);
+      setGraphData(response.graphData || null);
     }
     
     setIsTranslating(false);
@@ -324,7 +329,8 @@ export default function Home() {
         const dataUri = canvas.toDataURL('image/jpeg', 1.0);
         setCapturedImage(dataUri);
         setCroppedImage(null);
-        setSolutionSteps(null);
+        setSolution(null);
+        setGraphData(null);
         setError(null);
         setLanguage('en');
         setAppState('cropping');
@@ -335,7 +341,8 @@ export default function Home() {
   const handleRetake = () => {
     setCapturedImage(null);
     setCroppedImage(null);
-    setSolutionSteps(null);
+    setSolution(null);
+    setGraphData(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -531,9 +538,10 @@ export default function Home() {
             </div>
             {isTranslating ? (
               <SolutionSkeleton />
-            ) : solutionSteps ? (
+            ) : solution ? (
               <SolutionDisplay
-                solutionSteps={solutionSteps}
+                solution={solution}
+                graphData={graphData}
               />
             ) : !error ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[200px]">

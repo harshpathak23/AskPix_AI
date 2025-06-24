@@ -15,8 +15,7 @@ import {
 } from '@/ai/schemas';
 
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  const result = await solveQuestionFlow(input);
-  return { solutionSteps: result.solutionSteps || [] };
+  return solveQuestionFlow(input);
 }
 
 const prompt = ai.definePrompt({
@@ -24,15 +23,16 @@ const prompt = ai.definePrompt({
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
   prompt: `You are an expert {{subject}} tutor. The user has provided a cropped image focusing on a specific question.
-Your task is to analyze this image and provide a clear, step-by-step solution to the question shown.
+Your task is to analyze this image and provide a clear, detailed solution.
 
 **IMPORTANT INSTRUCTIONS:**
 1. You MUST provide the entire solution in the language specified by the 'language' code.
    - 'en' means English.
    - 'hi' means Hindi.
-2. The solution must be broken down into logical steps. Each step must be a separate string in the 'solutionSteps' array.
+2. The solution must be a single, detailed string in the 'solution' field. Break down the explanation into logical steps within this single string, using newline characters (\\n) to separate paragraphs.
 3. Use LaTeX for all mathematical formulas. Enclose inline math in $...$ and display math (for block equations) in $$...$$. Mathematical formulas and symbols should NOT be translated and should remain in standard mathematical notation.
-4. The output must be in JSON format.
+4. **Graph Generation (for Physics & Chemistry):** If the subject is Physics or Chemistry and a visual graph would significantly aid in explaining the answer (e.g., plotting velocity vs. time, reaction rate vs. concentration), you MUST generate the data for a bar chart and populate the 'graphData' field. If a graph is not relevant, leave 'graphData' empty.
+5. The output must be in JSON format.
 
 **TARGET LANGUAGE: {{language}}**
 

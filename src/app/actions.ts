@@ -3,6 +3,7 @@
 import { solveQuestion } from '@/ai/flows/solve-question';
 import { identifySubject } from '@/ai/flows/identify-question-subject';
 import { z } from 'zod';
+import type { GraphData } from '@/ai/schemas';
 
 const QuestionSchema = z.object({
   photoDataUri: z.string().startsWith('data:image/', { message: "Invalid image format." }),
@@ -12,7 +13,8 @@ const QuestionSchema = z.object({
 
 interface ActionState {
   error?: string | null;
-  solutionSteps?: string[] | null;
+  solution?: string | null;
+  graphData?: GraphData | null;
   detectedSubject?: string | null;
 }
 
@@ -50,13 +52,14 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
       subject: actualSubject,
     });
     
-    if (!result.solutionSteps || result.solutionSteps.length === 0) {
+    if (!result.solution) {
       return { error: 'Could not generate a solution. Please try a different question.' };
     }
     
     // 3. Return solution and the detected subject
     return { 
-        solutionSteps: result.solutionSteps,
+        solution: result.solution,
+        graphData: result.graphData || null,
         detectedSubject: actualSubject 
     };
 

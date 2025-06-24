@@ -7,25 +7,23 @@ export function SolutionSkeleton() {
       <Card>
         <CardHeader>
           <CardTitle>
-            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-7 w-1/3" />
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Skeleton className="h-20 w-full" />
+        <CardContent className="space-y-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-[90%]" />
+          <Skeleton className="h-4 w-[80%]" />
         </CardContent>
       </Card>
+      {/* Skeleton for the graph card */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-6 w-1/3" />
-          </CardTitle>
+           <Skeleton className="h-7 w-1/2" />
         </CardHeader>
-        <CardContent className="space-y-3">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-2/3" />
+        <CardContent>
+           <Skeleton className="h-48 w-full" />
         </CardContent>
       </Card>
     </div>
