@@ -314,7 +314,7 @@ export default function Home() {
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
       {/* Subject chooser section */}
-      <div className="w-full max-w-md self-center">
+      <div className="w-full max-w-md self-center overflow-y-auto py-4">
         <p className="mb-4 text-xl font-medium">Choose a subject</p>
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
           <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
@@ -339,7 +339,7 @@ export default function Home() {
       </div>
   
       {/* Bottom section: Button */}
-      <div className="w-full max-w-sm self-center mt-auto">
+      <div className="w-full max-w-sm self-center mt-auto pt-4">
         <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
           <Camera className="mr-3 h-6 w-6" />
           Start Scanning
@@ -520,6 +520,12 @@ export default function Home() {
     </div>
   );
   
+  const AppHeader = () => (
+    <header className="flex flex-col items-center text-center mb-4">
+      <Logo className="w-full max-w-xs aspect-[16/9]" />
+      <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
+    </header>
+  );
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center">
@@ -527,10 +533,7 @@ export default function Home() {
         <div className="w-full flex flex-1 flex-col items-stretch">
           <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
             
-            <header className="flex flex-col items-center text-center mb-4">
-              <Logo className="w-full max-w-xs aspect-video" />
-              <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
-            </header>
+            <AppHeader />
 
             <div className="w-full flex-1 flex flex-col">
               {appState === 'welcome' && renderWelcomeScreen()}
