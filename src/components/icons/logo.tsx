@@ -7,25 +7,40 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       width="1em"
       height="1em"
-      viewBox="0 0 125 40"
+      viewBox="0 0 44 44"
       {...props}
     >
-      <g transform="translate(20 20)">
-        <ellipse cx="0" cy="0" rx="6" ry="15" fill="#5E7354" transform="rotate(-35)" />
-        <ellipse cx="0" cy="0" rx="6" ry="15" fill="#6A7F5D" transform="rotate(-15)" />
-        <ellipse cx="0" cy="0" rx="6" ry="15" fill="#758A67" transform="rotate(15)" />
-        <ellipse cx="0" cy="0" rx="6" ry="15" fill="#809978" transform="rotate(35)" />
-      </g>
-      <text
-        x="45"
-        y="27"
-        fontFamily="serif"
-        fontSize="22"
-        fontWeight="500"
-        fill="#4a5c43"
-      >
-        AskPix AI
-      </text>
+        {/* Icon: Magnifying glass with a leaf/plant inside */}
+        <g transform="translate(2 2)">
+            {/* Magnifying glass circle */}
+            <circle cx="18" cy="18" r="16" fill="hsl(var(--card))" stroke="hsl(var(--primary))" strokeWidth="3" />
+            
+            {/* Magnifying glass handle */}
+            <line x1="30" y1="30" x2="40" y2="40" stroke="hsl(var(--primary))" strokeWidth="5" strokeLinecap="round" />
+            
+            {/* Leaf/plant inside */}
+            <path 
+              d="M 18, 28 Q 18, 18 10, 14"
+              stroke="hsl(var(--accent))"
+              strokeWidth="3"
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path 
+              d="M 18, 28 Q 18, 18 26, 14"
+              stroke="hsl(var(--accent))"
+              strokeWidth="3"
+              fill="none"
+              strokeLinecap="round"
+            />
+             <path 
+              d="M 18, 28 L 18, 20"
+              stroke="hsl(var(--accent))"
+              strokeWidth="3"
+              fill="none"
+              strokeLinecap="round"
+            />
+        </g>
     </svg>
   );
 }
