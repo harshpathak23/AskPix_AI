@@ -314,17 +314,9 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top section: Button and overlapping Logo */}
-      <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0">
-        <div className="relative pt-16"> {/* Add padding top to make space for the logo */}
-          <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
-              <Camera className="mr-3 h-6 w-6" />
-              Start Scanning
-          </Button>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32">
-            <Logo className="w-full h-full drop-shadow-lg" />
-          </div>
-        </div>
+      {/* Top section: Logo */}
+      <div className="w-full max-w-sm self-center px-4 pt-12 pb-4 shrink-0">
+        <Logo className="w-32 h-32 mx-auto drop-shadow-lg" />
       </div>
 
       {/* Middle section (scrollable content) */}
@@ -541,7 +533,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col justify-start items-center">
-      <main className="container mx-auto max-w-3xl w-full flex-col z-10 rounded-xl bg-card/80 backdrop-blur-sm shadow-sm pt-0">
+      <main className="container mx-auto max-w-3xl w-full z-10 rounded-xl bg-card/80 backdrop-blur-sm shadow-sm pt-0">
         <div className="h-full">
           {appState === 'welcome' && renderWelcomeScreen()}
           {appState === 'scanning' && renderScanningScreen()}
