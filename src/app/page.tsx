@@ -313,33 +313,35 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Subject chooser section */}
-      <div className="w-full max-w-md self-center overflow-y-auto py-4">
-        <p className="mb-4 text-xl font-medium">Choose a subject</p>
-        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
-            <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                <FunctionSquare className="h-8 w-8" />
-                <span>Math</span>
-            </TabsTrigger>
-            <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                <Atom className="h-8 w-8" />
-                <span>Physics</span>
-            </TabsTrigger>
-            <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                <TestTube className="h-8 w-8" />
-                <span>Chemistry</span>
-            </TabsTrigger>
-            <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                <Dna className="h-8 w-8" />
-                <span>Biology</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      {/* This wrapper will grow and center its content */}
+      <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto py-4">
+        <div className="w-full max-w-md">
+          <p className="mb-4 text-xl font-medium">Choose a subject</p>
+          <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
+              <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                  <FunctionSquare className="h-8 w-8" />
+                  <span>Math</span>
+              </TabsTrigger>
+              <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                  <Atom className="h-8 w-8" />
+                  <span>Physics</span>
+              </TabsTrigger>
+              <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                  <TestTube className="h-8 w-8" />
+                  <span>Chemistry</span>
+              </TabsTrigger>
+              <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                  <Dna className="h-8 w-8" />
+                  <span>Biology</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
   
       {/* Bottom section: Button */}
-      <div className="w-full max-w-sm self-center mt-auto pt-4">
+      <div className="w-full max-w-sm self-center pt-4">
         <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
           <Camera className="mr-3 h-6 w-6" />
           Start Scanning
