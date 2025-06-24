@@ -312,32 +312,30 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col text-center animate-in fade-in-50 duration-500">
-      {/* Middle section: This will now grow and be positioned at the top */}
-      <div className="w-full max-w-md flex flex-col self-center">
-        <div>
-          <p className="mb-4 text-xl font-medium">Choose a subject</p>
-          <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                  <FunctionSquare className="h-8 w-8" />
-                  <span>Math</span>
-              </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                  <Atom className="h-8 w-8" />
-                  <span>Physics</span>
-              </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                  <TestTube className="h-8 w-8" />
-                  <span>Chemistry</span>
-              </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                  <Dna className="h-8 w-8" />
-                  <span>Biology</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+    <div className="w-full h-full flex flex-col text-center">
+      {/* Subject chooser section */}
+      <div className="w-full max-w-md self-center">
+        <p className="mb-4 text-xl font-medium">Choose a subject</p>
+        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
+            <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <FunctionSquare className="h-8 w-8" />
+                <span>Math</span>
+            </TabsTrigger>
+            <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <Atom className="h-8 w-8" />
+                <span>Physics</span>
+            </TabsTrigger>
+            <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <TestTube className="h-8 w-8" />
+                <span>Chemistry</span>
+            </TabsTrigger>
+            <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <Dna className="h-8 w-8" />
+                <span>Biology</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
   
       {/* Bottom section: Button */}
@@ -530,7 +528,7 @@ export default function Home() {
           <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
             
             <header className="flex flex-col items-center text-center mb-4">
-              <Logo className="w-full max-w-md aspect-video" />
+              <Logo className={cn(appState === 'welcome' ? 'w-full max-w-md' : 'w-48 h-auto')} />
               <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
             </header>
 
