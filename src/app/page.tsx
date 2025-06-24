@@ -314,7 +314,7 @@ export default function Home() {
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center animate-in fade-in-50 duration-500">
       {/* Middle section: This will now grow and be positioned at the top */}
-      <div className="w-full max-w-md flex-grow flex flex-col justify-start pt-8 self-center">
+      <div className="w-full max-w-md flex flex-col self-center">
         <div>
           <p className="mb-4 text-xl font-medium">Choose a subject</p>
           <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
@@ -341,7 +341,7 @@ export default function Home() {
       </div>
   
       {/* Bottom section: Button */}
-      <div className="w-full max-w-sm self-center">
+      <div className="w-full max-w-sm self-center mt-auto">
         <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
           <Camera className="mr-3 h-6 w-6" />
           Start Scanning
