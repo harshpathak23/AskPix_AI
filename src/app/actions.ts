@@ -1,7 +1,6 @@
 'use server';
 
 import { solveQuestion } from '@/ai/flows/solve-question';
-import { identifySubject } from '@/ai/flows/identify-question-subject';
 import { z } from 'zod';
 import type { GraphData } from '@/ai/schemas';
 
@@ -15,7 +14,6 @@ interface ActionState {
   error?: string | null;
   solution?: string | null;
   graphData?: GraphData | null;
-  detectedSubject?: string | null;
 }
 
 export async function getSolution(data: { photoDataUri: string, language: 'en' | 'hi', subject: 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' }): Promise<ActionState> {
@@ -32,35 +30,21 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
   }
 
   try {
-    // 1. Identify the subject from the image
-    const subjectResult = await identifySubject({
-        photoDataUri: validatedFields.data.photoDataUri
-    });
-    
-    let actualSubject = subjectResult.subject;
-    const userSubject = validatedFields.data.subject;
-
-    // If AI is unsure or gives a category we don't support (like 'General'), trust the user's choice.
-    if (!['Mathematics', 'Physics', 'Chemistry', 'Biology'].includes(actualSubject)) {
-        actualSubject = userSubject;
-    }
-
-    // 2. Call solveQuestion with the identified subject
+    // Call solveQuestion directly with the user-provided subject for faster response
     const result = await solveQuestion({
       photoDataUri: validatedFields.data.photoDataUri,
       language: validatedFields.data.language,
-      subject: actualSubject,
+      subject: validatedFields.data.subject,
     });
     
     if (!result.solution) {
       return { error: 'Could not generate a solution. Please try a different question.' };
     }
     
-    // 3. Return solution and the detected subject
+    // Return solution
     return { 
         solution: result.solution,
         graphData: result.graphData || null,
-        detectedSubject: actualSubject 
     };
 
   } catch (e) {

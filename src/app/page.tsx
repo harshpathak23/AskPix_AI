@@ -76,6 +76,7 @@ export default function Home() {
           facingMode: 'environment',
           width: { ideal: 3840 },
           height: { ideal: 2160 },
+          // @ts-ignore
           torch: true,
         },
       };
@@ -272,13 +273,6 @@ export default function Home() {
         setError(response.error);
         setAppState('cropping');
       } else if (response.solution) {
-        if (response.detectedSubject && response.detectedSubject !== subject) {
-            setSubject(response.detectedSubject as Subject);
-            toast({
-                title: "Subject Auto-Corrected",
-                description: `We detected this is a ${response.detectedSubject} question and switched the subject for you.`,
-            });
-        }
         setSolution(response.solution);
         setGraphData(response.graphData || null);
         setAppState('result');
