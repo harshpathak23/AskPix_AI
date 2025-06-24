@@ -47,101 +47,17 @@ export default function Home() {
   const imgRef = useRef<HTMLImageElement>(null);
   const { toast } = useToast();
 
+  // This effect now ONLY handles cleaning up the camera stream when leaving the scanning screen.
   useEffect(() => {
-    let stream: MediaStream | null = null;
-    
-    const getCameraPermission = async () => {
-        // Reset states for new stream attempt
-        setIsFlashAvailable(false);
-        setIsFlashOn(false);
-        setZoom(1);
-        setZoomRange(null);
-        
-        if (!navigator.mediaDevices?.getUserMedia) {
-            setError("Camera access is not supported by your browser.");
-            setHasCameraPermission(false);
-            return;
-        }
-
-        try {
-            const idealConstraints: MediaStreamConstraints = {
-                video: {
-                    facingMode: 'environment',
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
-                    // @ts-ignore
-                    torch: true,
-                },
-            };
-            stream = await navigator.mediaDevices.getUserMedia(idealConstraints);
-        } catch (err) {
-            console.warn("Ideal camera request failed, trying without advanced features:", err);
-            try {
-                const fallbackConstraints: MediaStreamConstraints = {
-                    video: { facingMode: 'environment' },
-                };
-                stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-            } catch (finalErr) {
-                console.error("All camera requests failed:", finalErr);
-                setHasCameraPermission(false);
-                if (finalErr instanceof Error && (finalErr.name === 'NotAllowedError' || finalErr.name === 'PermissionDeniedError')) {
-                    setError('Camera access was denied. Please enable camera permissions in your browser settings.');
-                } else {
-                    setError('Could not access the back camera. It may be in use or not available.');
-                }
-                return;
-            }
-        }
-        
-        if (videoRef.current && stream) {
-            videoRef.current.srcObject = stream;
-            setHasCameraPermission(true);
-            setError(null);
-
-            // Get capabilities after a short delay for stabilization
-            const videoTrack = stream.getVideoTracks()?.[0];
-            if (videoTrack) {
-                setTimeout(() => {
-                    if (appState !== 'scanning') return; // Prevent updates if user navigates away
-                    try {
-                        const capabilities = videoTrack.getCapabilities();
-                        const settings = videoTrack.getSettings();
-                        // @ts-ignore
-                        if (capabilities.torch) {
-                          setIsFlashAvailable(true);
-                          // @ts-ignore
-                          setIsFlashOn(!!settings.torch);
-                        }
-                        // @ts-ignore
-                        if (capabilities.zoom) {
-                            // @ts-ignore
-                            const { min, max, step } = capabilities.zoom;
-                            setZoomRange({ min, max, step });
-                            // @ts-ignore
-                            setZoom(settings.zoom || min);
-                        }
-                    } catch (e) {
-                        console.error("Error reading camera capabilities:", e);
-                    }
-                }, 500);
-            }
-        }
-    };
-
-    if (appState === 'scanning') {
-        getCameraPermission();
+    const videoElement = videoRef.current;
+    if (appState !== 'scanning' && videoElement?.srcObject) {
+      const stream = videoElement.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoElement.srcObject = null;
     }
-
-    return () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const currentStream = videoRef.current.srcObject as MediaStream;
-            currentStream.getTracks().forEach((track) => track.stop());
-            videoRef.current.srcObject = null;
-        }
-    };
   }, [appState]);
 
-
+  // This effect handles applying zoom changes.
   useEffect(() => {
     if (appState !== 'scanning' || !videoRef.current?.srcObject || !zoomRange) return;
 
@@ -157,6 +73,104 @@ export default function Home() {
         });
     }
   }, [zoom, appState, zoomRange]);
+
+  const startCamera = async () => {
+    // Immediately switch to scanning view to show loading state
+    setAppState('scanning');
+    
+    // Reset states for a new camera session
+    setIsFlashAvailable(false);
+    setIsFlashOn(false);
+    setZoom(1);
+    setZoomRange(null);
+    setHasCameraPermission(null);
+    setError(null);
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+        setError("Camera access is not supported by your browser.");
+        setHasCameraPermission(false);
+        return;
+    }
+
+    let stream: MediaStream | null = null;
+    try {
+        const idealConstraints: MediaStreamConstraints = {
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+                // @ts-ignore
+                torch: true,
+            },
+        };
+        stream = await navigator.mediaDevices.getUserMedia(idealConstraints);
+    } catch (err) {
+        console.warn("Ideal camera request failed, trying without advanced features:", err);
+        try {
+            const fallbackConstraints: MediaStreamConstraints = {
+                video: { facingMode: 'environment' },
+            };
+            stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+        } catch (finalErr) {
+            console.error("All camera requests failed:", finalErr);
+            setHasCameraPermission(false);
+            if (finalErr instanceof Error && (finalErr.name === 'NotAllowedError' || finalErr.name === 'PermissionDeniedError')) {
+                setError('Camera access was denied. Please enable camera permissions in your browser settings.');
+            } else {
+                setError('Could not access the back camera. It may be in use or not available.');
+            }
+            return;
+        }
+    }
+    
+    if (videoRef.current && stream) {
+        videoRef.current.srcObject = stream;
+        setHasCameraPermission(true);
+
+        const videoTrack = stream.getVideoTracks()?.[0];
+        if (videoTrack) {
+            // Use a short delay to allow the stream to stabilize before getting capabilities
+            setTimeout(() => {
+                try {
+                    const capabilities = videoTrack.getCapabilities();
+                    const settings = videoTrack.getSettings();
+                    // @ts-ignore
+                    if (capabilities.torch) {
+                      setIsFlashAvailable(true);
+                      // @ts-ignore
+                      setIsFlashOn(!!settings.torch);
+                    }
+                    // @ts-ignore
+                    if (capabilities.zoom) {
+                        // @ts-ignore
+                        const { min, max, step } = capabilities.zoom;
+                        setZoomRange({ min, max, step });
+                        // @ts-ignore
+                        setZoom(settings.zoom || min);
+                    }
+                } catch (e) {
+                    console.error("Error reading camera capabilities:", e);
+                }
+            }, 500);
+        }
+    }
+  };
+
+  const handleStartScanning = async () => {
+    // Reset all previous results and states
+    setCapturedImage(null);
+    setCroppedImage(null);
+    setSolution(null);
+    setGraphData(null);
+    setError(null);
+    setLanguage('en');
+    setCrop(undefined);
+    await startCamera();
+  };
+
+  const handleRetake = async () => {
+    await handleStartScanning();
+  };
 
   const handleToggleFlash = async () => {
     if (!videoRef.current?.srcObject) return;
@@ -218,18 +232,6 @@ export default function Home() {
     });
   }
 
-  const handleStartScanning = () => {
-    setCapturedImage(null);
-    setCroppedImage(null);
-    setSolution(null);
-    setGraphData(null);
-    setError(null);
-    setLanguage('en');
-    setCrop(undefined);
-    setHasCameraPermission(null);
-    setAppState('scanning');
-  };
-  
   const handleGetSolution = async () => {
     if (!crop || !imgRef.current || !crop.width || !crop.height) {
       setError("Please select an area to crop before getting a solution.");
@@ -310,18 +312,6 @@ export default function Home() {
         setAppState('cropping');
       }
     }
-  };
-  
-  const handleRetake = () => {
-    setCapturedImage(null);
-    setCroppedImage(null);
-    setSolution(null);
-    setGraphData(null);
-    setError(null);
-    setLanguage('en');
-    setCrop(undefined);
-    setHasCameraPermission(null);
-    setAppState('scanning');
   };
   
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
