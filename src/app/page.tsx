@@ -92,35 +92,35 @@ export default function Home() {
         return;
     }
 
+    const constraintsToTry: MediaStreamConstraints[] = [
+      { video: { facingMode: 'environment', width: { ideal: 3840 }, height: { ideal: 2160 } } }, // 4K
+      { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } }, // Full HD
+      { video: { facingMode: 'environment' } } // Default
+    ];
+
     let stream: MediaStream | null = null;
-    try {
-        const idealConstraints: MediaStreamConstraints = {
-            video: {
-                facingMode: 'environment',
-                width: { ideal: 1920 },
-                height: { ideal: 1080 },
-                // @ts-ignore
-                torch: true,
-            },
-        };
-        stream = await navigator.mediaDevices.getUserMedia(idealConstraints);
-    } catch (err) {
-        console.warn("Ideal camera request failed, trying without advanced features:", err);
-        try {
-            const fallbackConstraints: MediaStreamConstraints = {
-                video: { facingMode: 'environment' },
-            };
-            stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-        } catch (finalErr) {
-            console.error("All camera requests failed:", finalErr);
-            setHasCameraPermission(false);
-            if (finalErr instanceof Error && (finalErr.name === 'NotAllowedError' || finalErr.name === 'PermissionDeniedError')) {
-                setError('Camera access was denied. Please enable camera permissions in your browser settings.');
-            } else {
-                setError('Could not access the back camera. It may be in use or not available.');
-            }
-            return;
-        }
+    let lastError: any = null;
+
+    for (const constraints of constraintsToTry) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log("Successfully got camera stream with constraints:", constraints);
+        break; // Success!
+      } catch (err) {
+        lastError = err;
+        console.warn("Failed to get stream with constraints:", constraints, "Error:", err);
+      }
+    }
+
+    if (!stream) {
+      console.error("All camera requests failed:", lastError);
+      setHasCameraPermission(false);
+      if (lastError instanceof Error && (lastError.name === 'NotAllowedError' || lastError.name === 'PermissionDeniedError')) {
+          setError('Camera access was denied. Please enable camera permissions in your browser settings.');
+      } else {
+          setError('Could not access the camera. It may be in use, not available, or not supported.');
+      }
+      return;
     }
     
     if (videoRef.current && stream) {
@@ -228,7 +228,8 @@ export default function Home() {
     );
   
     return new Promise((resolve) => {
-      resolve(canvas.toDataURL('image/jpeg', 1.0));
+      // Use PNG for lossless image quality
+      resolve(canvas.toDataURL('image/png'));
     });
   }
 
@@ -302,7 +303,8 @@ export default function Home() {
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        const dataUri = canvas.toDataURL('image/jpeg', 1.0);
+        // Use PNG for lossless image quality
+        const dataUri = canvas.toDataURL('image/png');
         setCapturedImage(dataUri);
         setCroppedImage(null);
         setSolution(null);
