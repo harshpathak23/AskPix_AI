@@ -313,7 +313,7 @@ export default function Home() {
   }
 
   const AppHeader = () => (
-    <header className="text-center py-4">
+    <header className="text-center">
       <Logo className="w-full aspect-square mx-auto" />
       <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
     </header>
@@ -327,7 +327,7 @@ export default function Home() {
           <AppHeader />
         </div>
         <ScrollArea className="w-full px-4">
-          <div className="w-full flex flex-col items-center pt-8">
+          <div className="w-full flex flex-col items-center pt-4">
             <p className="mb-4 text-xl font-medium">Choose a subject</p>
             <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
@@ -537,10 +537,10 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center">
-      <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 py-8 md:py-12 z-10">
+      <main className="container mx-auto flex max-w-3xl flex-1 flex-col items-center px-4 pt-4 z-10">
         <div className="w-full flex flex-1 flex-col items-stretch">
-          <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
-            <div className="w-full flex-1 flex flex-col mt-4">
+          <div className="w-full flex-1 flex flex-col p-4 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
+            <div className="w-full flex-1 flex flex-col">
               {appState === 'welcome' && renderWelcomeScreen()}
               {appState === 'scanning' && renderScanningScreen()}
               {appState === 'cropping' && renderCroppingScreen()}
