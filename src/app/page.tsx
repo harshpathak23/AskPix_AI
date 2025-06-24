@@ -528,7 +528,7 @@ export default function Home() {
           <div className="w-full flex-1 flex flex-col p-4 md:p-6 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm min-h-[70vh]">
             
             <header className="flex flex-col items-center text-center mb-4">
-              <Logo className={cn(appState === 'welcome' ? 'w-full max-w-md' : 'w-48 h-auto')} />
+              <Logo className="w-full max-w-xs aspect-video" />
               <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
             </header>
 
