@@ -314,16 +314,24 @@ export default function Home() {
 
   const AppHeader = () => (
     <header className="text-center">
-      <Logo className="w-full aspect-square mx-auto" />
+      <Logo className="w-full aspect-[1/1] mx-auto" />
       <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
     </header>
   );
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col justify-between text-center">
-      {/* Top section */}
-      <div className="w-full flex-1 flex flex-col items-center justify-start">
-        <div className="w-full max-w-xs mx-auto pt-4">
+    <div className="w-full h-full flex flex-col text-center">
+      {/* Top Button Section */}
+      <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0">
+        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
+            <Camera className="mr-3 h-6 w-6" />
+            Start Scanning
+        </Button>
+      </div>
+
+      {/* Middle section (scrollable content) */}
+      <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto py-4">
+        <div className="w-full max-w-xs mx-auto">
           <AppHeader />
         </div>
         <ScrollArea className="w-full px-4">
@@ -354,7 +362,7 @@ export default function Home() {
       </div>
       
       {/* Bottom section: Button */}
-      <div className="w-full max-w-sm self-center py-4 px-4 shrink-0">
+      <div className="w-full max-w-sm self-center px-4 pb-4 shrink-0">
           <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
               <Camera className="mr-3 h-6 w-6" />
               Start Scanning
@@ -537,8 +545,8 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-start">
-      <main className="container mx-auto max-w-3xl w-full flex-col z-10 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm p-4 pt-0">
-        <div>
+      <main className="container mx-auto max-w-3xl w-full flex-col z-10 rounded-xl bg-card/80 backdrop-blur-sm shadow-sm pt-0">
+        <div className="h-full">
           {appState === 'welcome' && renderWelcomeScreen()}
           {appState === 'scanning' && renderScanningScreen()}
           {appState === 'cropping' && renderCroppingScreen()}
