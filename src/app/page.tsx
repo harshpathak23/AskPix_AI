@@ -314,15 +314,16 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top section: Logo */}
-      <div className="w-full max-w-sm self-center px-4 pt-12 pb-4 shrink-0">
-        <Logo className="w-32 h-32 mx-auto drop-shadow-lg" />
+      {/* Top section: Big Logo */}
+      <div className="w-full shrink-0 px-4 pt-4 pb-2 text-center">
+          <Logo className="w-80 h-80 mx-auto" />
       </div>
 
       {/* Middle section (scrollable content) */}
       <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto py-4">
         <ScrollArea className="w-full px-4">
           <div className="w-full flex flex-col items-center pt-4">
+            <Logo className="w-24 h-24 mx-auto drop-shadow-lg mb-4" />
             <p className="mb-4 text-xl font-medium">Choose a subject</p>
             <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
@@ -349,7 +350,7 @@ export default function Home() {
       </div>
       
       {/* Bottom section: Button */}
-      <div className="w-full max-w-sm self-center px-4 pb-4 shrink-0">
+      <div className="w-full max-w-sm self-center px-4 pb-4 pt-2 shrink-0">
           <p className="mb-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
           <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
               <Camera className="mr-3 h-6 w-6" />
@@ -532,19 +533,14 @@ export default function Home() {
   );
 
   return (
-    <div className="flex min-h-screen w-full flex-col justify-start items-center">
-      <main className="container mx-auto max-w-3xl w-full z-10 rounded-xl bg-card/80 backdrop-blur-sm shadow-sm pt-0">
-        <div className="h-full">
-          {appState === 'welcome' && renderWelcomeScreen()}
-          {appState === 'scanning' && renderScanningScreen()}
-          {appState === 'cropping' && renderCroppingScreen()}
-          {appState === 'solving' && renderSolvingScreen()}
-          {appState === 'result' && renderResultScreen()}
-        </div>
-      </main>
-      <footer className="py-6 text-center text-sm text-muted-foreground z-10 flex items-center gap-2">
-        <Bot size={16} /> Powered by Generative AI.
-      </footer>
-    </div>
+    <main className="container mx-auto max-w-3xl flex-1 flex flex-col justify-start items-center p-0">
+      <div className="w-full h-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-col">
+        {appState === 'welcome' && renderWelcomeScreen()}
+        {appState === 'scanning' && renderScanningScreen()}
+        {appState === 'cropping' && renderCroppingScreen()}
+        {appState === 'solving' && renderSolvingScreen()}
+        {appState === 'result' && renderResultScreen()}
+      </div>
+    </main>
   );
 }
