@@ -312,30 +312,23 @@ export default function Home() {
     setCrop(crop);
   }
 
-  const AppHeader = () => (
-    <header className="text-center">
-      <Logo className="w-full aspect-square mx-auto max-w-xs" />
-      <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
-    </header>
-  );
-
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top section: Button */}
+      {/* Top section: Button and overlapping Logo */}
       <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0">
-        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
-            <Camera className="mr-3 h-6 w-6" />
-            Start Scanning
-        </Button>
+        <div className="relative pt-16"> {/* Add padding top to make space for the logo */}
+          <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
+              <Camera className="mr-3 h-6 w-6" />
+              Start Scanning
+          </Button>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32">
+            <Logo className="w-full h-full drop-shadow-lg" />
+          </div>
+        </div>
       </div>
 
       {/* Middle section (scrollable content) */}
       <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto py-4">
-        {/* Logo, now inside scrollable area */}
-        <div className="w-full max-w-xs self-center px-4">
-            <AppHeader />
-        </div>
-        
         <ScrollArea className="w-full px-4">
           <div className="w-full flex flex-col items-center pt-4">
             <p className="mb-4 text-xl font-medium">Choose a subject</p>
@@ -365,6 +358,7 @@ export default function Home() {
       
       {/* Bottom section: Button */}
       <div className="w-full max-w-sm self-center px-4 pb-4 shrink-0">
+          <p className="mb-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
           <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
               <Camera className="mr-3 h-6 w-6" />
               Start Scanning
