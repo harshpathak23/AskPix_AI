@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe, Dna } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Globe, Dna, Zap } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -33,6 +33,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [crop, setCrop] = useState<Crop>();
+  const [isFlashOn, setIsFlashOn] = useState(false);
+  const [isFlashAvailable, setIsFlashAvailable] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,11 +42,17 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let stream: MediaStream | null = null;
+    
     const stopStream = () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
+      if (stream) {
         stream.getTracks().forEach((track) => track.stop());
-        videoRef.current.srcObject = null;
+        stream = null;
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
+        setIsFlashAvailable(false);
+        setIsFlashOn(false);
       }
     };
 
@@ -59,12 +67,9 @@ export default function Home() {
         return;
       }
 
-      let stream: MediaStream;
+      let acquiredStream: MediaStream;
       try {
-        // We'll aim for a 4K resolution (approx. 8.3MP) to encourage the browser to
-        // select the main camera, as wide-angle or secondary lenses often don't
-        // support these higher video resolutions.
-        stream = await navigator.mediaDevices.getUserMedia({
+        acquiredStream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: 'environment',
             width: { ideal: 3840 },
@@ -74,8 +79,7 @@ export default function Home() {
       } catch (error) {
         console.warn('High-resolution camera request failed, falling back.', error);
         try {
-            // Fallback: If the high-res request fails, request any environment-facing camera.
-            stream = await navigator.mediaDevices.getUserMedia({
+            acquiredStream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: 'environment',
                 },
@@ -83,7 +87,6 @@ export default function Home() {
         } catch (fallbackError) {
             console.error('Error accessing any camera:', fallbackError);
             setHasCameraPermission(false);
-            // Provide a more specific error message based on the error type.
             if (fallbackError instanceof Error && (fallbackError.name === 'NotAllowedError' || fallbackError.name === 'PermissionDeniedError')) {
                  setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
             } else {
@@ -93,11 +96,30 @@ export default function Home() {
         }
       }
 
+      stream = acquiredStream; // Assign to the outer scope stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
       setHasCameraPermission(true);
       setError(null);
+
+      // After stream is acquired, check and activate flash
+      const videoTrack = stream.getVideoTracks()?.[0];
+      if (videoTrack) {
+        const capabilities = videoTrack.getCapabilities();
+        if (capabilities.torch) {
+          setIsFlashAvailable(true);
+          try {
+            // Activate flash by default
+            await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
+            setIsFlashOn(true);
+          } catch (e) {
+            console.warn("Couldn't activate flash by default:", e);
+          }
+        } else {
+          setIsFlashAvailable(false);
+        }
+      }
     };
     
     if (appState === 'scanning') {
@@ -110,6 +132,28 @@ export default function Home() {
       stopStream();
     };
   }, [appState, toast]);
+
+  const handleToggleFlash = async () => {
+    if (!videoRef.current?.srcObject) return;
+    const stream = videoRef.current.srcObject as MediaStream;
+    const videoTrack = stream.getVideoTracks()?.[0];
+
+    if (videoTrack && isFlashAvailable) {
+      try {
+        await videoTrack.applyConstraints({
+          advanced: [{ torch: !isFlashOn }],
+        });
+        setIsFlashOn(!isFlashOn);
+      } catch (e) {
+        console.error("Failed to toggle flash", e);
+        toast({
+          variant: "destructive",
+          title: "Flash Error",
+          description: "Could not toggle the flashlight.",
+        });
+      }
+    }
+  };
 
   function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<string> {
     const canvas = document.createElement('canvas');
@@ -155,6 +199,8 @@ export default function Home() {
     setError(null);
     setLanguage('en');
     setCrop(undefined);
+    setIsFlashAvailable(false);
+    setIsFlashOn(false);
     setAppState('scanning');
   };
   
@@ -305,6 +351,20 @@ export default function Home() {
       </div>
       <div className="w-full flex-1 bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
         <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+        
+        {isFlashAvailable && (
+          <div className="absolute top-4 right-4 z-10">
+            <Button
+              onClick={handleToggleFlash}
+              size="icon"
+              variant={isFlashOn ? "default" : "secondary"}
+              className="rounded-full h-12 w-12 text-yellow-300"
+            >
+              <Zap className="h-6 w-6" />
+            </Button>
+          </div>
+        )}
+
         {hasCameraPermission === false && !error && (
             <div className="absolute inset-0 flex items-center justify-center p-4">
                <Alert variant="destructive" className="w-11/12">
