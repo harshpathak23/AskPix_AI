@@ -313,9 +313,9 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* This wrapper will grow and position its content */}
-      <div className="flex-1 flex flex-col items-center justify-start overflow-y-auto pt-8 pb-4">
-        <div className="w-full max-w-md">
+      {/* Top section: Subject Selection */}
+      <div className="pt-8 pb-4">
+        <div className="w-full max-w-md mx-auto">
           <p className="mb-4 text-xl font-medium">Choose a subject</p>
           <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
             <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
@@ -339,9 +339,12 @@ export default function Home() {
           </Tabs>
         </div>
       </div>
-  
+
+      {/* This spacer div will grow to push the button to the bottom */}
+      <div className="flex-grow" />
+
       {/* Bottom section: Button */}
-      <div className="w-full max-w-sm self-center pt-4">
+      <div className="w-full max-w-sm self-center py-4 shrink-0">
         <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
           <Camera className="mr-3 h-6 w-6" />
           Start Scanning
@@ -523,10 +526,10 @@ export default function Home() {
   );
   
   const AppHeader = () => (
-    <header className="flex flex-col items-center text-center mb-4">
-      <Logo className="w-full max-w-xs aspect-[16/9]" />
+    <div className="text-center">
+      <Logo className="w-full max-w-sm aspect-video mx-auto" />
       <p className="mt-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
-    </header>
+    </div>
   );
 
   return (
@@ -537,7 +540,7 @@ export default function Home() {
             
             <AppHeader />
 
-            <div className="w-full flex-1 flex flex-col">
+            <div className="w-full flex-1 flex flex-col mt-4">
               {appState === 'welcome' && renderWelcomeScreen()}
               {appState === 'scanning' && renderScanningScreen()}
               {appState === 'cropping' && renderCroppingScreen()}
