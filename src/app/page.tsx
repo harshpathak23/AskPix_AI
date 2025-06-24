@@ -532,8 +532,8 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex flex-col items-center p-0 pt-0">
-      <div className="w-full h-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-col">
+    <main className="container mx-auto max-w-3xl flex flex-col items-center p-0 min-h-screen">
+      <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-col flex-1">
         {appState === 'welcome' && renderWelcomeScreen()}
         {appState === 'scanning' && renderScanningScreen()}
         {appState === 'cropping' && renderCroppingScreen()}
