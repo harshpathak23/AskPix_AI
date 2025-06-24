@@ -1,7 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 
-export function SolutionSkeleton() {
+export function SolutionSkeleton({ subject }: { subject: 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' }) {
+  const showGraphSkeleton = subject === 'Physics' || subject === 'Chemistry';
+
   return (
     <div className="space-y-6 mt-8 w-full">
       <Card>
@@ -17,15 +19,17 @@ export function SolutionSkeleton() {
           <Skeleton className="h-4 w-[80%]" />
         </CardContent>
       </Card>
-      {/* Skeleton for the graph card */}
-      <Card>
-        <CardHeader>
-           <Skeleton className="h-7 w-1/2" />
-        </CardHeader>
-        <CardContent>
-           <Skeleton className="h-48 w-full" />
-        </CardContent>
-      </Card>
+      
+      {showGraphSkeleton && (
+        <Card>
+          <CardHeader>
+             <Skeleton className="h-7 w-1/2" />
+          </CardHeader>
+          <CardContent>
+             <Skeleton className="h-48 w-full" />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

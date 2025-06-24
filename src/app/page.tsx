@@ -398,8 +398,8 @@ export default function Home() {
           </TabsList>
         </Tabs>
       </div>
-      <div className="w-full flex-1 overflow-hidden relative flex items-center justify-center">
-        <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+      <div className="w-full flex-1 overflow-hidden relative flex items-center justify-center bg-black">
+        <video ref={videoRef} className="w-full h-full object-contain" autoPlay muted playsInline />
         
         {zoomRange && (
             <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 h-1/2 w-10 flex flex-col items-center justify-center bg-black/30 rounded-full p-2 backdrop-blur-sm">
@@ -507,7 +507,7 @@ export default function Home() {
         Our AI tutor is analyzing the image. Please wait a few moments.
       </p>
       <div className='w-full max-w-lg mt-8'>
-        <SolutionSkeleton />
+        <SolutionSkeleton subject={subject} />
       </div>
     </div>
   );
@@ -537,7 +537,7 @@ export default function Home() {
                 </Tabs>
             </div>
             {isTranslating ? (
-              <SolutionSkeleton />
+              <SolutionSkeleton subject={subject} />
             ) : solution ? (
               <SolutionDisplay
                 solution={solution}
