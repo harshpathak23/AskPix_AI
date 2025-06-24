@@ -312,28 +312,44 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in-50 duration-500">
-      <Logo className="h-40 w-80" />
-      <p className="mt-8 max-w-xl text-lg text-muted-foreground">
-        Get instant, step-by-step solutions for your homework problems.
-      </p>
-      
-      <div className="mt-8 mb-6 w-full max-w-sm">
-        <p className="mb-3 text-lg font-medium">Choose a subject</p>
+    <div className="w-full h-full flex flex-col items-center justify-between text-center p-4 sm:p-8 animate-in fade-in-50 duration-500">
+      {/* Top section: Logo */}
+      <div className="w-full">
+        <Logo className="h-48 w-96 mx-auto" />
+      </div>
+
+      {/* Middle section: Subject selection */}
+      <div className="w-full max-w-md my-8">
+        <p className="mb-4 text-xl font-medium">Choose a subject</p>
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="Mathematics" className="flex-1"><FunctionSquare className="mr-2" />Math</TabsTrigger>
-            <TabsTrigger value="Physics" className="flex-1"><Atom className="mr-2" />Physics</TabsTrigger>
-            <TabsTrigger value="Chemistry" className="flex-1"><TestTube className="mr-2" />Chem</TabsTrigger>
-            <TabsTrigger value="Biology" className="flex-1"><Dna className="mr-2" />Biology</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
+            <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <FunctionSquare className="h-8 w-8" />
+                <span>Math</span>
+            </TabsTrigger>
+            <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <Atom className="h-8 w-8" />
+                <span>Physics</span>
+            </TabsTrigger>
+            <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <TestTube className="h-8 w-8" />
+                <span>Chemistry</span>
+            </TabsTrigger>
+            <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                <Dna className="h-8 w-8" />
+                <span>Biology</span>
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
-      
-      <Button onClick={handleStartScanning} size="lg" className="text-lg py-7 px-8 animate-pulse-glow">
-        <Camera className="mr-3 h-6 w-6" />
-        Start Scanning
-      </Button>
+
+      {/* Bottom section: Button */}
+      <div className="w-full max-w-sm">
+        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
+          <Camera className="mr-3 h-6 w-6" />
+          Start Scanning
+        </Button>
+      </div>
     </div>
   );
   
