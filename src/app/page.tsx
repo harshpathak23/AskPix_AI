@@ -314,16 +314,16 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top section: Big Logo */}
+      {/* Top section: Big and Small Logo */}
       <div className="w-full shrink-0 px-4 pt-4 pb-2 text-center">
           <Logo className="w-80 h-80 mx-auto" />
+          <Logo className="w-24 h-24 mx-auto drop-shadow-lg" />
       </div>
 
       {/* Middle section (scrollable content) */}
       <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto py-4">
         <ScrollArea className="w-full px-4">
-          <div className="w-full flex flex-col items-center pt-4">
-            <Logo className="w-24 h-24 mx-auto drop-shadow-lg mb-4" />
+          <div className="w-full flex flex-col items-center">
             <p className="mb-4 text-xl font-medium">Choose a subject</p>
             <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
@@ -533,7 +533,7 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex-1 flex flex-col justify-start items-center p-0">
+    <main className="container mx-auto max-w-3xl flex-1 flex flex-col pt-0 justify-start items-center p-0">
       <div className="w-full h-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-col">
         {appState === 'welcome' && renderWelcomeScreen()}
         {appState === 'scanning' && renderScanningScreen()}
