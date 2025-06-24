@@ -61,79 +61,92 @@ export default function Home() {
     };
 
     const startStream = async () => {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        toast({
-          variant: 'destructive',
-          title: 'Camera Not Supported',
-          description: 'Your browser does not support camera access.',
-        });
-        setHasCameraPermission(false);
-        return;
-      }
-
-      let acquiredStream: MediaStream;
-      try {
-        acquiredStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'environment',
-            width: { ideal: 3840 },
-            height: { ideal: 2160 },
-          },
-        });
-      } catch (error) {
-        console.warn('High-resolution camera request failed, falling back.', error);
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            toast({
+              variant: 'destructive',
+              title: 'Camera Not Supported',
+              description: 'Your browser does not support camera access.',
+            });
+            setHasCameraPermission(false);
+            return;
+        }
+    
+        let acquiredStream: MediaStream;
+        
         try {
             acquiredStream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: 'environment',
+                    width: { ideal: 3840 },
+                    height: { ideal: 2160 },
+                    torch: true, // Directly request the flashlight
                 },
             });
-        } catch (fallbackError) {
-            console.error('Error accessing any camera:', fallbackError);
-            setHasCameraPermission(false);
-            if (fallbackError instanceof Error && (fallbackError.name === 'NotAllowedError' || fallbackError.name === 'PermissionDeniedError')) {
-                 setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
-            } else {
-                 setError('Could not open the camera. It might be in use, not available, or your device may not support the required camera settings.');
-            }
-            return;
-        }
-      }
-
-      stream = acquiredStream; // Assign to the outer scope stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setHasCameraPermission(true);
-      setError(null);
-
-      // After stream is acquired, check and activate flash/zoom
-      const videoTrack = stream.getVideoTracks()?.[0];
-      if (videoTrack) {
-        const capabilities = videoTrack.getCapabilities();
-        if (capabilities.torch) {
-          setIsFlashAvailable(true);
-          try {
-            // Activate flash by default
-            await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
             setIsFlashOn(true);
-          } catch (e) {
-            console.warn("Couldn't activate flash by default:", e);
-          }
-        } else {
-          setIsFlashAvailable(false);
+            setIsFlashAvailable(true);
+        } catch (torchError) {
+            console.warn("Could not get camera with torch, falling back.", torchError);
+            try {
+                acquiredStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 3840 },
+                        height: { ideal: 2160 },
+                    },
+                });
+            } catch (highResError) {
+                console.warn("High-resolution camera request failed, falling back to default.", highResError);
+                try {
+                    acquiredStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'environment',
+                        },
+                    });
+                } catch (finalError) {
+                    console.error('Error accessing any camera:', finalError);
+                    setHasCameraPermission(false);
+                    if (finalError instanceof Error && (finalError.name === 'NotAllowedError' || finalError.name === 'PermissionDeniedError')) {
+                        setError('Camera access was denied. Please enable camera permissions in your browser settings to use this feature.');
+                    } else {
+                        setError('Could not open the camera. It might be in use by another app or not supported by your browser.');
+                    }
+                    return;
+                }
+            }
         }
-        
-        // @ts-ignore - zoom may not be in all TypeScript lib definitions yet
-        if (capabilities.zoom) {
+    
+        stream = acquiredStream;
+        if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+        }
+        setHasCameraPermission(true);
+        setError(null);
+    
+        const videoTrack = stream.getVideoTracks()?.[0];
+        if (videoTrack) {
+            const capabilities = videoTrack.getCapabilities();
             // @ts-ignore
-            const { min, max, step } = capabilities.zoom;
-            setZoomRange({ min, max, step });
-            setZoom(min);
-        } else {
-            setZoomRange(null);
+            if (capabilities.torch) {
+                setIsFlashAvailable(true);
+                const settings = videoTrack.getSettings();
+                // @ts-ignore
+                setIsFlashOn(!!settings.torch);
+            } else {
+                setIsFlashAvailable(false);
+            }
+            
+            // @ts-ignore
+            if (capabilities.zoom) {
+                // @ts-ignore
+                const { min, max, step } = capabilities.zoom;
+                setZoomRange({ min, max, step });
+                // @ts-ignore
+                const currentZoom = videoTrack.getSettings().zoom || min;
+                setZoom(currentZoom);
+            } else {
+                setZoomRange(null);
+            }
         }
-      }
     };
     
     if (appState === 'scanning') {
@@ -154,6 +167,7 @@ export default function Home() {
     const videoTrack = stream.getVideoTracks()?.[0];
 
     if (videoTrack) {
+        // @ts-ignore
         videoTrack.applyConstraints({
             advanced: [{ zoom: zoom }]
         }).catch(e => {
@@ -170,6 +184,7 @@ export default function Home() {
     if (videoTrack && isFlashAvailable) {
       try {
         await videoTrack.applyConstraints({
+          // @ts-ignore
           advanced: [{ torch: !isFlashOn }],
         });
         setIsFlashOn(!isFlashOn);
