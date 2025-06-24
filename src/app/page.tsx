@@ -369,11 +369,11 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in-50 duration-500">
-      <div className="p-4 mb-6 bg-card rounded-full border-8 border-background shadow-lg">
+      <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl flex items-center gap-4">
         <Logo className="h-16 w-16 text-primary" />
-      </div>
-      <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">Welcome to AskPix AI</h2>
-      <p className="mt-4 max-w-xl text-lg text-muted-foreground">
+        AskPix AI
+      </h2>
+      <p className="mt-8 max-w-xl text-lg text-muted-foreground">
         Get instant, step-by-step solutions for Math, Physics, Chemistry, and Biology problems.
       </p>
       <p className="mt-2 max-w-xl text-muted-foreground">
