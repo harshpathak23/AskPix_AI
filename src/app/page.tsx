@@ -327,20 +327,20 @@ export default function Home() {
             <p className="mb-4 text-xl font-medium">Choose a subject</p>
             <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 gap-2 h-auto p-0 bg-transparent">
-                  <TabsTrigger value="Mathematics" className="flex-col h-20 text-sm gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <FunctionSquare className="h-5 w-5" />
+                  <TabsTrigger value="Mathematics" className="flex-col h-16 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <FunctionSquare className="h-4 w-4" />
                       <span className="text-xs">Math</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Physics" className="flex-col h-20 text-sm gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <Atom className="h-5 w-5" />
+                  <TabsTrigger value="Physics" className="flex-col h-16 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <Atom className="h-4 w-4" />
                       <span className="text-xs">Physics</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Chemistry" className="flex-col h-20 text-sm gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <TestTube className="h-5 w-5" />
+                  <TabsTrigger value="Chemistry" className="flex-col h-16 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <TestTube className="h-4 w-4" />
                       <span className="text-xs">Chemistry</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Biology" className="flex-col h-20 text-sm gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <Dna className="h-5 w-5" />
+                  <TabsTrigger value="Biology" className="flex-col h-16 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <Dna className="h-4 w-4" />
                       <span className="text-xs">Biology</span>
                   </TabsTrigger>
               </TabsList>
@@ -350,7 +350,7 @@ export default function Home() {
       </div>
       
       {/* Bottom section: Fixed Footer */}
-      <div className="w-full max-w-sm self-center px-4 pt-4 pb-6 shrink-0">
+      <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0">
         <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]">
           <Camera className="mr-3 h-6 w-6" />
           Start Scanning
@@ -532,8 +532,8 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen p-4 pt-0">
-      <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-col flex-1">
+    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen px-4">
+      <div className="w-full rounded-t-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-1 flex-col">
         {appState === 'welcome' && renderWelcomeScreen()}
         {appState === 'scanning' && renderScanningScreen()}
         {appState === 'cropping' && renderCroppingScreen()}
