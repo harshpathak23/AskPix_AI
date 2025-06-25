@@ -18,19 +18,22 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
   return solveQuestionFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'solveQuestionPrompt',
-  input: {schema: SolveQuestionInputSchema},
-  output: {schema: SolveQuestionOutputSchema},
-  model: 'googleai/gemini-1.5-pro-latest',
-  prompt: `You are an expert tutor. The user has provided a cropped image of a question for the subject: '{{subject}}'.
+const solveQuestionFlow = ai.defineFlow(
+  {
+    name: 'solveQuestionFlow',
+    inputSchema: SolveQuestionInputSchema,
+    outputSchema: SolveQuestionOutputSchema,
+  },
+  async (input) => {
+    // Construct the prompt with explicit text and media parts.
+    const promptText = `You are an expert tutor. The user has provided a cropped image of a question for the subject: '${input.subject}'.
 
 **TASK:**
-1.  **Assume the user's subject is correct.** Act as an expert tutor for '{{subject}}'.
+1.  **Assume the user's subject is correct.** Act as an expert tutor for '${input.subject}'.
 2.  **Provide a clear, detailed solution** to the question in the image.
 
 **IMPORTANT INSTRUCTIONS:**
-1.  **Language:** You MUST provide the entire solution in the language specified by the 'language' code ('{{language}}').
+1.  **Language:** You MUST provide the entire solution in the language specified by the 'language' code ('${input.language}').
 2.  **Solution Format:** The solution must be a single, detailed string in the 'solution' field. Use newline characters (\\n) for paragraphs.
 3.  **Math Notation:** Use LaTeX for all mathematical formulas. Inline math: $...$. Block math: $$...$$. Math symbols should not be translated.
 4.  **JSON Output:** Your entire response MUST be a single, valid JSON object that adheres to the output schema.
@@ -54,22 +57,22 @@ const prompt = ai.definePrompt({
           }
         }
 
-**SUBJECT: {{subject}}**
-**TARGET LANGUAGE: {{language}}**
+**SUBJECT: ${input.subject}**
+**TARGET LANGUAGE: ${input.language}**
 
-Image: {{media url=photoDataUri}}
+Provide the solution now.`;
+    
+    const {output} = await ai.generate({
+      model: 'googleai/gemini-1.5-pro-latest',
+      prompt: [
+        {text: promptText},
+        {media: {url: input.photoDataUri}},
+      ],
+      output: {
+        schema: SolveQuestionOutputSchema,
+      }
+    });
 
-Provide the solution now.`,
-});
-
-const solveQuestionFlow = ai.defineFlow(
-  {
-    name: 'solveQuestionFlow',
-    inputSchema: SolveQuestionInputSchema,
-    outputSchema: SolveQuestionOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
     if (!output) {
       throw new Error("The AI failed to generate a valid output.");
     }
