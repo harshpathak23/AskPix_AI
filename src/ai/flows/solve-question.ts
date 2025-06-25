@@ -7,6 +7,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {
   SolveQuestionInputSchema,
   type SolveQuestionInput,
@@ -29,7 +30,7 @@ const solveQuestionOrchestratorFlow = ai.defineFlow(
     const extractionPrompt = `Analyze the provided image and extract any and all text related to the academic question shown. Output only the raw text content of the question. Do not attempt to solve it.`;
 
     const visionResult = await ai.generate({
-      model: 'googleai/gemini-1.5-flash-latest', // Using flash model for vision to resolve NOT_FOUND error.
+      model: googleAI.model('gemini-1.5-pro-latest'),
       prompt: [
         {text: extractionPrompt},
         {media: {url: input.photoDataUri}},
@@ -81,7 +82,7 @@ const solveQuestionOrchestratorFlow = ai.defineFlow(
 Provide the solution now.`;
 
     const {output} = await ai.generate({
-      model: 'googleai/gemini-1.5-flash-latest',
+      model: googleAI.model('gemini-1.5-pro-latest'),
       prompt: solvingPrompt,
       output: {
         schema: SolveQuestionOutputSchema,
