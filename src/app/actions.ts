@@ -1,6 +1,5 @@
 'use server';
 
-import { identifySubject } from '@/ai/flows/identify-question-subject';
 import { solveQuestion } from '@/ai/flows/solve-question';
 import { z } from 'zod';
 import type { GraphData } from '@/ai/schemas';
@@ -8,6 +7,7 @@ import type { GraphData } from '@/ai/schemas';
 const QuestionSchema = z.object({
   photoDataUri: z.string().startsWith('data:image/', { message: "Invalid image format." }),
   language: z.enum(['en', 'hi']),
+  subject: z.enum(['Mathematics', 'Physics', 'Chemistry', 'Biology']),
 });
 
 interface ActionState {
@@ -17,40 +17,22 @@ interface ActionState {
 }
 
 export async function getSolution(data: { photoDataUri: string, language: 'en' | 'hi', subject: 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' }): Promise<ActionState> {
-  const validatedFields = QuestionSchema.safeParse({
-    photoDataUri: data.photoDataUri,
-    language: data.language,
-  });
+  const validatedFields = QuestionSchema.safeParse(data);
 
   if (!validatedFields.success) {
-    const firstError = validatedFields.error.flatten().fieldErrors.photoDataUri?.[0] 
-      || validatedFields.error.flatten().fieldErrors.language?.[0]
-      || 'Invalid input.';
+    const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0] || 'Invalid input.';
     return {
       error: firstError,
     };
   }
 
   try {
-    // 1. Identify the subject from the image for a more accurate result.
-    const { subject: identifiedSubject } = await identifySubject({
-      photoDataUri: validatedFields.data.photoDataUri,
-    });
+    const result = await solveQuestion(validatedFields.data);
     
-    const finalSubject = identifiedSubject || data.subject; // Fallback to user-selected subject
-
-    // 2. Call solveQuestion with the determined subject.
-    const result = await solveQuestion({
-      photoDataUri: validatedFields.data.photoDataUri,
-      language: validatedFields.data.language,
-      subject: finalSubject,
-    });
-    
-    if (!result.solution) {
-      return { error: 'Could not generate a solution. Please try a different question.' };
+    if (!result?.solution) {
+      return { error: 'Could not generate a solution. Please try a different question or crop a different area.' };
     }
     
-    // Return solution
     return { 
         solution: result.solution,
         graphData: result.graphData || null,
@@ -58,6 +40,9 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
 
   } catch (e) {
     console.error(e);
+    if (e instanceof Error) {
+        return { error: e.message };
+    }
     return { error: 'An unexpected error occurred. Please try again.' };
   }
 }

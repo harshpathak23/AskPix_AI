@@ -22,11 +22,15 @@ const prompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
-  prompt: `You are an expert {{subject}} tutor. The user has provided a cropped image focusing on a specific question.
-Your task is to analyze this image and provide a clear, detailed solution.
+  prompt: `You are an expert tutor for multiple subjects. The user has provided a cropped image of a question and suggested its subject is '{{subject}}'.
+
+**TASK:**
+1.  **Analyze the image** to determine the **actual subject** of the question. The user's suggestion is a hint, but you should rely on your own analysis of the image content. The primary subjects are Mathematics, Physics, Chemistry, and Biology.
+2.  **Act as an expert tutor** for the identified subject.
+3.  **Provide a clear, detailed solution** to the question in the image.
 
 **IMPORTANT INSTRUCTIONS:**
-1.  **Language:** You MUST provide the entire solution in the language specified by the 'language' code ('en' for English, 'hi' for Hindi).
+1.  **Language:** You MUST provide the entire solution in the language specified by the 'language' code ('{{language}}').
 2.  **Solution Format:** The solution must be a single, detailed string in the 'solution' field. Use newline characters (\\n) for paragraphs.
 3.  **Math Notation:** Use LaTeX for all mathematical formulas. Inline math: $...$. Block math: $$...$$. Math symbols should not be translated.
 4.  **JSON Output:** Your entire response MUST be a single, valid JSON object that adheres to the output schema.
@@ -50,11 +54,12 @@ Your task is to analyze this image and provide a clear, detailed solution.
           }
         }
 
+**USER'S SUGGESTED SUBJECT: {{subject}}**
 **TARGET LANGUAGE: {{language}}**
 
 Image: {{media url=photoDataUri}}
 
-Provide the solution now.`,
+Provide the solution now based on your analysis.`,
 });
 
 const solveQuestionFlow = ai.defineFlow(
@@ -65,6 +70,9 @@ const solveQuestionFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to generate a valid output.");
+    }
+    return output;
   }
 );
