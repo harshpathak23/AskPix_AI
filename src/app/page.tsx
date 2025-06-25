@@ -312,31 +312,31 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-purple-200 to-purple-300 text-foreground rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
+    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
       <div className="flex-shrink-0 pt-8 pb-4 animate-fade-in-out">
         <Logo />
       </div>
 
       <div className="flex-1 flex flex-col justify-center space-y-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Choose a subject</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-100">Choose a subject</h1>
         </div>
         
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
           <TabsList className="grid w-full grid-cols-2 gap-3 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 border shadow-sm rounded-xl transition-all duration-200 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-400 data-[state=active]:to-purple-500 data-[state=active]:ring-2 data-[state=active]:ring-purple-700 data-[state=active]:border-purple-700">
+              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-400 data-[state=active]:to-purple-500 data-[state=active]:ring-2 data-[state=active]:ring-purple-700 data-[state=active]:border-purple-700">
                   <FunctionSquare className="h-4 w-4" />
                   <span className="font-medium text-xs">Math</span>
               </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 border shadow-sm rounded-xl transition-all duration-200 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-400 data-[state=active]:to-purple-500 data-[state=active]:ring-2 data-[state=active]:ring-purple-700 data-[state=active]:border-purple-700">
+              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-400 data-[state=active]:to-purple-500 data-[state=active]:ring-2 data-[state=active]:ring-purple-700 data-[state=active]:border-purple-700">
                   <Atom className="h-4 w-4" />
                   <span className="font-medium text-xs">Physics</span>
               </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 border shadow-sm rounded-xl transition-all duration-200 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-400 data-[state=active]:to-purple-500 data-[state=active]:ring-2 data-[state=active]:ring-purple-700 data-[state=active]:border-purple-700">
+              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-400 data-[state=active]:to-purple-500 data-[state=active]:ring-2 data-[state=active]:ring-purple-700 data-[state=active]:border-purple-700">
                   <TestTube className="h-4 w-4" />
                   <span className="font-medium text-xs">Chemistry</span>
               </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 border shadow-sm rounded-xl transition-all duration-200 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-400 data-[state=active]:to-purple-500 data-[state=active]:ring-2 data-[state=active]:ring-purple-700 data-[state=active]:border-purple-700">
+              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-400 data-[state=active]:to-purple-500 data-[state=active]:ring-2 data-[state=active]:ring-purple-700 data-[state=active]:border-purple-700">
                   <Dna className="h-4 w-4" />
                   <span className="font-medium text-xs">Biology</span>
               </TabsTrigger>
