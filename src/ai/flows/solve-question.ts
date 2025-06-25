@@ -16,22 +16,42 @@ import {
 } from '@/ai/schemas';
 
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  return solveQuestionFlow(input);
+  return solveQuestionOrchestratorFlow(input);
 }
 
-const solveQuestionFlow = ai.defineFlow(
+const solveQuestionOrchestratorFlow = ai.defineFlow(
   {
-    name: 'solveQuestionFlow',
+    name: 'solveQuestionOrchestratorFlow',
     inputSchema: SolveQuestionInputSchema,
     outputSchema: SolveQuestionOutputSchema,
   },
   async (input) => {
-    // Construct the prompt with explicit text and media parts.
-    const promptText = `You are an expert tutor. The user has provided a cropped image of a question for the subject: '${input.subject}'.
+    // Step 1: Use a vision model to extract the text from the image. This is a more reliable approach.
+    const visionModel = googleAI.model('gemini-pro-vision');
+    const extractionPrompt = `Analyze the provided image and extract any and all text related to the academic question shown. Output only the raw text content of the question. Do not attempt to solve it.`;
+
+    const visionResult = await ai.generate({
+      model: visionModel,
+      prompt: [
+        {text: extractionPrompt},
+        {media: {url: input.photoDataUri}},
+      ],
+    });
+    
+    const extractedQuestionText = visionResult.text;
+
+    if (!extractedQuestionText) {
+      throw new Error("The AI could not read any text from the image. Please try taking a clearer picture.");
+    }
+
+    // Step 2: Use a powerful language model to solve the extracted text and generate structured JSON.
+    const languageModel = googleAI.model('gemini-1.5-flash-latest'); // Optimized for speed and structured output.
+    
+    const solvingPrompt = `You are an expert tutor. The user has provided a question for the subject: '${input.subject}'. The question is: "${extractedQuestionText}".
 
 **TASK:**
 1.  **Assume the user's subject is correct.** Act as an expert tutor for '${input.subject}'.
-2.  **Provide a clear, detailed solution** to the question in the image.
+2.  **Provide a clear, detailed solution** to the question.
 
 **IMPORTANT INSTRUCTIONS:**
 1.  **Language:** You MUST provide the entire solution in the language specified by the 'language' code ('${input.language}').
@@ -59,24 +79,23 @@ const solveQuestionFlow = ai.defineFlow(
         }
 
 **SUBJECT: ${input.subject}**
+**QUESTION TEXT: ${extractedQuestionText}**
 **TARGET LANGUAGE: ${input.language}**
 
 Provide the solution now.`;
-    
+
     const {output} = await ai.generate({
-      model: googleAI.model('gemini-pro-vision'),
-      prompt: [
-        {text: promptText},
-        {media: {url: input.photoDataUri}},
-      ],
+      model: languageModel,
+      prompt: solvingPrompt,
       output: {
         schema: SolveQuestionOutputSchema,
       }
     });
 
     if (!output) {
-      throw new Error("The AI failed to generate a valid output.");
+      throw new Error("The AI failed to generate a valid solution from the extracted text.");
     }
+    
     return output;
   }
 );
