@@ -18,11 +18,12 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
   return solveQuestionFlow(input);
 }
 
+// This prompt is now simplified. It does NOT specify an output schema,
+// so it will return raw text, which is a more robust approach.
 const solveQuestionPrompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
-  model: 'googleai/gemini-pro-vision',
+  model: 'gemini-pro-vision',
   input: {schema: SolveQuestionInputSchema},
-  output: {schema: SolveQuestionOutputSchema},
   config: {
     temperature: 0.2,
   },
@@ -46,12 +47,17 @@ const solveQuestionFlow = ai.defineFlow(
     outputSchema: SolveQuestionOutputSchema,
   },
   async (input) => {
-    const {output} = await solveQuestionPrompt(input);
+    // Generate raw text from the model using the simplified prompt
+    const response = await solveQuestionPrompt(input);
+    const solutionText = response.text;
 
-    if (!output) {
+    if (!solutionText) {
       throw new Error('Failed to process the image. The AI could not generate a response. Please try again.');
     }
 
-    return output;
+    // Manually construct the object to match the flow's required output schema
+    return {
+      solution: solutionText,
+    };
   },
 );
