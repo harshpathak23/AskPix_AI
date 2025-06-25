@@ -319,7 +319,7 @@ export default function Home() {
         {/* The logo is pulled up to overlap the top border of the card */}
         <Logo className="w-40 h-40 -mt-16 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]" />
       </div>
-
+  
       {/* Middle section (scrollable content) */}
       <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto py-4">
         <ScrollArea className="w-full px-4">
@@ -350,9 +350,9 @@ export default function Home() {
       </div>
       
       {/* Bottom section: Fixed Footer */}
-      <div className="w-full max-w-sm self-center px-4 pb-4 pt-2 shrink-0">
+      <div className="w-full max-w-sm self-center px-4 pt-2 pb-12 shrink-0">
           <p className="mb-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
-          <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
+          <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow relative top-8 [filter:drop-shadow(0_-4px_6px_rgba(0,0,0,0.1))]">
               <Camera className="mr-3 h-6 w-6" />
               Start Scanning
           </Button>
@@ -533,7 +533,7 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen p-0 pt-0">
+    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen p-4 pt-0">
       <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-col flex-1">
         {appState === 'welcome' && renderWelcomeScreen()}
         {appState === 'scanning' && renderScanningScreen()}
