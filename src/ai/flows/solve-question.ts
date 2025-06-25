@@ -20,6 +20,7 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
 
 const prompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
   prompt: `You are an expert tutor for multiple subjects. The user has provided a cropped image of a question and suggested its subject is '{{subject}}'.
