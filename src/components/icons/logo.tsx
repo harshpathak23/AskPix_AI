@@ -4,12 +4,12 @@ import { cn } from '@/lib/utils';
 export function Logo({className}: {className?: string}) {
   return (
     <div className={cn('flex flex-col items-center justify-center', className)}>
-      <div className="relative h-80 w-80 rounded-full bg-slate-100/10 backdrop-blur-sm p-8 ring-1 ring-white/20 shadow-lg">
+      <div className="relative h-80 w-80">
         <Image
           src="/logo.png"
           alt="App Logo"
           fill
-          className="object-contain"
+          className="object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.7)]"
           priority
         />
       </div>
