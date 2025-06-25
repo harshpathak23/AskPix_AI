@@ -317,7 +317,7 @@ export default function Home() {
       {/* Top section: Fixed Header */}
       <div className="w-full shrink-0 flex justify-center pb-2">
         {/* The logo is pulled up to overlap the top border of the card */}
-        <Logo className="w-40 h-40 -mt-16 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]" />
+        <Logo className="w-48 h-48 -mt-20 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]" />
       </div>
   
       {/* Middle section (scrollable content) */}
@@ -327,20 +327,20 @@ export default function Home() {
             <p className="mb-4 text-xl font-medium">Choose a subject</p>
             <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 gap-2 h-auto p-0 bg-transparent">
-                  <TabsTrigger value="Mathematics" className="flex-col h-16 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <FunctionSquare className="h-4 w-4" />
+                  <TabsTrigger value="Mathematics" className="flex-col h-14 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <FunctionSquare className="h-3 w-3" />
                       <span className="text-xs">Math</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Physics" className="flex-col h-16 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <Atom className="h-4 w-4" />
+                  <TabsTrigger value="Physics" className="flex-col h-14 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <Atom className="h-3 w-3" />
                       <span className="text-xs">Physics</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Chemistry" className="flex-col h-16 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <TestTube className="h-4 w-4" />
+                  <TabsTrigger value="Chemistry" className="flex-col h-14 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <TestTube className="h-3 w-3" />
                       <span className="text-xs">Chemistry</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Biology" className="flex-col h-16 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <Dna className="h-4 w-4" />
+                  <TabsTrigger value="Biology" className="flex-col h-14 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <Dna className="h-3 w-3" />
                       <span className="text-xs">Biology</span>
                   </TabsTrigger>
               </TabsList>
@@ -350,8 +350,8 @@ export default function Home() {
       </div>
       
       {/* Bottom section: Fixed Footer */}
-      <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0">
-        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]">
+      <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0 pb-0">
+        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]">
           <Camera className="mr-3 h-6 w-6" />
           Start Scanning
         </Button>
@@ -532,8 +532,8 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen px-4">
-      <div className="w-full rounded-t-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-1 flex-col">
+    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen px-0 pb-0">
+      <div className="w-full rounded-t-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-1 flex-col rounded-b-none">
         {appState === 'welcome' && renderWelcomeScreen()}
         {appState === 'scanning' && renderScanningScreen()}
         {appState === 'cropping' && renderCroppingScreen()}
