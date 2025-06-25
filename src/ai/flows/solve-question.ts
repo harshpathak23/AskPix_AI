@@ -18,42 +18,27 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
   return solveQuestionFlow(input);
 }
 
-const solveQuestionPrompt = `You are an expert tutor. A user has provided an image of a question for the subject: '${input.subject}'.
+const solveQuestionPrompt = ai.definePrompt({
+  name: 'solveQuestionPrompt',
+  input: {schema: SolveQuestionInputSchema},
+  output: {schema: SolveQuestionOutputSchema},
+  prompt: `You are an expert tutor. A user has provided an image of a question.
 
 **TASK:**
-1.  **Analyze the image** to understand the full question, including any text, diagrams, or formulas.
-2.  **Provide a clear, detailed solution** to the question. Assume the user's chosen subject is correct and act as an expert tutor for that subject.
+1.  Analyze the image to understand the full question, including any text, diagrams, or formulas.
+2.  Provide a clear, detailed, step-by-step solution to the question.
 
 **IMPORTANT INSTRUCTIONS:**
-1.  **Language:** You MUST provide the entire solution in the language specified by the 'language' code ('${input.language}').
-2.  **Solution Format:** The solution must be a single, detailed string in the 'solution' field. Use newline characters (\\n) for paragraphs.
-3.  **Math Notation:** Use LaTeX for all mathematical formulas. Inline math: $...$. Block math: $$...$$. Math symbols should not be translated.
-4.  **JSON Output:** Your entire response MUST be a single, valid JSON object that adheres to the output schema.
-    *   **For Math/Biology questions (or any question not needing a graph):** The JSON should ONLY contain the 'solution' field.
-        Example:
-        {
-          "solution": "The step-by-step solution goes here..."
-        }
-    *   **For Physics/Chemistry questions (where a graph is helpful):** The JSON should contain both 'solution' and 'graphData' fields.
-        Example:
-        {
-          "solution": "The detailed step-by-step solution goes here...",
-          "graphData": {
-            "title": "Velocity vs. Time",
-            "data": [
-              { "name": "0s", "value": 0 },
-              { "name": "1s", "value": 9.8 }
-            ],
-            "xAxisLabel": "Time (s)",
-            "yAxisLabel": "Velocity (m/s)"
-          }
-        }
+*   **Subject:** You must act as an expert for the given subject: {{{subject}}}.
+*   **Language:** You MUST provide the entire solution in the language specified: {{{language}}}.
+*   **Math Notation:** Use LaTeX for all mathematical formulas (e.g., $...$ for inline, $$...$$ for block).
+*   **JSON Output:** Your entire response MUST be a single, valid JSON object.
+*   **Graphs:** If a graph would be helpful to explain the solution (especially for Physics or Chemistry), include the 'graphData' field. Otherwise, you can omit it.
 
-**SUBJECT: ${input.subject}**
-**TARGET LANGUAGE: ${input.language}**
-
-Provide the solution now based on the content of the image.`;
-
+Image of the question is below:
+{{media url=photoDataUri}}
+`,
+});
 
 const solveQuestionFlow = ai.defineFlow(
   {
@@ -62,22 +47,22 @@ const solveQuestionFlow = ai.defineFlow(
     outputSchema: SolveQuestionOutputSchema,
   },
   async (input) => {
-    
     const {output} = await ai.generate({
       model: 'googleai/gemini-1.5-pro-latest',
-      prompt: [
-        {text: solveQuestionPrompt},
-        {media: {url: input.photoDataUri}},
-      ],
+      prompt: await solveQuestionPrompt.render(input),
       output: {
         schema: SolveQuestionOutputSchema,
-      }
+      },
+      config: {
+        temperature: 0.2,
+      },
     });
 
     if (!output) {
-      throw new Error("The AI failed to generate a valid solution. The image may be unclear or the question may be outside the supported subjects.");
+      // This is the source of the error message.
+      throw new Error('Failed to process the image. Please try again.');
     }
-    
+
     return output;
-  }
+  },
 );
