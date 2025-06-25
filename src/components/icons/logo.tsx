@@ -5,8 +5,8 @@ export function Logo({className}: {className?: string}) {
   return (
     <div className={cn("flex justify-center", className)}>
       <Image
-        src="/logo-light.png" // This points to /public/logo-light.png
-        alt="AI Question Solver Logo"
+        src="/logo.png"
+        alt="ScanSolve Logo"
         width={128}
         height={128}
         priority
