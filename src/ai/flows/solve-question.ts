@@ -20,7 +20,7 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
 
 const solveQuestionPrompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-pro-vision',
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
   config: {
