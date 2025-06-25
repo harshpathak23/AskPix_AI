@@ -22,7 +22,7 @@ const prompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
   input: {schema: SolveQuestionInputSchema},
   output: {schema: SolveQuestionOutputSchema},
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-1.5-pro-latest',
   prompt: `You are an expert tutor. The user has provided a cropped image of a question for the subject: '{{subject}}'.
 
 **TASK:**
