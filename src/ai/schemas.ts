@@ -22,19 +22,40 @@ export const SolveQuestionInputSchema = z.object({
 });
 export type SolveQuestionInput = z.infer<typeof SolveQuestionInputSchema>;
 
-export const GraphDataSchema = z.object({
-  title: z.string().describe('A concise and descriptive title for the graph.'),
-  data: z.array(z.object({
-    name: z.string().describe("Label for the data point, typically shown on the x-axis."),
-    value: z.number().describe("Numerical value for the data point, typically shown on the y-axis."),
-  })).describe('An array of data points for the graph.'),
-  xAxisLabel: z.string().describe('The label for the horizontal (X) axis.'),
-  yAxisLabel: z.string().describe('The label for the vertical (Y) axis.'),
-});
-export type GraphData = z.infer<typeof GraphDataSchema>;
-
 export const SolveQuestionOutputSchema = z.object({
   solution: z.string().describe('A single block of text containing a detailed, step-by-step solution. Use newline characters for paragraph breaks.'),
-  graphData: z.optional(GraphDataSchema).describe('If the question is from Physics or Chemistry and a graph would help explain the solution, provide structured data for the graph here.'),
 });
 export type SolveQuestionOutput = z.infer<typeof SolveQuestionOutputSchema>;
+
+// Schemas for identify-question-subject.ts
+export const IdentifySubjectInputSchema = z.object({
+  photoDataUri: z
+    .string()
+    .describe(
+      "A photo of a question, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+});
+export type IdentifySubjectInput = z.infer<typeof IdentifySubjectInputSchema>;
+
+export const IdentifySubjectOutputSchema = z.object({
+  subject: z.enum(['Mathematics', 'Physics', 'Chemistry', 'Biology', 'General']),
+});
+export type IdentifySubjectOutput = z.infer<
+  typeof IdentifySubjectOutputSchema
+>;
+
+// Schemas for process-question-text.ts
+export const ProcessQuestionTextInputSchema = z.object({
+  questionText: z.string(),
+  language: z.string().default('en'),
+});
+export type ProcessQuestionTextInput = z.infer<
+  typeof ProcessQuestionTextInputSchema
+>;
+
+export const ProcessQuestionTextOutputSchema = z.object({
+  subject: z.enum(['Mathematics', 'Physics', 'Chemistry', 'Biology', 'General']),
+});
+export type ProcessQuestionTextOutput = z.infer<
+  typeof ProcessQuestionTextOutputSchema
+>;

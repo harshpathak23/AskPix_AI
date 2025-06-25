@@ -1,14 +1,11 @@
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { MathRenderer } from "./math-renderer";
-import type { GraphData } from "@/ai/schemas";
-import { SolutionChart } from "./solution-chart";
 
 interface SolutionDisplayProps {
   solution: string;
-  graphData?: GraphData | null;
 }
 
-export function SolutionDisplay({ solution, graphData }: SolutionDisplayProps) {
+export function SolutionDisplay({ solution }: SolutionDisplayProps) {
 
   return (
     <div className="space-y-6 mt-8 w-full animate-in fade-in-50 duration-500">
@@ -20,12 +17,6 @@ export function SolutionDisplay({ solution, graphData }: SolutionDisplayProps) {
           <MathRenderer text={solution} />
         </CardContent>
       </Card>
-      
-      {graphData && (
-        <div className="animate-in fade-in-50 duration-500">
-           <SolutionChart chartData={graphData} />
-        </div>
-      )}
     </div>
   );
 }

@@ -32,8 +32,6 @@ const solveQuestionPrompt = ai.definePrompt({
 *   **Subject:** You must act as an expert for the given subject: {{{subject}}}.
 *   **Language:** You MUST provide the entire solution in the language specified: {{{language}}}.
 *   **Math Notation:** Use LaTeX for all mathematical formulas (e.g., $...$ for inline, $$...$$ for block).
-*   **JSON Output:** Your entire response MUST be a single, valid JSON object.
-*   **Graphs:** If a graph would be helpful to explain the solution (especially for Physics or Chemistry), include the 'graphData' field. Otherwise, you can omit it.
 
 Image of the question is below:
 {{media url=photoDataUri}}
@@ -48,7 +46,7 @@ const solveQuestionFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await ai.generate({
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-pro-vision',
       prompt: await solveQuestionPrompt.render(input),
       output: {
         schema: SolveQuestionOutputSchema,

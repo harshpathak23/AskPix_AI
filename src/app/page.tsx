@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -14,20 +14,18 @@ import { SolutionSkeleton } from '@/components/solution-skeleton';
 import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { GraphData } from '@/ai/schemas';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
 
-type Subject = 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology';
+type Subject = 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' | 'General';
 type Language = 'en' | 'hi';
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('welcome');
   const [solution, setSolution] = useState<string | null>(null);
-  const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -130,7 +128,6 @@ export default function Home() {
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
-    setGraphData(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -203,7 +200,6 @@ export default function Home() {
         setAppState('cropping');
       } else if (response.solution) {
         setSolution(response.solution);
-        setGraphData(response.graphData || null);
         setAppState('result');
       }
     } catch (e) {
@@ -234,7 +230,6 @@ export default function Home() {
       // Keep previous solution steps visible on translation error
     } else if (response.solution) {
       setSolution(response.solution);
-      setGraphData(response.graphData || null);
     }
     
     setIsTranslating(false);
@@ -254,7 +249,6 @@ export default function Home() {
         setCapturedImage(dataUri);
         setCroppedImage(null);
         setSolution(null);
-        setGraphData(null);
         setError(null);
         setLanguage('en');
         setAppState('cropping');
@@ -323,7 +317,7 @@ export default function Home() {
         </div>
         
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 gap-3 h-auto p-0 bg-transparent">
+          <TabsList className="grid w-full grid-cols-3 gap-3 h-auto p-0 bg-transparent">
               <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
                   <FunctionSquare className="h-4 w-4" />
                   <span className="font-medium text-xs">Math</span>
@@ -339,6 +333,10 @@ export default function Home() {
               <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
                   <Dna className="h-4 w-4" />
                   <span className="font-medium text-xs">Biology</span>
+              </TabsTrigger>
+              <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
+                  <BrainCircuit className="h-4 w-4" />
+                  <span className="font-medium text-xs">General Question</span>
               </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -473,7 +471,7 @@ export default function Home() {
         Our AI tutor is analyzing the image. Please wait a few moments.
       </p>
       <div className='w-full max-w-lg mt-8'>
-        <SolutionSkeleton subject={subject} />
+        <SolutionSkeleton />
       </div>
     </div>
   );
@@ -503,11 +501,10 @@ export default function Home() {
                 </Tabs>
             </div>
             {isTranslating ? (
-              <SolutionSkeleton subject={subject} />
+              <SolutionSkeleton />
             ) : solution ? (
               <SolutionDisplay
                 solution={solution}
-                graphData={graphData}
               />
             ) : !error ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[200px]">
