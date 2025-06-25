@@ -48,7 +48,7 @@ const solveQuestionFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await ai.generate({
-      model: 'googleai/gemini-1.5-pro-latest',
+      model: 'gemini-1.5-flash-latest',
       prompt: await solveQuestionPrompt.render(input),
       output: {
         schema: SolveQuestionOutputSchema,
@@ -59,7 +59,6 @@ const solveQuestionFlow = ai.defineFlow(
     });
 
     if (!output) {
-      // This is the source of the error message.
       throw new Error('Failed to process the image. Please try again.');
     }
 
