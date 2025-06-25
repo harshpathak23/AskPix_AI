@@ -327,20 +327,20 @@ export default function Home() {
             <p className="mb-4 text-xl font-medium">Choose a subject</p>
             <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 gap-4 h-auto p-0 bg-transparent">
-                  <TabsTrigger value="Mathematics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <FunctionSquare className="h-8 w-8" />
+                  <TabsTrigger value="Mathematics" className="flex-col h-24 text-base gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <FunctionSquare className="h-7 w-7" />
                       <span>Math</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Physics" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <Atom className="h-8 w-8" />
+                  <TabsTrigger value="Physics" className="flex-col h-24 text-base gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <Atom className="h-7 w-7" />
                       <span>Physics</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Chemistry" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <TestTube className="h-8 w-8" />
+                  <TabsTrigger value="Chemistry" className="flex-col h-24 text-base gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <TestTube className="h-7 w-7" />
                       <span>Chemistry</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Biology" className="flex-col h-28 text-lg gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <Dna className="h-8 w-8" />
+                  <TabsTrigger value="Biology" className="flex-col h-24 text-base gap-2 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                      <Dna className="h-7 w-7" />
                       <span>Biology</span>
                   </TabsTrigger>
               </TabsList>
