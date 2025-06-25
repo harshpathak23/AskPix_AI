@@ -1,6 +1,7 @@
 'use server';
 
 import { z } from 'zod';
+import { solveQuestion } from '@/ai/flows/solve-question';
 import type { GraphData, SolveQuestionOutput } from '@/ai/schemas';
 
 const QuestionSchema = z.object({
@@ -26,24 +27,8 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
   }
 
   try {
-    // This fetch call communicates with the Genkit flow running as a Next.js API route.
-    const response = await fetch(`http://localhost:3000/api/genkit/flow/solveQuestionFlow`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ input: validatedFields.data }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Genkit flow error:', errorData);
-      throw new Error(errorData.message || 'The AI service failed to process the request.');
-    }
-    
-    // The response from the Next.js plugin wraps the flow's output in an 'output' key.
-    const flowResult: { output: SolveQuestionOutput } = await response.json();
-    const result = flowResult.output;
+    // Call the Genkit flow directly as a server function instead of using fetch.
+    const result = await solveQuestion(validatedFields.data);
     
     if (!result?.solution) {
       return { error: 'Could not generate a solution. Please try a different question or crop a different area.' };
