@@ -5,6 +5,7 @@ export function Logo({className}: {className?: string}) {
   return (
     <div className={cn("flex justify-center", className)}>
       <Image
+        className="animate-subtle-float"
         src="/logo.png"
         alt="ScanSolve Logo"
         width={320}
