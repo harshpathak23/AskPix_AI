@@ -11,7 +11,7 @@ export function Logo({className}: {className?: string}) {
     >
       <div className="relative h-80 w-80">
         <Image
-          src="/logo.png"
+          src="/logo-light.png"
           alt="AI Question Solver Logo"
           fill
           className="object-contain"
