@@ -324,19 +324,19 @@ export default function Home() {
         
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
           <TabsList className="grid w-full grid-cols-2 gap-3 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
                   <FunctionSquare className="h-4 w-4" />
                   <span className="font-medium text-xs">Math</span>
               </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
                   <Atom className="h-4 w-4" />
                   <span className="font-medium text-xs">Physics</span>
               </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
                   <TestTube className="h-4 w-4" />
                   <span className="font-medium text-xs">Chemistry</span>
               </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
                   <Dna className="h-4 w-4" />
                   <span className="font-medium text-xs">Biology</span>
               </TabsTrigger>
