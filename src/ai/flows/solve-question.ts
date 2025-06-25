@@ -26,27 +26,29 @@ const prompt = ai.definePrompt({
 Your task is to analyze this image and provide a clear, detailed solution.
 
 **IMPORTANT INSTRUCTIONS:**
-1. You MUST provide the entire solution in the language specified by the 'language' code.
-   - 'en' means English.
-   - 'hi' means Hindi.
-2. The solution must be a single, detailed string in the 'solution' field. Break down the explanation into logical steps within this single string, using newline characters (\\n) to separate paragraphs.
-3. Use LaTeX for all mathematical formulas. Enclose inline math in $...$ and display math (for block equations) in $$...$$. Mathematical formulas and symbols should NOT be translated and should remain in standard mathematical notation.
-4. **Graph Generation (for Physics & Chemistry):** If the subject is Physics or Chemistry and a visual graph would significantly aid in explaining the answer (e.g., plotting velocity vs. time, reaction rate vs. concentration), you MUST generate the data for a bar chart and populate the 'graphData' field. If a graph is not relevant, leave 'graphData' empty.
-5. The output must be in JSON format. For example, if a graph is needed, your output must look like this:
-   {
-     "solution": "The detailed step-by-step solution goes here...",
-     "graphData": {
-       "title": "Velocity vs. Time",
-       "data": [
-         { "name": "0s", "value": 0 },
-         { "name": "1s", "value": 9.8 },
-         { "name": "2s", "value": 19.6 },
-         { "name": "3s", "value": 29.4 }
-       ],
-       "xAxisLabel": "Time (s)",
-       "yAxisLabel": "Velocity (m/s)"
-     }
-   }
+1.  **Language:** You MUST provide the entire solution in the language specified by the 'language' code ('en' for English, 'hi' for Hindi).
+2.  **Solution Format:** The solution must be a single, detailed string in the 'solution' field. Use newline characters (\\n) for paragraphs.
+3.  **Math Notation:** Use LaTeX for all mathematical formulas. Inline math: $...$. Block math: $$...$$. Math symbols should not be translated.
+4.  **JSON Output:** Your entire response MUST be a single, valid JSON object that adheres to the output schema.
+    *   **For Math/Biology questions (or any question not needing a graph):** The JSON should ONLY contain the 'solution' field. OMIT the 'graphData' field.
+        Example:
+        {
+          "solution": "The step-by-step solution goes here..."
+        }
+    *   **For Physics/Chemistry questions (where a graph is helpful):** The JSON should contain both 'solution' and 'graphData' fields.
+        Example:
+        {
+          "solution": "The detailed step-by-step solution goes here...",
+          "graphData": {
+            "title": "Velocity vs. Time",
+            "data": [
+              { "name": "0s", "value": 0 },
+              { "name": "1s", "value": 9.8 }
+            ],
+            "xAxisLabel": "Time (s)",
+            "yAxisLabel": "Velocity (m/s)"
+          }
+        }
 
 **TARGET LANGUAGE: {{language}}**
 
