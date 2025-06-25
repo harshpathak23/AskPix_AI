@@ -63,7 +63,7 @@ const solveQuestionFlow = ai.defineFlow(
 Provide the solution now.`;
     
     const {output} = await ai.generate({
-      model: 'googleai/gemini-pro-vision',
+      model: 'gemini-pro-vision',
       prompt: [
         {text: promptText},
         {media: {url: input.photoDataUri}},
