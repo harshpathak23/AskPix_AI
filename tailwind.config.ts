@@ -78,9 +78,9 @@ export default {
             height: '0',
           },
         },
-        'subtle-float': {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-10px)' },
+        'shine': {
+          'from': { transform: 'translateX(-100%) skewX(-12deg)' },
+          'to': { transform: 'translateX(100%) skewX(-12deg)' },
         },
         'scan-line': {
           '0%': { top: '0%' },
@@ -90,7 +90,7 @@ export default {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'subtle-float': 'subtle-float 4s ease-in-out infinite',
+        'shine': 'shine 4s ease-out 2s infinite',
         'scan-line': 'scan-line 3s linear infinite',
       },
     },

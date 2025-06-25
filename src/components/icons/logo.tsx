@@ -3,15 +3,15 @@ import { cn } from '@/lib/utils';
 
 export function Logo({className}: {className?: string}) {
   return (
-    <div className={cn("flex justify-center", className)}>
+    <div className={cn("flex justify-center relative overflow-hidden", className)}>
       <Image
-        className="animate-subtle-float"
         src="/logo.png"
-        alt="ScanSolve Logo"
+        alt="ScanSolve AI Logo"
         width={320}
         height={320}
         priority
       />
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine" />
     </div>
   );
 }
