@@ -313,7 +313,7 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full max-w-sm mx-auto bg-card rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
-      <div className="flex-shrink-0 pt-8 pb-4 animate-float">
+      <div className="flex-shrink-0 pt-8 pb-4 animate-fade-in-out">
         <Logo />
       </div>
 
