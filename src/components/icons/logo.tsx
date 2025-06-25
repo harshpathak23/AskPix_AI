@@ -7,8 +7,8 @@ export function Logo({className}: {className?: string}) {
       <Image
         src="/logo.png"
         alt="ScanSolve Logo"
-        width={128}
-        height={128}
+        width={320}
+        height={320}
         priority
       />
     </div>
