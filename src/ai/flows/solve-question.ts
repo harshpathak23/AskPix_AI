@@ -7,6 +7,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {
   SolveQuestionInputSchema,
   type SolveQuestionInput,
@@ -63,7 +64,7 @@ const solveQuestionFlow = ai.defineFlow(
 Provide the solution now.`;
     
     const {output} = await ai.generate({
-      model: 'gemini-pro-vision',
+      model: googleAI.model('gemini-pro-vision'),
       prompt: [
         {text: promptText},
         {media: {url: input.photoDataUri}},
