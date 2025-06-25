@@ -18,11 +18,11 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
   return solveQuestionFlow(input);
 }
 
-// This prompt is now simplified. It does NOT specify an output schema or model,
-// so it will return raw text and use the default vision model, which is a more robust approach.
+// It specifies a stable vision model and does not request a specific JSON output format, which is more robust.
 const solveQuestionPrompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
   input: {schema: SolveQuestionInputSchema},
+  model: 'googleai/gemini-1.0-pro-vision-001',
   config: {
     temperature: 0.2,
   },
