@@ -312,40 +312,40 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full max-w-sm mx-auto bg-card rounded-2xl shadow-lg p-6 sm:p-8 flex flex-col animate-in fade-in-50 duration-500 h-[90vh] min-h-[700px]">
-      <div className="flex-shrink-0">
+    <div className="w-full max-w-sm mx-auto bg-card rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
+      <div className="flex-shrink-0 pt-8 pb-4 animate-float">
         <Logo />
       </div>
-      
-      <div className="flex-grow flex flex-col justify-center space-y-4">
+
+      <div className="flex-1 flex flex-col justify-center space-y-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold tracking-tight">Choose a subject</h1>
         </div>
         
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
           <TabsList className="grid w-full grid-cols-2 gap-3 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-20 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
-                  <FunctionSquare className="h-5 w-5" />
-                  <span className="font-medium text-sm">Math</span>
+              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+                  <FunctionSquare className="h-4 w-4" />
+                  <span className="font-medium text-xs">Math</span>
               </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-20 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
-                  <Atom className="h-5 w-5" />
-                  <span className="font-medium text-sm">Physics</span>
+              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+                  <Atom className="h-4 w-4" />
+                  <span className="font-medium text-xs">Physics</span>
               </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-20 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
-                  <TestTube className="h-5 w-5" />
-                  <span className="font-medium text-sm">Chemistry</span>
+              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+                  <TestTube className="h-4 w-4" />
+                  <span className="font-medium text-xs">Chemistry</span>
               </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-20 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
-                  <Dna className="h-5 w-5" />
-                  <span className="font-medium text-sm">Biology</span>
+              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+                  <Dna className="h-4 w-4" />
+                  <span className="font-medium text-xs">Biology</span>
               </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      <div className="flex-shrink-0 pt-4">
-        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-6">
+      <div className="flex-shrink-0 pt-4 pb-2">
+        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-6 animate-pulse-glow">
           <Camera className="mr-3 h-6 w-6" />
           Start Scanning
         </Button>
@@ -529,7 +529,7 @@ export default function Home() {
     <main className={cn(
       "min-h-screen",
       appState === 'welcome' 
-        ? "flex flex-col items-center justify-center bg-muted p-4" 
+        ? "flex flex-col items-center justify-center p-4" 
         : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
     )}>
       {appState === 'welcome' && renderWelcomeScreen()}
