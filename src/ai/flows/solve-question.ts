@@ -15,39 +15,14 @@ import {
 } from '@/ai/schemas';
 
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  return solveQuestionOrchestratorFlow(input);
+  return solveQuestionFlow(input);
 }
 
-const solveQuestionOrchestratorFlow = ai.defineFlow(
-  {
-    name: 'solveQuestionOrchestratorFlow',
-    inputSchema: SolveQuestionInputSchema,
-    outputSchema: SolveQuestionOutputSchema,
-  },
-  async (input) => {
-    // Step 1: Use a vision model to extract the text from the image. This is a more reliable approach.
-    const extractionPrompt = `Analyze the provided image and extract any and all text related to the academic question shown. Output only the raw text content of the question. Do not attempt to solve it.`;
-
-    const visionResult = await ai.generate({
-      model: 'googleai/gemini-1.5-pro-latest',
-      prompt: [
-        {text: extractionPrompt},
-        {media: {url: input.photoDataUri}},
-      ],
-    });
-    
-    const extractedQuestionText = visionResult.text;
-
-    if (!extractedQuestionText) {
-      throw new Error("The AI could not read any text from the image. Please try taking a clearer picture.");
-    }
-
-    // Step 2: Use a powerful language model to solve the extracted text and generate structured JSON.
-    const solvingPrompt = `You are an expert tutor. The user has provided a question for the subject: '${input.subject}'. The question is: "${extractedQuestionText}".
+const solveQuestionPrompt = `You are an expert tutor. A user has provided an image of a question for the subject: '${input.subject}'.
 
 **TASK:**
-1.  **Assume the user's subject is correct.** Act as an expert tutor for '${input.subject}'.
-2.  **Provide a clear, detailed solution** to the question.
+1.  **Analyze the image** to understand the full question, including any text, diagrams, or formulas.
+2.  **Provide a clear, detailed solution** to the question. Assume the user's chosen subject is correct and act as an expert tutor for that subject.
 
 **IMPORTANT INSTRUCTIONS:**
 1.  **Language:** You MUST provide the entire solution in the language specified by the 'language' code ('${input.language}').
@@ -75,21 +50,32 @@ const solveQuestionOrchestratorFlow = ai.defineFlow(
         }
 
 **SUBJECT: ${input.subject}**
-**QUESTION TEXT: ${extractedQuestionText}**
 **TARGET LANGUAGE: ${input.language}**
 
-Provide the solution now.`;
+Provide the solution now based on the content of the image.`;
 
+
+const solveQuestionFlow = ai.defineFlow(
+  {
+    name: 'solveQuestionFlow',
+    inputSchema: SolveQuestionInputSchema,
+    outputSchema: SolveQuestionOutputSchema,
+  },
+  async (input) => {
+    
     const {output} = await ai.generate({
       model: 'googleai/gemini-1.5-pro-latest',
-      prompt: solvingPrompt,
+      prompt: [
+        {text: solveQuestionPrompt},
+        {media: {url: input.photoDataUri}},
+      ],
       output: {
         schema: SolveQuestionOutputSchema,
       }
     });
 
     if (!output) {
-      throw new Error("The AI failed to generate a valid solution from the extracted text.");
+      throw new Error("The AI failed to generate a valid solution. The image may be unclear or the question may be outside the supported subjects.");
     }
     
     return output;
