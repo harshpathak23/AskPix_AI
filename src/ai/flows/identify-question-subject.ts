@@ -22,7 +22,7 @@ const prompt = ai.definePrompt({
   name: 'identifySubjectPrompt',
   input: {schema: IdentifySubjectInputSchema},
   output: {schema: IdentifySubjectOutputSchema},
-  model: 'googleai/gemini-1.0-pro-vision-001',
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are an expert at identifying the subject of academic questions.
   Analyze the provided image and determine its subject.
   The possible subjects are: Mathematics, Physics, Chemistry, Biology, General.
