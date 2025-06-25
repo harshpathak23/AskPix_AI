@@ -7,7 +7,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
 import {
   SolveQuestionInputSchema,
   type SolveQuestionInput,
@@ -27,11 +26,10 @@ const solveQuestionOrchestratorFlow = ai.defineFlow(
   },
   async (input) => {
     // Step 1: Use a vision model to extract the text from the image. This is a more reliable approach.
-    const visionModel = googleAI.model('gemini-pro-vision');
     const extractionPrompt = `Analyze the provided image and extract any and all text related to the academic question shown. Output only the raw text content of the question. Do not attempt to solve it.`;
 
     const visionResult = await ai.generate({
-      model: visionModel,
+      model: 'googleai/gemini-pro-vision',
       prompt: [
         {text: extractionPrompt},
         {media: {url: input.photoDataUri}},
@@ -45,8 +43,6 @@ const solveQuestionOrchestratorFlow = ai.defineFlow(
     }
 
     // Step 2: Use a powerful language model to solve the extracted text and generate structured JSON.
-    const languageModel = googleAI.model('gemini-1.5-flash-latest'); // Optimized for speed and structured output.
-    
     const solvingPrompt = `You are an expert tutor. The user has provided a question for the subject: '${input.subject}'. The question is: "${extractedQuestionText}".
 
 **TASK:**
@@ -85,7 +81,7 @@ const solveQuestionOrchestratorFlow = ai.defineFlow(
 Provide the solution now.`;
 
     const {output} = await ai.generate({
-      model: languageModel,
+      model: 'googleai/gemini-1.5-flash-latest',
       prompt: solvingPrompt,
       output: {
         schema: SolveQuestionOutputSchema,
