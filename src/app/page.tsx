@@ -314,32 +314,26 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top section: Fixed Header */}
-      <div className="w-full shrink-0 flex justify-center pb-2">
-        {/* The logo is pulled up to overlap the top border of the card */}
-        <Logo className="w-48 h-48 -mt-20 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]" />
-      </div>
-  
       {/* Middle section (scrollable content) */}
-      <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto py-4">
+      <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto pt-8 pb-4">
         <ScrollArea className="w-full px-4">
           <div className="w-full flex flex-col items-center">
             <p className="mb-4 text-xl font-medium">Choose a subject</p>
             <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 gap-2 h-auto p-0 bg-transparent">
-                  <TabsTrigger value="Mathematics" className="flex-col h-14 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                  <TabsTrigger value="Mathematics" className="flex-col h-12 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
                       <FunctionSquare className="h-3 w-3" />
                       <span className="text-xs">Math</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Physics" className="flex-col h-14 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                  <TabsTrigger value="Physics" className="flex-col h-12 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
                       <Atom className="h-3 w-3" />
                       <span className="text-xs">Physics</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Chemistry" className="flex-col h-14 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                  <TabsTrigger value="Chemistry" className="flex-col h-12 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
                       <TestTube className="h-3 w-3" />
                       <span className="text-xs">Chemistry</span>
                   </TabsTrigger>
-                  <TabsTrigger value="Biology" className="flex-col h-14 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
+                  <TabsTrigger value="Biology" className="flex-col h-12 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
                       <Dna className="h-3 w-3" />
                       <span className="text-xs">Biology</span>
                   </TabsTrigger>
@@ -532,8 +526,17 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen px-0 pb-0">
-      <div className="w-full rounded-t-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-1 flex-col rounded-b-none">
+    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen px-0 pb-0 relative">
+      {appState === 'welcome' && (
+          <Logo className="w-40 h-40 absolute top-0 left-1/2 -translate-x-1/2 z-10 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]" />
+      )}
+      <div className={cn(
+        "w-full bg-card/80 backdrop-blur-sm shadow-sm flex flex-1 flex-col rounded-b-none",
+        {
+          'rounded-xl mt-20': appState === 'welcome',
+          'rounded-t-xl': appState !== 'welcome',
+        }
+      )}>
         {appState === 'welcome' && renderWelcomeScreen()}
         {appState === 'scanning' && renderScanningScreen()}
         {appState === 'cropping' && renderCroppingScreen()}
