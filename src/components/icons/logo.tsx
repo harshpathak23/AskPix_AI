@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 export function Logo({className}: {className?: string}) {
   return (
     <div className={cn('flex flex-col items-center justify-center', className)}>
-      <div className="relative h-16 w-16">
+      <div className="relative h-80 w-80">
         <Image
           src="/logo.png"
           alt="App Logo"
