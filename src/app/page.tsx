@@ -314,9 +314,10 @@ export default function Home() {
 
   const renderWelcomeScreen = () => (
     <div className="w-full h-full flex flex-col text-center">
-      {/* Top section: Header bar containing the logo */}
-      <div className="w-full shrink-0">
-          <Logo className="w-80 h-80 mx-auto" />
+      {/* Top section: Fixed Header */}
+      <div className="w-full shrink-0 flex justify-center pb-2">
+        {/* The logo is pulled up to overlap the top border of the card */}
+        <Logo className="w-40 h-40 -mt-16 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]" />
       </div>
 
       {/* Middle section (scrollable content) */}
@@ -348,7 +349,7 @@ export default function Home() {
         </ScrollArea>
       </div>
       
-      {/* Bottom section: Button */}
+      {/* Bottom section: Fixed Footer */}
       <div className="w-full max-w-sm self-center px-4 pb-4 pt-2 shrink-0">
           <p className="mb-2 text-sm text-muted-foreground">Build By Harsh Pathak</p>
           <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 animate-pulse-glow">
@@ -532,7 +533,7 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen p-0">
+    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen p-0 pt-0">
       <div className="w-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm flex flex-col flex-1">
         {appState === 'welcome' && renderWelcomeScreen()}
         {appState === 'scanning' && renderScanningScreen()}
