@@ -17,7 +17,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { GraphData } from '@/ai/schemas';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
@@ -313,43 +312,38 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full h-full flex flex-col text-center">
-      {/* Middle section (scrollable content) */}
-      <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto pt-8 pb-4">
-        <ScrollArea className="w-full px-4">
-          <div className="w-full flex flex-col items-center">
-            <p className="mb-4 text-xl font-medium">Choose a subject</p>
-            <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full max-w-md">
-              <TabsList className="grid w-full grid-cols-2 gap-2 h-auto p-0 bg-transparent">
-                  <TabsTrigger value="Mathematics" className="flex-col h-12 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <FunctionSquare className="h-3 w-3" />
-                      <span className="text-xs">Math</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="Physics" className="flex-col h-12 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <Atom className="h-3 w-3" />
-                      <span className="text-xs">Physics</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="Chemistry" className="flex-col h-12 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <TestTube className="h-3 w-3" />
-                      <span className="text-xs">Chemistry</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="Biology" className="flex-col h-12 text-xs gap-1 border shadow-sm rounded-lg data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:shadow-lg">
-                      <Dna className="h-3 w-3" />
-                      <span className="text-xs">Biology</span>
-                  </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </ScrollArea>
+    <div className="w-full max-w-sm mx-auto bg-card rounded-2xl shadow-lg p-6 sm:p-8 space-y-6 animate-in fade-in-50 duration-500">
+      <Logo />
+      
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight">Choose a subject</h1>
       </div>
       
-      {/* Bottom section: Fixed Footer */}
-      <div className="w-full max-w-sm self-center px-4 pt-4 shrink-0 pb-0">
-        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-7 px-8 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]">
-          <Camera className="mr-3 h-6 w-6" />
-          Start Scanning
-        </Button>
-      </div>
+      <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 gap-3 h-auto p-0 bg-transparent">
+            <TabsTrigger value="Mathematics" className="flex-col h-24 gap-2 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+                <FunctionSquare className="h-6 w-6" />
+                <span className="font-medium text-sm">Math</span>
+            </TabsTrigger>
+            <TabsTrigger value="Physics" className="flex-col h-24 gap-2 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+                <Atom className="h-6 w-6" />
+                <span className="font-medium text-sm">Physics</span>
+            </TabsTrigger>
+            <TabsTrigger value="Chemistry" className="flex-col h-24 gap-2 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+                <TestTube className="h-6 w-6" />
+                <span className="font-medium text-sm">Chemistry</span>
+            </TabsTrigger>
+            <TabsTrigger value="Biology" className="flex-col h-24 gap-2 border shadow-sm rounded-xl data-[state=active]:ring-2 data-[state=active]:ring-primary data-[state=active]:border-primary data-[state=active]:shadow-lg transition-all duration-200">
+                <Dna className="h-6 w-6" />
+                <span className="font-medium text-sm">Biology</span>
+            </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-6 !mt-8">
+        <Camera className="mr-3 h-6 w-6" />
+        Start Scanning
+      </Button>
     </div>
   );
   
@@ -526,23 +520,22 @@ export default function Home() {
   );
 
   return (
-    <main className="container mx-auto max-w-3xl flex flex-col items-center min-h-screen px-0 pb-0 relative">
-      {appState === 'welcome' && (
-          <Logo className="w-40 h-40 absolute top-0 left-1/2 -translate-x-1/2 z-10 [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.1))]" />
+    <main className={cn(
+      "min-h-screen",
+      appState === 'welcome' 
+        ? "flex flex-col items-center justify-center bg-muted p-4" 
+        : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
+    )}>
+      {appState === 'welcome' && renderWelcomeScreen()}
+      
+      {appState !== 'welcome' && (
+        <div className="w-full bg-card/80 backdrop-blur-sm shadow-sm flex flex-1 flex-col rounded-t-xl">
+          {appState === 'scanning' && renderScanningScreen()}
+          {appState === 'cropping' && renderCroppingScreen()}
+          {appState === 'solving' && renderSolvingScreen()}
+          {appState === 'result' && renderResultScreen()}
+        </div>
       )}
-      <div className={cn(
-        "w-full bg-card/80 backdrop-blur-sm shadow-sm flex flex-1 flex-col rounded-b-none",
-        {
-          'rounded-xl mt-20': appState === 'welcome',
-          'rounded-t-xl': appState !== 'welcome',
-        }
-      )}>
-        {appState === 'welcome' && renderWelcomeScreen()}
-        {appState === 'scanning' && renderScanningScreen()}
-        {appState === 'cropping' && renderCroppingScreen()}
-        {appState === 'solving' && renderSolvingScreen()}
-        {appState === 'result' && renderResultScreen()}
-      </div>
     </main>
   );
 }
