@@ -9,7 +9,7 @@ export function Logo({className}: {className?: string}) {
           src="/logo.png"
           alt="App Logo"
           fill
-          className="object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.7)]"
+          className="object-contain"
           priority
         />
       </div>
