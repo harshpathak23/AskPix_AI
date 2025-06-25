@@ -22,7 +22,6 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
 // so it will return raw text, which is a more robust approach.
 const solveQuestionPrompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
-  model: 'gemini-pro-vision',
   input: {schema: SolveQuestionInputSchema},
   config: {
     temperature: 0.2,
