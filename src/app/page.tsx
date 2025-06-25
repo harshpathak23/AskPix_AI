@@ -312,7 +312,7 @@ export default function Home() {
   }
 
   const renderWelcomeScreen = () => (
-    <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-purple-700 via-purple-800 to-purple-900 text-primary-foreground rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px] bg-[length:100%_200%] animate-gradient-flow-y">
+    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-purple-400 to-purple-600 text-primary-foreground rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
       <div className="flex-shrink-0 pt-8 pb-4 animate-fade-in-out">
         <Logo />
       </div>

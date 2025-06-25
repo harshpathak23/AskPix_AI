@@ -102,14 +102,6 @@ export default {
           '0%, 100%': { opacity: '0.4' },
           '50%': { opacity: '1' },
         },
-        'gradient-flow-y': {
-          '0%, 100%': {
-            backgroundPosition: '50% 0%',
-          },
-          '50%': {
-            backgroundPosition: '50% 100%',
-          },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -118,7 +110,6 @@ export default {
         'scan-line': 'scan-line 3s linear infinite',
         'float': 'float 6s ease-in-out infinite',
         'fade-in-out': 'fade-in-out 4s ease-in-out infinite',
-        'gradient-flow-y': 'gradient-flow-y 8s ease infinite',
       },
     },
   },
