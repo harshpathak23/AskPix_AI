@@ -20,6 +20,7 @@ export async function processQuestionText(input: ProcessQuestionTextInput): Prom
 
 const prompt = ai.definePrompt({
   name: 'processQuestionTextPrompt',
+  model: 'googleai/gemini-2.0-flash',
   input: {schema: ProcessQuestionTextInputSchema},
   output: {schema: ProcessQuestionTextOutputSchema},
   prompt: `You are an expert tutor specializing in Mathematics, Physics, Chemistry, and Biology.

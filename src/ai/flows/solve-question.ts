@@ -21,6 +21,7 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
 // It specifies a stable vision model and does not request a specific JSON output format, which is more robust.
 const solveQuestionPrompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
+  model: 'googleai/gemini-2.0-flash',
   input: {schema: SolveQuestionInputSchema},
   config: {
     temperature: 0.2,

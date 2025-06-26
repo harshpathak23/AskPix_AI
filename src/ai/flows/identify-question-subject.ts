@@ -20,6 +20,7 @@ export async function identifySubject(input: IdentifySubjectInput): Promise<Iden
 
 const prompt = ai.definePrompt({
   name: 'identifySubjectPrompt',
+  model: 'googleai/gemini-2.0-flash',
   input: {schema: IdentifySubjectInputSchema},
   output: {schema: IdentifySubjectOutputSchema},
   prompt: `You are an expert at identifying the subject of academic questions.
