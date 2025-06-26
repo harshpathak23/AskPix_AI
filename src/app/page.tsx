@@ -363,7 +363,7 @@ export default function Home() {
   );
   
   const renderScanningScreen = () => (
-    <div className="w-full h-full flex flex-col items-center justify-center">
+    <div className="w-full h-full flex flex-col items-center justify-center p-4">
       <div className="w-full h-full overflow-hidden relative flex items-center justify-center bg-black rounded-lg">
         {hasCameraPermission === null && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-white bg-black/50">
@@ -501,7 +501,7 @@ export default function Home() {
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="flex flex-col items-center text-center mb-2">
-            <Logo className="h-10 w-auto mb-2" />
+            <Logo className="h-16 w-auto mb-4" />
             <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
         </div>
         
@@ -585,7 +585,7 @@ export default function Home() {
             ) : null}
         </div>
 
-        <Button onClick={handleStartScanning} className="w-full text-lg py-6">
+        <Button onClick={handleStartScanning} variant="secondary" className="w-full text-lg py-6 bg-primary hover:bg-primary/90">
             <RefreshCw className="mr-2 h-5 w-5" />
             Scan Another Question
         </Button>
