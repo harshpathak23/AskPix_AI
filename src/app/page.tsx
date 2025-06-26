@@ -500,7 +500,7 @@ export default function Home() {
   
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="w-full aspect-video bg-slate-800 border-slate-700 border rounded-lg overflow-hidden relative flex items-center justify-center">
+        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         
