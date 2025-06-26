@@ -563,7 +563,7 @@ export default function Home() {
                                 <CardTitle className="flex items-center gap-2 text-slate-100">
                                     <NotebookText />
                                     Key Formulas
-                                </Title>
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <MathRenderer text={formulas} />
