@@ -504,7 +504,7 @@ export default function Home() {
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div>
             <div className="flex flex-col items-center text-center mb-3">
-                <Logo className="h-[220px] w-auto animate-fade-in-out" />
+                <Logo className="h-[220px] w-auto" animated />
             </div>
             
             <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
