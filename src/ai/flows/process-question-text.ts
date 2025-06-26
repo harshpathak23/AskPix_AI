@@ -22,7 +22,7 @@ const prompt = ai.definePrompt({
   name: 'processQuestionTextPrompt',
   input: {schema: ProcessQuestionTextInputSchema},
   output: {schema: ProcessQuestionTextOutputSchema},
-  model: 'googleai/gemini-1.5-pro',
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are an expert tutor specializing in Mathematics, Physics, Chemistry, and Biology.
   Your task is to determine the subject of a given question.
 
