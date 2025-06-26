@@ -430,7 +430,7 @@ export default function Home() {
   );
 
   const renderCroppingScreen = () => (
-    <div className="w-full h-full flex flex-col items-center p-4">
+    <div className="w-full h-full flex flex-col items-center p-4 text-slate-200">
        {error && (
           <Alert variant="destructive" className="mb-4 w-full">
             <XCircle className="h-4 w-4" />
@@ -439,10 +439,10 @@ export default function Home() {
           </Alert>
        )}
       <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold">Crop Your Question</h2>
-        <p className="text-muted-foreground">Drag to select the area with the question you want to solve.</p>
+        <h2 className="text-2xl font-bold text-slate-100">Crop Your Question</h2>
+        <p className="text-slate-400">Drag to select the area with the question you want to solve.</p>
       </div>
-      <div className="w-full flex-1 bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
+      <div className="w-full flex-1 bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
         {capturedImage && (
           <ReactCrop
             crop={crop}
@@ -462,7 +462,7 @@ export default function Home() {
         )}
       </div>
       <div className="flex w-full gap-4 mt-4">
-        <Button onClick={handleRetake} variant="outline" className="w-full text-lg py-6">
+        <Button onClick={handleRetake} className="w-full text-lg py-6 bg-black/20 text-slate-300 hover:bg-black/40">
           <RefreshCw className="mr-2 h-5 w-5" />
           Retake
         </Button>
@@ -475,15 +475,15 @@ export default function Home() {
   );
   
   const renderSolvingScreen = () => (
-    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4">
-        <div className="w-full aspect-video bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
+    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         
         <div className="w-full">
-            <Card className="min-h-[200px] bg-card/50 backdrop-blur-sm">
+            <Card className="min-h-[200px] bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
                 <CardHeader>
-                  <CardTitle>Detailed Solution</CardTitle>
+                  <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <LoadingDots className="justify-start" />
@@ -491,7 +491,7 @@ export default function Home() {
             </Card>
         </div>
 
-        <Button onClick={handleStartScanning} variant="outline" className="w-full text-lg py-6" disabled>
+        <Button onClick={handleStartScanning} className="w-full text-lg py-6" disabled>
             <RefreshCw className="mr-2 h-5 w-5" />
             Scan Another Question
         </Button>
@@ -604,9 +604,7 @@ export default function Home() {
       {appState !== 'welcome' && (
         <div className={cn(
           "w-full shadow-sm flex flex-1 flex-col rounded-t-xl",
-          appState === 'result'
-            ? "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900"
-            : "bg-card/80 backdrop-blur-sm"
+          "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900"
         )}>
           {appState === 'scanning' && renderScanningScreen()}
           {appState === 'cropping' && renderCroppingScreen()}
