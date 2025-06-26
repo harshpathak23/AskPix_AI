@@ -319,7 +319,7 @@ export default function Home() {
   const renderWelcomeScreen = () => (
     <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
       <div className="flex-shrink-0 pt-8 pb-4">
-        <Logo />
+        <Logo animated />
       </div>
 
       <div className="flex-1 flex flex-col justify-center space-y-4">
@@ -500,6 +500,11 @@ export default function Home() {
   
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+        <div className="flex flex-col items-center text-center mb-2">
+            <Logo className="h-10 w-auto mb-2" />
+            <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
+        </div>
+        
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
@@ -526,7 +531,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-4 mb-4">
                 <p className="text-slate-400">Language:</p>
                 <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                <TabsList className="bg-slate-800/80 border border-slate-700 text-slate-300">
+                <TabsList className="bg-secondary text-secondary-foreground">
                     <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">English</TabsTrigger>
                     <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Hindi</TabsTrigger>
                 </TabsList>
@@ -580,7 +585,7 @@ export default function Home() {
             ) : null}
         </div>
 
-        <Button onClick={handleStartScanning} className="w-full text-lg py-6 bg-slate-800/80 border border-slate-700 text-slate-300 hover:bg-slate-700">
+        <Button onClick={handleStartScanning} variant="secondary" className="w-full text-lg py-6">
             <RefreshCw className="mr-2 h-5 w-5" />
             Scan Another Question
         </Button>
