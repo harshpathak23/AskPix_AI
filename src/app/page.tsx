@@ -501,7 +501,7 @@ export default function Home() {
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="flex flex-col items-center text-center mb-2">
-            <Logo className="h-16 w-auto mb-4" />
+            <Logo className="h-32 w-auto mb-4" />
             <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
         </div>
         
@@ -531,7 +531,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-4 mb-4">
                 <p className="text-slate-400">Language:</p>
                 <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                <TabsList className="bg-black/20 text-slate-300">
+                <TabsList className="bg-white/5 text-slate-300">
                     <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">English</TabsTrigger>
                     <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Hindi</TabsTrigger>
                 </TabsList>
@@ -585,7 +585,7 @@ export default function Home() {
             ) : null}
         </div>
 
-        <Button onClick={handleStartScanning} variant="secondary" className="w-full text-lg py-6 bg-primary hover:bg-primary/90">
+        <Button onClick={handleStartScanning} variant="default" className="w-full text-lg py-6 bg-primary hover:bg-primary/90">
             <RefreshCw className="mr-2 h-5 w-5" />
             Scan Another Question
         </Button>
