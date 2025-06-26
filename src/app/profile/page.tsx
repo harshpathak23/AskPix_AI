@@ -34,7 +34,7 @@ export default function ProfilePage() {
             <CardContent>
                 <ul className="space-y-4">
                     {savedFiles.map((file) => (
-                        <li key={file.id} className="flex justify-between items-center p-4 rounded-lg bg-slate-800 hover:bg-slate-700/80 transition-colors">
+                        <li key={file.id} className="flex justify-between items-center p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-colors">
                            <div className="flex items-center gap-4">
                              <FileText className="w-6 h-6 text-primary"/>
                              <div>
