@@ -475,8 +475,10 @@ export default function Home() {
       <p className="mt-2 max-w-md text-lg text-muted-foreground">
         Our AI tutor is analyzing the image. Please wait a few moments.
       </p>
-      <div className='w-full max-w-lg mt-8'>
-        <SolutionSkeleton />
+      <div className="w-full max-w-lg mt-8">
+        <div className="pt-4 text-muted-foreground animate-pulse text-lg">
+          Typing.....
+        </div>
       </div>
     </div>
   );
