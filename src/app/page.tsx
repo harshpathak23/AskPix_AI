@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText } from 'lucide-react';
+import Link from 'next/link';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -585,10 +586,18 @@ export default function Home() {
             ) : null}
         </div>
 
-        <Button onClick={handleStartScanning} variant="default" className="w-full text-lg py-6">
-            <RefreshCw className="mr-2 h-5 w-5" />
-            Scan Another Question
-        </Button>
+        <div className="flex w-full gap-4">
+          <Button onClick={handleStartScanning} variant="secondary" className="w-full text-lg py-6">
+              <RefreshCw className="mr-2 h-5 w-5" />
+              Scan Another
+          </Button>
+          <Button asChild className="w-full text-lg py-6 animate-pulse-glow">
+            <Link href="/login">
+              <Download className="mr-2 h-5 w-5" />
+              Download PDF
+            </Link>
+          </Button>
+        </div>
     </div>
   );
 
