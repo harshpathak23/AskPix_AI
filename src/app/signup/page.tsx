@@ -12,7 +12,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-sm bg-slate-900/50 backdrop-blur-sm border-purple-900/50 text-slate-200">
         <CardHeader className="text-center">
            <div className="flex flex-col items-center mb-6">
-            <Logo className="h-24 w-24 mb-2" />
+            <Logo className="h-[220px] w-[220px] mb-2" animated />
             <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
           </div>
           <CardTitle className="text-3xl font-bold text-slate-100">Create an Account</CardTitle>
