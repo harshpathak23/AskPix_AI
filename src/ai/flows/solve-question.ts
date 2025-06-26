@@ -22,7 +22,6 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
 const solveQuestionPrompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
   input: {schema: SolveQuestionInputSchema},
-  model: 'googleai/gemini-2.0-flash',
   config: {
     temperature: 0.2,
   },
