@@ -499,14 +499,14 @@ export default function Home() {
   );
   
   const renderResultScreen = () => (
-    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4">
-        <div className="w-full aspect-video bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
+    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+        <div className="w-full aspect-video bg-slate-800 border-slate-700 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         
         {identifiedSubject && identifiedSubject !== subject && (
-            <Alert className="mb-4">
-              <BrainCircuit className="h-4 w-4" />
+            <Alert className="mb-4 bg-slate-800/50 border-slate-700 text-slate-200">
+              <BrainCircuit className="h-4 w-4 text-primary" />
               <AlertTitle>Subject Correction</AlertTitle>
               <AlertDescription>
                 You selected <strong>{subject}</strong>, but we detected a <strong>{identifiedSubject}</strong> question. We've provided the solution for {identifiedSubject}.
@@ -524,11 +524,11 @@ export default function Home() {
         
         <div className="w-full">
             <div className="flex items-center justify-center gap-4 mb-4">
-                <p className="text-muted-foreground">Language:</p>
+                <p className="text-slate-400">Language:</p>
                 <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                <TabsList>
-                    <TabsTrigger value="en" disabled={isTranslating}>English</TabsTrigger>
-                    <TabsTrigger value="hi" disabled={isTranslating}>Hindi</TabsTrigger>
+                <TabsList className="bg-slate-800/80 border border-slate-700 text-slate-300">
+                    <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">English</TabsTrigger>
+                    <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Hindi</TabsTrigger>
                 </TabsList>
                 </Tabs>
             </div>
@@ -552,15 +552,15 @@ export default function Home() {
                     )}
                 </div>
             ) : !error ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[200px]">
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-slate-800 border border-slate-700 shadow-sm min-h-[200px]">
                     <Bot size={48} className="mb-4 text-primary" />
                     <h3 className="text-xl font-semibold">Processing Error</h3>
-                    <p className="text-muted-foreground">Could not generate a solution. Please try scanning again.</p>
+                    <p className="text-slate-400">Could not generate a solution. Please try scanning again.</p>
                 </div>
             ) : null}
         </div>
 
-        <Button onClick={handleStartScanning} variant="outline" className="w-full text-lg py-6">
+        <Button onClick={handleStartScanning} variant="secondary" className="w-full text-lg py-6">
             <RefreshCw className="mr-2 h-5 w-5" />
             Scan Another Question
         </Button>
@@ -577,7 +577,12 @@ export default function Home() {
       {appState === 'welcome' && renderWelcomeScreen()}
       
       {appState !== 'welcome' && (
-        <div className="w-full bg-card/80 backdrop-blur-sm shadow-sm flex flex-1 flex-col rounded-t-xl">
+        <div className={cn(
+          "w-full shadow-sm flex flex-1 flex-col rounded-t-xl",
+          appState === 'result'
+            ? "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900"
+            : "bg-card/80 backdrop-blur-sm"
+        )}>
           {appState === 'scanning' && renderScanningScreen()}
           {appState === 'cropping' && renderCroppingScreen()}
           {appState === 'solving' && renderSolvingScreen()}
