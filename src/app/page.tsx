@@ -75,8 +75,6 @@ export default function Home() {
 
     const constraintsToTry: MediaStreamConstraints[] = [
       { video: { facingMode: 'environment', width: { ideal: 3840 }, height: { ideal: 2160 } } }, // 4K
-      { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } }, // Full HD
-      { video: { facingMode: 'environment' } } // Default
     ];
 
     let stream: MediaStream | null = null;
