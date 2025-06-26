@@ -506,10 +506,10 @@ export default function Home() {
             <div className="flex flex-col items-center text-center">
                 <Logo className="h-[220px] w-auto" animated />
             </div>
-            
-            <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-                {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
-            </div>
+        </div>
+        
+        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         
         {identifiedSubject && identifiedSubject !== subject && (
@@ -589,7 +589,7 @@ export default function Home() {
         </div>
 
         <div className="flex w-full gap-4">
-          <Button onClick={handleStartScanning} className="w-full whitespace-normal h-auto" variant="secondary">
+          <Button onClick={handleStartScanning} className="w-full whitespace-normal h-auto">
               <RefreshCw className="h-4 w-4" />
               Scan Another Question
           </Button>
