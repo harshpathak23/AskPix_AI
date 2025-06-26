@@ -432,7 +432,7 @@ export default function Home() {
   const renderCroppingScreen = () => (
     <div className="w-full h-full flex flex-col items-center p-4 text-slate-200">
        {error && (
-          <Alert variant="destructive" className="mb-4 w-full">
+          <Alert variant="destructive" className="mb-4 w-full bg-red-900/50 border-red-500/50 text-white">
             <XCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
@@ -462,7 +462,7 @@ export default function Home() {
         )}
       </div>
       <div className="flex w-full gap-4 mt-4">
-        <Button onClick={handleRetake} className="w-full text-lg py-6 bg-black/20 text-slate-300 hover:bg-black/40">
+        <Button onClick={handleRetake} variant="secondary" className="w-full text-lg py-6">
           <RefreshCw className="mr-2 h-5 w-5" />
           Retake
         </Button>
@@ -501,7 +501,7 @@ export default function Home() {
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="flex flex-col items-center text-center mb-2">
-            <Logo className="h-32 w-auto mb-4" />
+            <Logo className="h-[220px] w-auto mb-4" />
             <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
         </div>
         
@@ -520,7 +520,7 @@ export default function Home() {
         )}
 
         {error && (
-            <Alert variant="destructive" className="w-full">
+            <Alert variant="destructive" className="w-full bg-red-900/50 border-red-500/50 text-white">
               <XCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
@@ -585,7 +585,7 @@ export default function Home() {
             ) : null}
         </div>
 
-        <Button onClick={handleStartScanning} variant="default" className="w-full text-lg py-6 bg-primary hover:bg-primary/90">
+        <Button onClick={handleStartScanning} variant="default" className="w-full text-lg py-6">
             <RefreshCw className="mr-2 h-5 w-5" />
             Scan Another Question
         </Button>
