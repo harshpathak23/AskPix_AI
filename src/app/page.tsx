@@ -32,6 +32,7 @@ export default function Home() {
   const [solution, setSolution] = useState<string | null>(null);
   const [formulas, setFormulas] = useState<string | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
+  const [identifiedSubject, setIdentifiedSubject] = useState<Subject | null>(null);
   const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -135,6 +136,7 @@ export default function Home() {
     setError(null);
     setLanguage('en');
     setCrop(undefined);
+    setIdentifiedSubject(null);
     await startCamera();
   };
 
@@ -205,6 +207,7 @@ export default function Home() {
       } else if (response.solution) {
         setSolution(response.solution);
         setFormulas(response.formulas || null);
+        setIdentifiedSubject(response.identifiedSubject || subject);
         setAppState('result');
       }
     } catch (e) {
@@ -224,10 +227,12 @@ export default function Home() {
     setError(null);
     setLanguage(newLang);
 
+    const subjectForTranslation = identifiedSubject || subject;
+
     const response = await getSolution({ 
       photoDataUri: croppedImage, 
       language: newLang, 
-      subject 
+      subject: subjectForTranslation
     });
     
     if (response.error) {
@@ -499,6 +504,16 @@ export default function Home() {
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         
+        {identifiedSubject && identifiedSubject !== subject && (
+            <Alert className="mb-4">
+              <BrainCircuit className="h-4 w-4" />
+              <AlertTitle>Subject Correction</AlertTitle>
+              <AlertDescription>
+                You selected <strong>{subject}</strong>, but we detected a <strong>{identifiedSubject}</strong> question. We've provided the solution for {identifiedSubject}.
+              </AlertDescription>
+            </Alert>
+        )}
+
         {error && (
             <Alert variant="destructive" className="w-full">
               <XCircle className="h-4 w-4" />

@@ -2,7 +2,8 @@
 
 import { z } from 'zod';
 import { solveQuestion } from '@/ai/flows/solve-question';
-import type { SolveQuestionOutput } from '@/ai/schemas';
+import { identifySubject } from '@/ai/flows/identify-question-subject';
+import type { SolveQuestionOutput, IdentifySubjectOutput } from '@/ai/schemas';
 
 const QuestionSchema = z.object({
   photoDataUri: z.string().startsWith('data:image/', { message: "Invalid image format." }),
@@ -14,6 +15,7 @@ interface ActionState {
   error?: string | null;
   solution?: string | null;
   formulas?: string | null;
+  identifiedSubject?: 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' | 'General' | null;
 }
 
 export async function getSolution(data: { photoDataUri: string, language: 'en' | 'hi', subject: 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' | 'General' }): Promise<ActionState> {
@@ -27,15 +29,25 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
   }
 
   try {
-    const result = await solveQuestion(validatedFields.data);
+    // First, identify the actual subject from the image
+    const subjectDetectionResult = await identifySubject({ photoDataUri: validatedFields.data.photoDataUri });
+    const identifiedSubject = subjectDetectionResult.subject;
+
+    // Now, solve the question using the identified subject, ignoring the user's initial selection
+    const result = await solveQuestion({ 
+      ...validatedFields.data,
+      subject: identifiedSubject // Use the AI-detected subject for accuracy
+    });
     
     if (!result?.solution) {
       return { error: 'Could not generate a solution. Please try a different question or crop a different area.' };
     }
     
+    // Return the solution, formulas, and the subject that was used to solve it
     return { 
         solution: result.solution,
         formulas: result.formulas || null,
+        identifiedSubject: identifiedSubject,
     };
 
   } catch (e) {
