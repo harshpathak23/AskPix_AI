@@ -41,7 +41,7 @@ export function SolutionDisplay({ solution }: SolutionDisplayProps) {
 
   return (
     <div className="w-full animate-in fade-in-50 duration-500">
-      <Card className="bg-slate-900/80 text-slate-200 border-purple-900/50 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
         <CardHeader>
           <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
         </CardHeader>
