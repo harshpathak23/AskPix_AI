@@ -7,7 +7,7 @@ import {z} from 'genkit';
 
 // Schema for chart data
 export const GraphDataSchema = z.object({
-  type: z.literal('bar'),
+  type: z.string().describe("The type of chart. This must always be 'bar'."),
   title: z.string().describe('The title of the chart.'),
   data: z.array(z.object({
     name: z.string().describe('The label for the data point (x-axis).'),
@@ -36,7 +36,7 @@ export const SolveQuestionInputSchema = z.object({
 export type SolveQuestionInput = z.infer<typeof SolveQuestionInputSchema>;
 
 export const SolveQuestionOutputSchema = z.object({
-  solution: z.string().describe('A single block of text containing a detailed, step-by-step solution. Use newline characters for paragraph breaks.'),
+  solution: z.string().describe('A single block of text containing a detailed, step-by-step solution. Use double newline characters for paragraph breaks.'),
   graph: GraphDataSchema.optional().describe('Optional: If the solution can be visualized, provide data for a bar chart.'),
 });
 export type SolveQuestionOutput = z.infer<typeof SolveQuestionOutputSchema>;
