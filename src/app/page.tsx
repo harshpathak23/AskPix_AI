@@ -502,17 +502,18 @@ export default function Home() {
   
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="flex flex-col items-center text-center mb-2">
-            <Logo className="h-[220px] w-auto animate-fade-in-out" />
-            <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
-        </div>
-        
-        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
+        <div>
+            <div className="flex flex-col items-center text-center">
+                <Logo className="h-[220px] w-auto animate-fade-in-out" />
+            </div>
+            
+            <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+                {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
+            </div>
         </div>
         
         {identifiedSubject && identifiedSubject !== subject && (
-            <Alert className="mb-4 bg-slate-800/50 border-slate-700 text-slate-200">
+            <Alert className="bg-slate-800/50 border-slate-700 text-slate-200">
               <BrainCircuit className="h-4 w-4 text-primary" />
               <AlertTitle>Subject Correction</AlertTitle>
               <AlertDescription>
