@@ -502,8 +502,8 @@ export default function Home() {
   
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div>
-            <div className="flex flex-col items-center text-center mb-3">
+        <div className="mb-3">
+            <div className="flex flex-col items-center text-center">
                 <Logo className="h-[220px] w-auto" animated />
             </div>
             
@@ -589,7 +589,7 @@ export default function Home() {
         </div>
 
         <div className="flex w-full gap-4">
-          <Button onClick={handleStartScanning} variant="secondary" className="w-full whitespace-normal h-auto">
+          <Button onClick={handleStartScanning} className="w-full whitespace-normal h-auto">
               <RefreshCw className="h-4 w-4" />
               Scan Another Question
           </Button>
