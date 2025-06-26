@@ -503,7 +503,7 @@ export default function Home() {
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div>
-            <div className="flex flex-col items-center text-center mb-6">
+            <div className="flex flex-col items-center text-center mb-3">
                 <Logo className="h-[220px] w-auto animate-fade-in-out" />
             </div>
             
