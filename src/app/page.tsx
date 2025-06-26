@@ -504,7 +504,8 @@ export default function Home() {
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="mb-3">
             <div className="flex flex-col items-center text-center">
-                <Logo className="h-[220px] w-auto" animated />
+                <Logo className="h-[220px] w-auto mt-2" animated />
+                <p className="text-xs text-slate-400 tracking-wider mt-2">Build By Harsh Pathak</p>
             </div>
         </div>
         
