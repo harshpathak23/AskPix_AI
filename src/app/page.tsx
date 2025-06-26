@@ -589,13 +589,13 @@ export default function Home() {
         </div>
 
         <div className="flex w-full gap-4">
-          <Button onClick={handleStartScanning} variant="secondary" className="w-full text-lg py-6">
-              <RefreshCw className="mr-2 h-5 w-5" />
+          <Button onClick={handleStartScanning} variant="outline" className="w-full">
+              <RefreshCw className="h-4 w-4" />
               Scan Another
           </Button>
-          <Button asChild className="w-full text-lg py-6 animate-pulse-glow">
+          <Button asChild className="w-full animate-pulse-glow">
             <Link href="/login">
-              <Download className="mr-2 h-5 w-5" />
+              <Download className="h-4 w-4" />
               Download PDF
             </Link>
           </Button>
