@@ -464,7 +464,7 @@ export default function Home() {
         )}
       </div>
       <div className="flex w-full gap-4 mt-4">
-        <Button onClick={handleRetake} variant="secondary" className="w-full text-lg py-6">
+        <Button onClick={handleRetake} className="w-full text-lg py-6">
           <RefreshCw className="mr-2 h-5 w-5" />
           Retake
         </Button>
@@ -589,7 +589,7 @@ export default function Home() {
         </div>
 
         <div className="flex w-full gap-4">
-          <Button onClick={handleStartScanning} className="w-full whitespace-normal h-auto">
+          <Button onClick={handleStartScanning} className="w-full whitespace-normal h-auto" variant="secondary">
               <RefreshCw className="h-4 w-4" />
               Scan Another Question
           </Button>
