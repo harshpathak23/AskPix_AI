@@ -501,7 +501,7 @@ export default function Home() {
   const renderResultScreen = () => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="flex flex-col items-center text-center mb-2">
-            <Logo className="h-[220px] w-auto mb-4" />
+            <Logo className="h-[220px] w-auto mb-4 animate-fade-in-out" />
             <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
         </div>
         

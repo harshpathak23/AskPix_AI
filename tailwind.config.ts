@@ -86,12 +86,17 @@ export default {
           '0%': { top: '0%' },
           '100%': { top: 'calc(100% - 2px)' },
         },
+        'fade-in-out': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'shine': 'shine 4s ease-out 2s infinite',
         'scan-line': 'scan-line 3s linear infinite',
+        'fade-in-out': 'fade-in-out 3s ease-in-out infinite',
       },
     },
   },
