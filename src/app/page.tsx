@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { MathRenderer } from '@/components/math-renderer';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { LoadingDots } from '@/components/loading-dots';
 
 
 // Define the states for our app's screen flow
@@ -476,9 +477,7 @@ export default function Home() {
         Our AI tutor is analyzing the image. Please wait a few moments.
       </p>
       <div className="w-full max-w-lg mt-8">
-        <div className="pt-4 text-muted-foreground animate-pulse text-lg">
-          Typing.....
-        </div>
+        <LoadingDots />
       </div>
     </div>
   );
