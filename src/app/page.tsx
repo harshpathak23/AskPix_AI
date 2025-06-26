@@ -531,7 +531,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-4 mb-4">
                 <p className="text-slate-400">Language:</p>
                 <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                <TabsList className="bg-secondary text-secondary-foreground">
+                <TabsList className="bg-black/20 text-slate-300">
                     <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">English</TabsTrigger>
                     <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Hindi</TabsTrigger>
                 </TabsList>
