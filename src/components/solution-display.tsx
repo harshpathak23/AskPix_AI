@@ -41,9 +41,9 @@ export function SolutionDisplay({ solution }: SolutionDisplayProps) {
 
   return (
     <div className="w-full animate-in fade-in-50 duration-500">
-      <Card className="bg-card/50 backdrop-blur-sm">
+      <Card className="bg-slate-900/80 text-slate-200 border-purple-900/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Detailed Solution</CardTitle>
+          <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
         </CardHeader>
         <CardContent>
           <MathRenderer text={displayedSolution} />

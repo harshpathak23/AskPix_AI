@@ -538,9 +538,9 @@ export default function Home() {
                 <div className="space-y-6">
                     <SolutionDisplay solution={solution} />
                     {formulas && (
-                        <Card className="bg-card/50 backdrop-blur-sm">
+                        <Card className="bg-slate-900/80 text-slate-200 border-purple-900/50 backdrop-blur-sm">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="flex items-center gap-2 text-slate-100">
                                     <NotebookText />
                                     Key Formulas
                                 </CardTitle>

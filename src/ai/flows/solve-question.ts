@@ -36,9 +36,9 @@ It is critical that your entire response is in the language with this code: {{{l
 
 Your task:
 1.  **Analyze the image**: Understand the full question, including any text, diagrams, or formulas.
-2.  **Provide a solution**: Write a clear, detailed, step-by-step solution.
+2.  **Provide a solution**: Write a clear, comprehensive, and detailed step-by-step solution. Explain each step thoroughly as if you were teaching the concept to a student for the first time. Break down complex concepts into simple, easy-to-understand parts. Your goal is to leave no room for confusion.
     - Use LaTeX for all mathematical formulas (e.g., $...$ for inline, $$...$$ for block).
-    - Use double newlines to separate paragraphs for readability.
+    - Use double newlines to separate paragraphs for better readability and structure.
 3.  **Provide relevant formulas**: In the 'formulas' field, provide a list of important formulas related to the question's topic.
     - Each formula must be formatted using LaTeX and be on a new line.
     - This section must also be in the requested language.
