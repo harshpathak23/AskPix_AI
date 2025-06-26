@@ -24,7 +24,7 @@ export default function ProfilePage() {
             </Button>
         </header>
 
-        <Card className="bg-card/50 backdrop-blur-sm border-purple-900/50">
+        <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
             <CardHeader>
                 <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
                 <CardDescription className="text-slate-400">
@@ -34,7 +34,7 @@ export default function ProfilePage() {
             <CardContent>
                 <ul className="space-y-4">
                     {savedFiles.map((file) => (
-                        <li key={file.id} className="flex justify-between items-center p-4 rounded-lg bg-slate-800/50 hover:bg-slate-800/80 transition-colors">
+                        <li key={file.id} className="flex justify-between items-center p-4 rounded-lg bg-slate-800 hover:bg-slate-700/80 transition-colors">
                            <div className="flex items-center gap-4">
                              <FileText className="w-6 h-6 text-primary"/>
                              <div>
