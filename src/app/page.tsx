@@ -533,7 +533,27 @@ export default function Home() {
                 </Tabs>
             </div>
             {isTranslating ? (
-              <SolutionSkeleton />
+              <div className="space-y-6">
+                <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+                    <CardHeader>
+                      <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <LoadingDots className="justify-start" />
+                    </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-slate-100">
+                            <NotebookText />
+                            Key Formulas
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <LoadingDots className="justify-start" />
+                    </CardContent>
+                </Card>
+              </div>
             ) : solution ? (
                 <div className="space-y-6">
                     <SolutionDisplay solution={solution} />
@@ -543,7 +563,7 @@ export default function Home() {
                                 <CardTitle className="flex items-center gap-2 text-slate-100">
                                     <NotebookText />
                                     Key Formulas
-                                </CardTitle>
+                                </Title>
                             </CardHeader>
                             <CardContent>
                                 <MathRenderer text={formulas} />
