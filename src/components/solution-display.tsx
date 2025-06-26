@@ -47,7 +47,11 @@ export function SolutionDisplay({ solution }: SolutionDisplayProps) {
         </CardHeader>
         <CardContent>
           <MathRenderer text={displayedSolution} />
-          {isTyping && <span className="animate-pulse">▋</span>}
+          {isTyping && (
+            <div className="pt-4 text-muted-foreground animate-pulse">
+              Typing.....
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
