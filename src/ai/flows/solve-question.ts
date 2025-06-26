@@ -32,14 +32,16 @@ const solveQuestionPrompt = ai.definePrompt({
   },
   prompt: `You are an expert tutor for the subject: {{{subject}}}.
 A user has provided an image of a question.
-Your entire response MUST be in the language with this code: {{{language}}}.
+It is critical that your entire response is in the language with this code: {{{language}}}. For example, if the language code is 'hi', the entire response must be in Hindi.
 
-Analyze the image to understand the full question, including any text, diagrams, or formulas.
-Provide a clear, detailed, step-by-step solution to the question.
-Use LaTeX for all mathematical formulas (e.g., $...$ for inline, $$...$$ for block).
-Use double newlines to separate paragraphs.
-
-If the question involves data that can be visualized as a bar chart, generate the data for the chart and include it in the 'graph' field of your response. For example, if comparing quantities, show them in a bar chart. If no chart is relevant, do not include the 'graph' field.
+Your task:
+1.  **Analyze the image**: Understand the full question, including any text, diagrams, or formulas.
+2.  **Provide a solution**: Write a clear, detailed, step-by-step solution.
+    - Use LaTeX for all mathematical formulas (e.g., $...$ for inline, $$...$$ for block).
+    - Use double newlines to separate paragraphs for readability.
+3.  **Provide relevant formulas**: In the 'formulas' field, provide a list of important formulas related to the question's topic.
+    - Each formula must be formatted using LaTeX and be on a new line.
+    - This section must also be in the requested language.
 
 Image of the question is below:
 {{media url=photoDataUri}}

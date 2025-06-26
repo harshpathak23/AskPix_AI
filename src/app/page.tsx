@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -16,7 +16,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
-import type { GraphData } from '@/ai/schemas';
+import { MathRenderer } from '@/components/math-renderer';
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
@@ -27,7 +29,7 @@ type Language = 'en' | 'hi';
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('welcome');
   const [solution, setSolution] = useState<string | null>(null);
-  const [graphData, setGraphData] = useState<GraphData | null>(null);
+  const [formulas, setFormulas] = useState<string | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -128,7 +130,7 @@ export default function Home() {
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
-    setGraphData(null);
+    setFormulas(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -201,7 +203,7 @@ export default function Home() {
         setAppState('cropping');
       } else if (response.solution) {
         setSolution(response.solution);
-        setGraphData(response.graphData || null);
+        setFormulas(response.formulas || null);
         setAppState('result');
       }
     } catch (e) {
@@ -232,7 +234,7 @@ export default function Home() {
       // Keep previous solution steps visible on translation error
     } else if (response.solution) {
       setSolution(response.solution);
-      setGraphData(response.graphData || null);
+      setFormulas(response.formulas || null);
     }
     
     setIsTranslating(false);
@@ -506,10 +508,22 @@ export default function Home() {
             {isTranslating ? (
               <SolutionSkeleton />
             ) : solution ? (
-              <SolutionDisplay
-                solution={solution}
-                graphData={graphData}
-              />
+                <div className="space-y-6">
+                    <SolutionDisplay solution={solution} />
+                    {formulas && (
+                        <Card className="bg-card/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <NotebookText />
+                                    Key Formulas
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <MathRenderer text={formulas} />
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
             ) : !error ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[200px]">
                     <Bot size={48} className="mb-4 text-primary" />
