@@ -9,7 +9,7 @@ import { Logo } from '@/components/icons/logo';
 export default function SignupPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 p-4">
-      <Card className="w-full max-w-sm bg-slate-900/50 backdrop-blur-sm border-purple-900/50 text-slate-200">
+      <Card className="w-full max-w-sm bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border-purple-900/50 text-slate-200">
         <CardHeader className="text-center">
            <div className="flex flex-col items-center mb-6">
             <Logo className="h-[220px] w-[220px] mb-2" animated />
