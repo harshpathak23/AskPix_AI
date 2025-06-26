@@ -470,15 +470,26 @@ export default function Home() {
   );
   
   const renderSolvingScreen = () => (
-    <div className="w-full h-full flex flex-col items-center justify-center text-center p-8">
-      <Bot size={64} className="mb-6 text-primary animate-bounce" />
-      <h2 className="font-headline text-3xl font-bold tracking-tight">Solving your question...</h2>
-      <p className="mt-2 max-w-md text-lg text-muted-foreground">
-        Our AI tutor is analyzing the image. Please wait a few moments.
-      </p>
-      <div className="w-full max-w-lg mt-8">
-        <LoadingDots />
-      </div>
+    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4">
+        <div className="w-full aspect-video bg-muted border rounded-lg overflow-hidden relative flex items-center justify-center">
+            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
+        </div>
+        
+        <div className="w-full">
+            <Card className="min-h-[200px] bg-card/50 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Detailed Solution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LoadingDots className="justify-start" />
+                </CardContent>
+            </Card>
+        </div>
+
+        <Button onClick={handleStartScanning} variant="outline" className="w-full text-lg py-6" disabled>
+            <RefreshCw className="mr-2 h-5 w-5" />
+            Scan Another Question
+        </Button>
     </div>
   );
   
