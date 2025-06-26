@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { solveQuestion } from '@/ai/flows/solve-question';
-import type { SolveQuestionOutput } from '@/ai/schemas';
+import type { SolveQuestionOutput, GraphData } from '@/ai/schemas';
 
 const QuestionSchema = z.object({
   photoDataUri: z.string().startsWith('data:image/', { message: "Invalid image format." }),
@@ -13,6 +13,7 @@ const QuestionSchema = z.object({
 interface ActionState {
   error?: string | null;
   solution?: string | null;
+  graphData?: GraphData | null;
 }
 
 export async function getSolution(data: { photoDataUri: string, language: 'en' | 'hi', subject: 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' | 'General' }): Promise<ActionState> {
@@ -34,6 +35,7 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
     
     return { 
         solution: result.solution,
+        graphData: result.graph || null,
     };
 
   } catch (e) {

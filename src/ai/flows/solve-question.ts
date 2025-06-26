@@ -18,11 +18,15 @@ export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQue
   return solveQuestionFlow(input);
 }
 
-// It specifies a stable vision model and does not request a specific JSON output format, which is more robust.
+// It specifies a stable vision model and requests a specific JSON output format.
 const solveQuestionPrompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
   model: 'googleai/gemini-2.0-flash',
   input: {schema: SolveQuestionInputSchema},
+  output: {
+    format: 'json',
+    schema: SolveQuestionOutputSchema
+  },
   config: {
     temperature: 0.2,
   },
@@ -33,6 +37,9 @@ Your entire response MUST be in the language with this code: {{{language}}}.
 Analyze the image to understand the full question, including any text, diagrams, or formulas.
 Provide a clear, detailed, step-by-step solution to the question.
 Use LaTeX for all mathematical formulas (e.g., $...$ for inline, $$...$$ for block).
+Use double newlines to separate paragraphs.
+
+If the question involves data that can be visualized as a bar chart, generate the data for the chart and include it in the 'graph' field of your response. For example, if comparing quantities, show them in a bar chart. If no chart is relevant, do not include the 'graph' field.
 
 Image of the question is below:
 {{media url=photoDataUri}}
@@ -46,17 +53,10 @@ const solveQuestionFlow = ai.defineFlow(
     outputSchema: SolveQuestionOutputSchema,
   },
   async (input) => {
-    // Generate raw text from the model using the simplified prompt
-    const response = await solveQuestionPrompt(input);
-    const solutionText = response.text;
-
-    if (!solutionText) {
+    const {output} = await solveQuestionPrompt(input);
+    if (!output) {
       throw new Error('Failed to process the image. The AI could not generate a response. Please try again.');
     }
-
-    // Manually construct the object to match the flow's required output schema
-    return {
-      solution: solutionText,
-    };
+    return output;
   },
 );

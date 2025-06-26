@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
+import type { GraphData } from '@/ai/schemas';
 
 // Define the states for our app's screen flow
 type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
@@ -26,6 +27,7 @@ type Language = 'en' | 'hi';
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('welcome');
   const [solution, setSolution] = useState<string | null>(null);
+  const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -126,6 +128,7 @@ export default function Home() {
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
+    setGraphData(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -198,6 +201,7 @@ export default function Home() {
         setAppState('cropping');
       } else if (response.solution) {
         setSolution(response.solution);
+        setGraphData(response.graphData || null);
         setAppState('result');
       }
     } catch (e) {
@@ -228,6 +232,7 @@ export default function Home() {
       // Keep previous solution steps visible on translation error
     } else if (response.solution) {
       setSolution(response.solution);
+      setGraphData(response.graphData || null);
     }
     
     setIsTranslating(false);
@@ -503,6 +508,7 @@ export default function Home() {
             ) : solution ? (
               <SolutionDisplay
                 solution={solution}
+                graphData={graphData}
               />
             ) : !error ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-card border shadow-sm min-h-[200px]">
