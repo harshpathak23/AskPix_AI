@@ -589,11 +589,11 @@ export default function Home() {
         </div>
 
         <div className="flex w-full gap-4">
-          <Button onClick={handleStartScanning} variant="outline" className="w-full">
+          <Button onClick={handleStartScanning} variant="secondary" className="w-full whitespace-normal h-auto">
               <RefreshCw className="h-4 w-4" />
-              Scan Another
+              Scan Another Question
           </Button>
-          <Button asChild className="w-full animate-pulse-glow">
+          <Button asChild className="w-full h-auto animate-pulse-glow">
             <Link href="/login">
               <Download className="h-4 w-4" />
               Download PDF
