@@ -585,7 +585,7 @@ export default function Home() {
             ) : null}
         </div>
 
-        <Button onClick={handleStartScanning} variant="secondary" className="w-full text-lg py-6">
+        <Button onClick={handleStartScanning} className="w-full text-lg py-6">
             <RefreshCw className="mr-2 h-5 w-5" />
             Scan Another Question
         </Button>
