@@ -60,18 +60,22 @@ export default function ProfilePage() {
 
                 try {
                     setSolutionsLoading(true);
-                    const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid));
+                    // Optimized query to fetch and order solutions by creation date
+                    const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
                     const querySnapshot = await getDocs(q);
                     const fetchedSolutions = querySnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data(),
                     })) as SavedSolution[];
                     
-                    fetchedSolutions.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
-
                     setSolutions(fetchedSolutions);
                 } catch (error) {
                     console.error("Error fetching solutions: ", error);
+                    toast({
+                        title: "Could not load solutions",
+                        description: "There was an error fetching your saved solutions. It might be a permission issue. See console for details.",
+                        variant: "destructive"
+                    });
                 } finally {
                     setSolutionsLoading(false);
                 }
@@ -82,7 +86,7 @@ export default function ProfilePage() {
         });
 
         return () => unsubscribe();
-    }, [router]);
+    }, [router, toast]);
 
     const handleNameUpdate = async () => {
         if (!user || !newName.trim()) {
@@ -237,7 +241,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-6 mb-8">
              <div className="relative group">
                 <Avatar className="w-20 h-20 text-lg border-2 border-primary/50">
-                    <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || 'User'} />
+                    {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />}
                     <AvatarFallback>
                         <User className="w-10 h-10" />
                     </AvatarFallback>
