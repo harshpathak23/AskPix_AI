@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Mail, KeyRound, Loader2 } from 'lucide-react';
+import { Mail, KeyRound, Loader2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword, AuthError } from 'firebase/auth';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const LoginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -30,12 +33,30 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setError(null);
-    console.log('Login submitted with:', data);
-    // Simulate API call to your authentication service
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // In a real app, you would handle success/error from your auth service.
-    // For now, we'll just redirect to the profile page on success.
-    router.push('/profile');
+    try {
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      router.push('/profile');
+    } catch (e) {
+      const authError = e as AuthError;
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      switch (authError.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+            errorMessage = 'Invalid email or password. Please try again.';
+            break;
+        case 'auth/invalid-email':
+            errorMessage = 'Please enter a valid email address.';
+            break;
+        case 'auth/user-disabled':
+            errorMessage = 'This account has been disabled.';
+            break;
+        default:
+            console.error(authError);
+            break;
+      }
+      setError(errorMessage);
+    }
   };
 
   return (
@@ -52,6 +73,13 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4 bg-red-900/50 border-red-500/50 text-white">
+                <XCircle className="h-4 w-4" />
+                <AlertTitle>Login Failed</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-slate-400">Email</Label>
