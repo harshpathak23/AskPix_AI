@@ -2,18 +2,19 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, FileText, LogOut, User, Loader2, Home } from "lucide-react";
+import { Download, LogOut, User, Loader2, Home, Pencil } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
+import { signOut, updateProfile } from "firebase/auth";
 import { useEffect, useState } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
-import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, Timestamp, orderBy } from "firebase/firestore";
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
-
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 interface SavedSolution {
     id: string;
@@ -27,13 +28,17 @@ interface SavedSolution {
     createdAt: Timestamp;
 }
 
-
 export default function ProfilePage() {
     const router = useRouter();
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [solutions, setSolutions] = useState<SavedSolution[]>([]);
     const [loading, setLoading] = useState(true);
     const [solutionsLoading, setSolutionsLoading] = useState(true);
+
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [newName, setNewName] = useState("");
+    const [isSavingName, setIsSavingName] = useState(false);
+    const { toast } = useToast();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
@@ -46,6 +51,8 @@ export default function ProfilePage() {
                 }
 
                 setUser(currentUser);
+                setNewName(currentUser.displayName || "");
+
                 try {
                     setSolutionsLoading(true);
                     const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid));
@@ -71,6 +78,25 @@ export default function ProfilePage() {
 
         return () => unsubscribe();
     }, [router]);
+
+    const handleNameUpdate = async () => {
+        if (!user || !newName.trim()) {
+            toast({ title: "Error", description: "Name cannot be empty.", variant: "destructive" });
+            return;
+        }
+        setIsSavingName(true);
+        try {
+            await updateProfile(user, { displayName: newName.trim() });
+            setUser(prevUser => prevUser ? { ...prevUser, displayName: newName.trim() } : null);
+            toast({ title: "Success", description: "Your name has been updated." });
+            setIsEditingName(false);
+        } catch (error) {
+            console.error("Error updating profile name:", error);
+            toast({ title: "Error", description: "Failed to update your name.", variant: "destructive" });
+        } finally {
+            setIsSavingName(false);
+        }
+    };
 
 
     const handleDownload = async (solution: SavedSolution) => {
@@ -186,7 +212,31 @@ export default function ProfilePage() {
         <div className="flex items-center gap-4 mb-8">
             <User className="w-12 h-12 p-2.5 rounded-full bg-primary/20 text-primary" />
             <div>
-                <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
+                 {isEditingName ? (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <Input 
+                            type="text" 
+                            value={newName} 
+                            onChange={(e) => setNewName(e.target.value)}
+                            placeholder="Enter your name"
+                            className="bg-slate-800/70 border-slate-700 text-base"
+                            onKeyDown={(e) => e.key === 'Enter' && handleNameUpdate()}
+                        />
+                        <div className="flex gap-2">
+                            <Button onClick={handleNameUpdate} disabled={isSavingName} size="sm">
+                                {isSavingName ? <Loader2 className="animate-spin" /> : "Save"}
+                            </Button>
+                            <Button variant="ghost" onClick={() => setIsEditingName(false)} size="sm">Cancel</Button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditingName(true)}>
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
                 <p className="text-slate-400 mt-1">{user?.email}</p>
             </div>
         </div>
