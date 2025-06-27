@@ -3,10 +3,6 @@
 import { z } from 'zod';
 import { solveQuestion } from '@/ai/flows/solve-question';
 import { identifySubject } from '@/ai/flows/identify-question-subject';
-import type { SolveQuestionOutput, IdentifySubjectOutput } from '@/ai/schemas';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-
 
 const QuestionSchema = z.object({
   photoDataUri: z.string().startsWith('data:image/', { message: "Invalid image format." }),
@@ -59,51 +55,14 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
         if (e.message.includes('fetch failed')) {
             return { error: 'Could not connect to the AI service. Please ensure the server is running and try again.' };
         }
+        if (e.message.includes('permission-denied') || e.message.includes('PERMISSION_DENIED')) {
+             return { error: 'Permission denied. Please double-check your Firestore security rules to ensure they allow writes for authenticated users.' };
+        }
+        if (e.message.includes('longer than') && e.message.includes('bytes')) {
+            return { error: 'Image file is too large to save. Please try cropping a smaller area.' };
+        }
         return { error: e.message };
     }
     return { error: 'An unexpected error occurred. Please try again.' };
   }
-}
-
-
-const SaveSolutionSchema = z.object({
-  userId: z.string().min(1),
-  croppedImage: z.string().startsWith('data:image/'),
-  solution: z.string().min(1),
-  formulas: z.string().optional().nullable(),
-  subject: z.string(),
-  identifiedSubject: z.string(),
-  language: z.string(),
-});
-
-export async function saveSolution(data: z.infer<typeof SaveSolutionSchema>): Promise<{success?: boolean; error?: string}> {
-    const validatedFields = SaveSolutionSchema.safeParse(data);
-
-    if (!validatedFields.success) {
-        console.error("SaveSolution validation error:", validatedFields.error.flatten());
-        return { error: 'Invalid data provided for saving.' };
-    }
-
-    try {
-        await addDoc(collection(db, 'solutions'), {
-            ...validatedFields.data,
-            createdAt: serverTimestamp(),
-        });
-        return { success: true };
-    } catch(e) {
-        console.error("Error saving solution to Firestore: ", e);
-        if (e instanceof Error) {
-            if (e.message.includes('permission-denied') || e.message.includes('PERMISSION_DENIED')) {
-                 return { error: 'Permission denied. Please double-check your Firestore security rules to ensure they allow writes for authenticated users.' };
-            }
-            if (e.message.includes('longer than') && e.message.includes('bytes')) {
-                return { error: 'Image file is too large to save. Please try cropping a smaller area.' };
-            }
-            if (e.message.includes('fetch failed')) {
-                return { error: 'Could not connect to the database. Please check your network and Firebase setup.' };
-            }
-            return { error: `A database error occurred: ${e.message}` };
-        }
-        return { error: 'An unexpected error occurred while saving. Please try again.' };
-    }
 }

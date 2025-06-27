@@ -9,7 +9,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 
 
 import { Button } from '@/components/ui/button';
-import { getSolution, saveSolution } from './actions';
+import { getSolution } from './actions';
 import { Logo } from '@/components/icons/logo';
 import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -19,9 +19,10 @@ import { Slider } from '@/components/ui/slider';
 import { MathRenderer } from '@/components/math-renderer';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { LoadingDots } from '@/components/loading-dots';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { collection, addDoc, serverTimestamp, FirestoreError } from 'firebase/firestore';
 
 
 // Define the states for our app's screen flow
@@ -344,26 +345,40 @@ export default function Home() {
 
     setIsSaving(true);
     try {
-      const result = await saveSolution({
-          userId: user.uid,
-          croppedImage,
-          solution,
-          formulas,
-          subject,
-          identifiedSubject: identifiedSubject || subject,
-          language,
-      });
-
-      if (result.success) {
-          toast({ title: "Success!", description: "Solution saved to your profile." });
-      } else {
-          toast({ title: "Save Failed", description: result.error, variant: "destructive" });
-      }
+        await addDoc(collection(db, 'solutions'), {
+            userId: user.uid,
+            croppedImage,
+            solution,
+            formulas,
+            subject,
+            identifiedSubject: identifiedSubject || subject,
+            language,
+            createdAt: serverTimestamp(),
+        });
+        toast({ title: "Success!", description: "Solution saved to your profile." });
     } catch (e) {
-      console.error("Failed to execute saveSolution action:", e);
-      toast({ title: "An unexpected error occurred", description: "Could not communicate with the server.", variant: "destructive" });
+        console.error("Error saving solution to Firestore: ", e);
+        let title = "Save Failed";
+        let description = "An unexpected error occurred while saving.";
+
+        if (e instanceof FirestoreError) {
+            switch(e.code) {
+                case 'permission-denied':
+                    description = 'Permission denied. Please check your Firestore security rules.';
+                    break;
+                case 'resource-exhausted':
+                case 'invalid-argument': // Firestore uses invalid-argument for too large documents
+                    description = 'Image file is too large to save. Please try cropping a smaller area.';
+                    break;
+                case 'unauthenticated':
+                    description = 'You must be logged in to save solutions.';
+                    break;
+            }
+        }
+        
+        toast({ title, description, variant: "destructive" });
     } finally {
-      setIsSaving(false);
+        setIsSaving(false);
     }
   };
 
