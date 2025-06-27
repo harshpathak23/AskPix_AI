@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2 } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, User } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -20,9 +20,11 @@ import { MathRenderer } from '@/components/math-renderer';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { LoadingDots } from '@/components/loading-dots';
 import { auth, db } from '@/lib/firebase';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { collection, addDoc, serverTimestamp, FirestoreError } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { ToastAction } from '@/components/ui/toast';
 
 
 // Define the states for our app's screen flow
@@ -48,9 +50,11 @@ export default function Home() {
   const [zoomSupported, setZoomSupported] = useState(false);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [solutionSaved, setSolutionSaved] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -151,6 +155,7 @@ export default function Home() {
     setLanguage('en');
     setCrop(undefined);
     setIdentifiedSubject(null);
+    setSolutionSaved(false);
     await startCamera();
   };
 
@@ -355,7 +360,16 @@ export default function Home() {
             language,
             createdAt: serverTimestamp(),
         });
-        toast({ title: "Success!", description: "Solution saved to your profile." });
+        setSolutionSaved(true);
+        toast({ 
+            title: "Success!", 
+            description: "Solution saved to your profile.",
+            action: (
+              <ToastAction altText="View Profile" onClick={() => router.push('/profile')}>
+                View Profile
+              </ToastAction>
+            ),
+        });
     } catch (e) {
         console.error("Error saving solution to Firestore: ", e);
         let title = "Save Failed";
@@ -659,7 +673,14 @@ export default function Home() {
               <RefreshCw className="h-4 w-4" />
               Scan Another Question
           </Button>
-          {user ? (
+          {solutionSaved ? (
+            <Button asChild className="w-full h-auto">
+              <Link href="/profile">
+                <User className="h-4 w-4" />
+                View Profile
+              </Link>
+            </Button>
+          ) : user ? (
             <Button onClick={handleSaveSolution} disabled={isSaving} className="w-full h-auto">
               {isSaving ? <Loader2 className="animate-spin" /> : <Download className="h-4 w-4" />}
               Save Solution
