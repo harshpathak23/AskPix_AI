@@ -363,8 +363,8 @@ export default function Home() {
 
     setIsSaving(true);
     try {
-        await addDoc(collection(db, 'solutions'), {
-            userId: user.uid,
+        // NEW: Save to a subcollection under the user's ID
+        await addDoc(collection(db, 'users', user.uid, 'solutions'), {
             croppedImage,
             solution,
             formulas,

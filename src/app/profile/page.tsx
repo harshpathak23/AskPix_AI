@@ -10,7 +10,7 @@ import { auth, db, storage } from "@/lib/firebase";
 import { signOut, updateProfile } from "firebase/auth";
 import { useEffect, useState, useRef } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
-import { collection, query, where, getDocs, Timestamp, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, Timestamp, orderBy } from "firebase/firestore";
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,6 @@ interface SavedSolution {
     subject: string;
     identifiedSubject: string;
     language: string;
-    userId: string;
     createdAt: Timestamp;
 }
 
@@ -46,7 +45,7 @@ export default function ProfilePage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((currentUser) => {
             if (currentUser) {
                 if (!currentUser.emailVerified) {
                     router.push('/verify-email');
@@ -55,8 +54,11 @@ export default function ProfilePage() {
                 
                 setUser(currentUser);
                 setNewName(currentUser.displayName || "");
+                setLoading(false);
 
-                const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid));
+                // NEW: Fetch from the user's dedicated subcollection
+                const solutionsColl = collection(db, "users", currentUser.uid, "solutions");
+                const q = query(solutionsColl, orderBy("createdAt", "desc"));
                 
                 const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
                     const fetchedSolutions = querySnapshot.docs.map(doc => ({
@@ -64,8 +66,6 @@ export default function ProfilePage() {
                         ...doc.data(),
                     })) as SavedSolution[];
                     
-                    fetchedSolutions.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
-
                     setSolutions(fetchedSolutions);
                     setSolutionsLoading(false);
                 }, (error) => {
@@ -78,7 +78,6 @@ export default function ProfilePage() {
                      setSolutionsLoading(false);
                 });
                 
-                setLoading(false);
                 return () => unsubscribeSnapshot();
             } else {
                 router.push('/login');
@@ -86,7 +85,7 @@ export default function ProfilePage() {
             }
         });
 
-        return () => unsubscribe();
+        return () => unsubscribeAuth();
     }, [router, toast]);
     
     const handleNameUpdate = async () => {
