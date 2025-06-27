@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { createUserWithEmailAndPassword, AuthError } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, AuthError } from 'firebase/auth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const SignupSchema = z.object({
@@ -36,7 +36,12 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupFormValues) => {
     setError(null);
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      if (userCredential.user) {
+        await updateProfile(userCredential.user, {
+            displayName: data.name
+        });
+      }
       router.push('/profile');
     } catch (e) {
       const authError = e as AuthError;

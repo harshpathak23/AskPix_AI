@@ -40,12 +40,17 @@ export default function ProfilePage() {
                 setUser(user);
                 try {
                     setSolutionsLoading(true);
-                    const q = query(collection(db, "solutions"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+                    // Simplified query to avoid needing a composite index, then sort on the client
+                    const q = query(collection(db, "solutions"), where("userId", "==", user.uid));
                     const querySnapshot = await getDocs(q);
                     const fetchedSolutions = querySnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data(),
                     })) as SavedSolution[];
+                    
+                    // Sort by creation date descending (newest first)
+                    fetchedSolutions.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
                     setSolutions(fetchedSolutions);
                 } catch (error) {
                     console.error("Error fetching solutions: ", error);
@@ -178,7 +183,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-4 mb-8">
             <User className="w-12 h-12 p-2.5 rounded-full bg-primary/20 text-primary" />
             <div>
-                <h1 className="text-3xl font-bold text-slate-100">My Profile</h1>
+                <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || 'My Profile'}</h1>
                 <p className="text-slate-400 mt-1">{user?.email}</p>
             </div>
         </div>
