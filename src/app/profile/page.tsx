@@ -172,7 +172,6 @@ export default function ProfilePage() {
         <header className="flex justify-between items-center mb-8">
             <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
                 <Logo className="h-8 w-8" />
-                <span>ScanSolve AI</span>
             </Link>
             <div className="flex items-center gap-4">
                 <Button variant="ghost" onClick={handleLogout}>
@@ -184,7 +183,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-4 mb-8">
             <User className="w-12 h-12 p-2.5 rounded-full bg-primary/20 text-primary" />
             <div>
-                <h1 className="text-3xl font-bold text-slate-100">{user?.displayName}</h1>
+                <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
                 <p className="text-slate-400 mt-1">{user?.email}</p>
             </div>
         </div>
