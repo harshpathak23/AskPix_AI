@@ -2,19 +2,21 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, LogOut, User, Loader2, Home, Pencil } from "lucide-react";
+import { Camera, Download, LogOut, User, Loader2, Home, Pencil } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
-import { auth, db } from "@/lib/firebase";
+import { auth, db, storage } from "@/lib/firebase";
 import { signOut, updateProfile } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
 import { collection, query, where, getDocs, Timestamp, orderBy } from "firebase/firestore";
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface SavedSolution {
     id: string;
@@ -39,6 +41,9 @@ export default function ProfilePage() {
     const [newName, setNewName] = useState("");
     const [isSavingName, setIsSavingName] = useState(false);
     const { toast } = useToast();
+
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
@@ -95,6 +100,26 @@ export default function ProfilePage() {
             toast({ title: "Error", description: "Failed to update your name.", variant: "destructive" });
         } finally {
             setIsSavingName(false);
+        }
+    };
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!user || !event.target.files || event.target.files.length === 0) return;
+        const file = event.target.files[0];
+        const storageRef = ref(storage, `profile-pictures/${user.uid}`);
+    
+        setIsUploading(true);
+        try {
+            await uploadBytes(storageRef, file);
+            const photoURL = await getDownloadURL(storageRef);
+            await updateProfile(user, { photoURL });
+            setUser(prevUser => prevUser ? { ...prevUser, photoURL } : null);
+            toast({ title: "Success", description: "Profile picture updated!" });
+        } catch (error) {
+            console.error("Error uploading profile picture:", error);
+            toast({ title: "Error", description: "Failed to upload picture.", variant: "destructive" });
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -209,8 +234,31 @@ export default function ProfilePage() {
             </div>
         </header>
         
-        <div className="flex items-center gap-4 mb-8">
-            <User className="w-12 h-12 p-2.5 rounded-full bg-primary/20 text-primary" />
+        <div className="flex items-center gap-6 mb-8">
+             <div className="relative group">
+                <Avatar className="w-20 h-20 text-lg border-2 border-primary/50">
+                    <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || 'User'} />
+                    <AvatarFallback>
+                        <User className="w-10 h-10" />
+                    </AvatarFallback>
+                </Avatar>
+                <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    disabled={isUploading}
+                    aria-label="Upload profile picture"
+                >
+                    {isUploading ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Camera className="w-6 h-6 text-white" />}
+                </button>
+                <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleImageUpload}
+                    className="hidden" 
+                    accept="image/png, image/jpeg" 
+                />
+            </div>
+
             <div>
                  {isEditingName ? (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
