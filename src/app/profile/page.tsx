@@ -60,20 +60,23 @@ export default function ProfilePage() {
 
                 try {
                     setSolutionsLoading(true);
-                    // Optimized query to fetch and order solutions by creation date
-                    const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
+                    // Fetch solutions without ordering from Firestore to avoid index requirement
+                    const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid));
                     const querySnapshot = await getDocs(q);
                     const fetchedSolutions = querySnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data(),
                     })) as SavedSolution[];
                     
+                    // Sort solutions by date on the client-side
+                    fetchedSolutions.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+                    
                     setSolutions(fetchedSolutions);
                 } catch (error) {
                     console.error("Error fetching solutions: ", error);
                     toast({
                         title: "Could not load solutions",
-                        description: "There was an error fetching your saved solutions. It might be a permission issue. See console for details.",
+                        description: "There was an error fetching your saved solutions. Please check your security rules and console for details.",
                         variant: "destructive"
                     });
                 } finally {
@@ -99,7 +102,7 @@ export default function ProfilePage() {
             setUser(prevUser => prevUser ? { ...prevUser, displayName: newName.trim() } : null);
             toast({ title: "Success", description: "Your name has been updated." });
             setIsEditingName(false);
-        } catch (error) {
+        } catch (error)_ {
             console.error("Error updating profile name:", error);
             toast({ title: "Error", description: "Failed to update your name.", variant: "destructive" });
         } finally {
@@ -121,7 +124,7 @@ export default function ProfilePage() {
             toast({ title: "Success", description: "Profile picture updated!" });
         } catch (error) {
             console.error("Error uploading profile picture:", error);
-            toast({ title: "Error", description: "Failed to upload picture.", variant: "destructive" });
+            toast({ title: "Error", description: "Failed to upload picture. This is often a security rule issue.", variant: "destructive" });
         } finally {
             setIsUploading(false);
         }
@@ -241,7 +244,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-6 mb-8">
              <div className="relative group">
                 <Avatar className="w-20 h-20 text-lg border-2 border-primary/50">
-                    {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />}
+                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
                     <AvatarFallback>
                         <User className="w-10 h-10" />
                     </AvatarFallback>
