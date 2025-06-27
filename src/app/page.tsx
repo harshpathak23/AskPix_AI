@@ -9,7 +9,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
 
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { getSolution } from './actions';
 import { Logo } from '@/components/icons/logo';
 import { SolutionDisplay } from '@/components/solution-display';
@@ -709,42 +709,38 @@ export default function Home() {
         ? "flex flex-col items-center justify-center p-4" 
         : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
     )}>
-       {appState !== 'welcome' && (
-         <header className="w-full max-w-3xl mx-auto py-4 px-4 sm:px-0 flex justify-between items-center text-slate-200">
-            <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => appState !== 'welcome' && setAppState('welcome')}>
-                <Logo className="h-8 w-8" />
-                <span className="hidden sm:inline">ScanSolve AI</span>
-            </Link>
-            <div>
-                {user ? (
-                    <div className="flex items-center gap-2 sm:gap-4">
-                        <Button asChild variant="ghost" className="px-2 sm:px-4">
-                            <Link href="/profile" className="flex items-center gap-2">
-                                <User className="h-5 w-5" />
-                                <span className="hidden sm:inline">{user.email}</span>
-                            </Link>
-                        </Button>
-                        <Button variant="secondary" size="sm" onClick={handleLogout}>
-                            <LogOut className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Logout</span>
-                        </Button>
-                    </div>
-                ) : (
-                    <Button asChild>
-                        <Link href="/login">Login / Sign Up</Link>
-                    </Button>
-                )}
-            </div>
-        </header>
-       )}
-
       {appState === 'welcome' && renderWelcomeScreen()}
       
       {appState !== 'welcome' && (
         <div className={cn(
-          "w-full shadow-sm flex flex-1 flex-col rounded-t-xl mt-4",
-          "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900"
+          "w-full shadow-sm flex flex-1 flex-col mt-4",
+          "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-t-xl"
         )}>
+           <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
+              <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => appState !== 'welcome' && setAppState('welcome')}>
+                  <Logo className="h-8 w-8" />
+                  <span className="hidden sm:inline">ScanSolve AI</span>
+              </Link>
+              <div>
+                  {user ? (
+                      <div className="flex items-center gap-2 sm:gap-4">
+                          <Link href="/profile" className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2 px-2 sm:px-4")}>
+                              <User className="h-5 w-5" />
+                              <span className="hidden sm:inline">{user.email}</span>
+                          </Link>
+                          <Button variant="secondary" size="sm" onClick={handleLogout}>
+                              <LogOut className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Logout</span>
+                          </Button>
+                      </div>
+                  ) : (
+                      <Button asChild>
+                          <Link href="/login">Login / Sign Up</Link>
+                      </Button>
+                  )}
+              </div>
+          </header>
+          
           {appState === 'scanning' && renderScanningScreen()}
           {appState === 'cropping' && renderCroppingScreen()}
           {appState === 'solving' && renderSolvingScreen()}
