@@ -41,6 +41,9 @@ const identifySubjectFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('Failed to identify the subject from the image. The AI could not generate a response.');
+    }
+    return output;
   }
 );

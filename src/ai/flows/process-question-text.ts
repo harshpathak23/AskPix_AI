@@ -44,6 +44,9 @@ const processQuestionTextFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('Failed to process the question text. The AI could not generate a response.');
+    }
+    return output;
   }
 );
