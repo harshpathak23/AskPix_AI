@@ -22,14 +22,18 @@ const prompt = ai.definePrompt({
   name: 'identifySubjectPrompt',
   model: 'googleai/gemini-2.0-flash',
   input: {schema: IdentifySubjectInputSchema},
-  output: {schema: IdentifySubjectOutputSchema},
+  output: {
+    format: 'json',
+    schema: IdentifySubjectOutputSchema
+  },
   prompt: `You are an expert at identifying the subject of academic questions.
   Analyze the provided image and determine its subject.
   The possible subjects are: Mathematics, Physics, Chemistry, Biology, General.
 
   Image: {{media url=photoDataUri}}
 
-  Return only the subject name in the output.`,
+  You must respond with a JSON object containing a single key "subject" with one of the possible subject values.
+  For example: {"subject": "Mathematics"}`,
 });
 
 
