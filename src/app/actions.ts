@@ -94,9 +94,8 @@ export async function saveSolution(data: z.infer<typeof SaveSolutionSchema>): Pr
         console.error("Error saving solution to Firestore: ", e);
         if (e instanceof Error) {
             if (e.message.includes('permission-denied') || e.message.includes('PERMISSION_DENIED')) {
-                 return { error: 'Permission denied. Please check your Firestore security rules to allow writes.' };
+                 return { error: 'Permission denied. Please double-check your Firestore security rules to ensure they allow writes for authenticated users.' };
             }
-            // Better check for the document size limit error.
             if (e.message.includes('longer than') && e.message.includes('bytes')) {
                 return { error: 'Image file is too large to save. Please try cropping a smaller area.' };
             }
