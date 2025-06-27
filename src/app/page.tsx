@@ -2,16 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
 
 import { Button } from '@/components/ui/button';
-import { getSolution } from './actions';
+import { getSolution, saveSolution } from './actions';
 import { Logo } from '@/components/icons/logo';
-import { SolutionSkeleton } from '@/components/solution-skeleton';
 import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,6 +19,9 @@ import { Slider } from '@/components/ui/slider';
 import { MathRenderer } from '@/components/math-renderer';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { LoadingDots } from '@/components/loading-dots';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
 
 
 // Define the states for our app's screen flow
@@ -45,11 +47,21 @@ export default function Home() {
   const [zoomSupported, setZoomSupported] = useState(false);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [user, setUser] = useState<User | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // This effect now ONLY handles cleaning up the camera stream when leaving the scanning screen.
   useEffect(() => {
@@ -316,6 +328,35 @@ export default function Home() {
     );
     setCrop(crop);
   }
+
+  const handleSaveSolution = async () => {
+    if (!user) {
+        toast({ title: "Login Required", description: "Please log in to save your solutions.", variant: "destructive" });
+        return;
+    }
+    if (!croppedImage || !solution) {
+        toast({ title: "Error", description: "No solution to save.", variant: "destructive" });
+        return;
+    }
+
+    setIsSaving(true);
+    const result = await saveSolution({
+        userId: user.uid,
+        croppedImage,
+        solution,
+        formulas,
+        subject,
+        identifiedSubject: identifiedSubject || subject,
+        language,
+    });
+    setIsSaving(false);
+
+    if (result.success) {
+        toast({ title: "Success!", description: "Solution saved to your profile." });
+    } else {
+        toast({ title: "Save Failed", description: result.error, variant: "destructive" });
+    }
+  };
 
   const renderWelcomeScreen = () => (
     <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
@@ -594,12 +635,19 @@ export default function Home() {
               <RefreshCw className="h-4 w-4" />
               Scan Another Question
           </Button>
-          <Button asChild className="w-full h-auto animate-pulse-glow">
-            <Link href="/login">
-              <Download className="h-4 w-4" />
-              Download PDF
-            </Link>
-          </Button>
+          {user ? (
+            <Button onClick={handleSaveSolution} disabled={isSaving} className="w-full h-auto">
+              {isSaving ? <Loader2 className="animate-spin" /> : <Download className="h-4 w-4" />}
+              Save Solution
+            </Button>
+          ) : (
+            <Button asChild className="w-full h-auto animate-pulse-glow">
+              <Link href="/login">
+                <Download className="h-4 w-4" />
+                Login to Save PDF
+              </Link>
+            </Button>
+          )}
         </div>
     </div>
   );

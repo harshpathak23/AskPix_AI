@@ -4,6 +4,9 @@ import { z } from 'zod';
 import { solveQuestion } from '@/ai/flows/solve-question';
 import { identifySubject } from '@/ai/flows/identify-question-subject';
 import type { SolveQuestionOutput, IdentifySubjectOutput } from '@/ai/schemas';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
 
 const QuestionSchema = z.object({
   photoDataUri: z.string().startsWith('data:image/', { message: "Invalid image format." }),
@@ -60,4 +63,34 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
     }
     return { error: 'An unexpected error occurred. Please try again.' };
   }
+}
+
+
+const SaveSolutionSchema = z.object({
+  userId: z.string().min(1),
+  croppedImage: z.string().startsWith('data:image/'),
+  solution: z.string().min(1),
+  formulas: z.string().optional().nullable(),
+  subject: z.string(),
+  identifiedSubject: z.string(),
+  language: z.string(),
+});
+
+export async function saveSolution(data: z.infer<typeof SaveSolutionSchema>): Promise<{success?: boolean; error?: string}> {
+    const validatedFields = SaveSolutionSchema.safeParse(data);
+
+    if (!validatedFields.success) {
+        return { error: 'Invalid data provided for saving.' };
+    }
+
+    try {
+        await addDoc(collection(db, 'solutions'), {
+            ...validatedFields.data,
+            createdAt: serverTimestamp(),
+        });
+        return { success: true };
+    } catch(e) {
+        console.error("Error saving solution to Firestore: ", e);
+        return { error: 'Could not save the solution to your profile. Please try again.' };
+    }
 }
