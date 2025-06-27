@@ -184,7 +184,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-4 mb-8">
             <User className="w-12 h-12 p-2.5 rounded-full bg-primary/20 text-primary" />
             <div>
-                <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || 'My Profile'}</h1>
+                <h1 className="text-3xl font-bold text-slate-100">{user?.displayName}</h1>
                 <p className="text-slate-400 mt-1">{user?.email}</p>
             </div>
         </div>
@@ -221,7 +221,7 @@ export default function ProfilePage() {
                                </div>
                                <Button size="sm" onClick={() => handleDownload(file)} className="self-end sm:self-center">
                                     <Download className="mr-2 h-4 w-4"/>
-                                    Download
+                                    Download Pdf
                                </Button>
                             </li>
                         ))}
