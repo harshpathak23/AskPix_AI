@@ -340,21 +340,27 @@ export default function Home() {
     }
 
     setIsSaving(true);
-    const result = await saveSolution({
-        userId: user.uid,
-        croppedImage,
-        solution,
-        formulas,
-        subject,
-        identifiedSubject: identifiedSubject || subject,
-        language,
-    });
-    setIsSaving(false);
+    try {
+      const result = await saveSolution({
+          userId: user.uid,
+          croppedImage,
+          solution,
+          formulas,
+          subject,
+          identifiedSubject: identifiedSubject || subject,
+          language,
+      });
 
-    if (result.success) {
-        toast({ title: "Success!", description: "Solution saved to your profile." });
-    } else {
-        toast({ title: "Save Failed", description: result.error, variant: "destructive" });
+      if (result.success) {
+          toast({ title: "Success!", description: "Solution saved to your profile." });
+      } else {
+          toast({ title: "Save Failed", description: result.error, variant: "destructive" });
+      }
+    } catch (e) {
+      console.error("Failed to execute saveSolution action:", e);
+      toast({ title: "An unexpected error occurred", description: "Could not communicate with the server.", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
     }
   };
 
