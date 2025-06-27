@@ -36,20 +36,25 @@ export default function ProfilePage() {
     const [solutionsLoading, setSolutionsLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                setUser(user);
+        const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+            if (currentUser) {
+                await currentUser.reload();
+                
+                if (!currentUser.emailVerified) {
+                    router.push('/verify-email');
+                    return;
+                }
+
+                setUser(currentUser);
                 try {
                     setSolutionsLoading(true);
-                    // Simplified query to avoid needing a composite index, then sort on the client
-                    const q = query(collection(db, "solutions"), where("userId", "==", user.uid));
+                    const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid));
                     const querySnapshot = await getDocs(q);
                     const fetchedSolutions = querySnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data(),
                     })) as SavedSolution[];
                     
-                    // Sort by creation date descending (newest first)
                     fetchedSolutions.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
                     setSolutions(fetchedSolutions);
@@ -64,7 +69,6 @@ export default function ProfilePage() {
             setLoading(false);
         });
 
-        // Cleanup subscription on unmount
         return () => unsubscribe();
     }, [router]);
 
@@ -87,7 +91,7 @@ export default function ProfilePage() {
             img.src = imgData;
             await new Promise(resolve => {
                 img.onload = resolve;
-                img.onerror = () => resolve(null); // Resolve on error too
+                img.onerror = () => resolve(null);
             });
             
             const imgWidth = doc.internal.pageSize.getWidth() - (margin * 2);
@@ -106,7 +110,6 @@ export default function ProfilePage() {
             yPos += 10;
         }
     
-        // Ensure yPos is on the current page before adding more content
         const checkPageBreak = () => {
           if (yPos > pageHeight - margin) {
             doc.addPage();
@@ -126,7 +129,7 @@ export default function ProfilePage() {
         for (const line of solutionLines) {
             checkPageBreak();
             doc.text(line, margin, yPos);
-            yPos += 7; // line height
+            yPos += 7;
         }
         
         yPos += 10;
@@ -158,7 +161,7 @@ export default function ProfilePage() {
         }
     };
     
-    if (loading) {
+    if (loading || !user) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
                 <Loader2 className="h-8 w-8 animate-spin text-white" />

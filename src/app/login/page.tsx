@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, AuthError, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword, AuthError, sendPasswordResetEmail, sendEmailVerification } from 'firebase/auth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const LoginSchema = z.object({
@@ -37,7 +37,15 @@ export default function LoginPage() {
     setError(null);
     setResetEmailSent(false);
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      
+      if (!userCredential.user.emailVerified) {
+          setError("Please verify your email address to continue. Check your inbox for a verification link.");
+          await sendEmailVerification(userCredential.user);
+          router.push('/verify-email');
+          return;
+      }
+      
       router.push('/profile');
     } catch (e) {
       const authError = e as AuthError;
@@ -67,7 +75,6 @@ export default function LoginPage() {
     setResetEmailSent(false);
     
     const email = getValues("email");
-    // Simple validation, since this isn't part of the main form submission
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
       setError("Please enter a valid email address in the email field to reset your password.");
       return;

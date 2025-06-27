@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { createUserWithEmailAndPassword, updateProfile, AuthError } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, AuthError, sendEmailVerification } from 'firebase/auth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const SignupSchema = z.object({
@@ -37,15 +37,16 @@ export default function SignupPage() {
     setError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      // Ensure the user object exists before trying to update the profile
+      
       if (userCredential.user) {
         await updateProfile(userCredential.user, {
             displayName: data.name
         });
+        
+        await sendEmailVerification(userCredential.user);
       }
-      // Manually reload the user to ensure the displayName is available on the next page
-      await auth.currentUser?.reload();
-      router.push('/profile');
+      
+      router.push('/verify-email');
     } catch (e) {
       const authError = e as AuthError;
       let errorMessage = 'An unexpected error occurred. Please try again.';
