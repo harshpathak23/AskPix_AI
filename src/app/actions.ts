@@ -96,8 +96,9 @@ export async function saveSolution(data: z.infer<typeof SaveSolutionSchema>): Pr
             if (e.message.includes('permission-denied') || e.message.includes('PERMISSION_DENIED')) {
                  return { error: 'Permission denied. Please check your Firestore security rules to allow writes.' };
             }
-            if (e.message.includes('1 MiB')) { // Catches the document size limit error
-                return { error: 'Image is too large to save. Please try cropping a smaller area.' };
+            // Better check for the document size limit error.
+            if (e.message.includes('longer than') && e.message.includes('bytes')) {
+                return { error: 'Image file is too large to save. Please try cropping a smaller area.' };
             }
             if (e.message.includes('fetch failed')) {
                 return { error: 'Could not connect to the database. Please check your network and Firebase setup.' };

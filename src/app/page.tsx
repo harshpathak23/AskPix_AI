@@ -176,6 +176,9 @@ export default function Home() {
     }
   
     ctx.imageSmoothingQuality = 'high';
+    // Fill with white background for JPEG compression of transparent areas
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   
     ctx.drawImage(
       image,
@@ -190,8 +193,8 @@ export default function Home() {
     );
   
     return new Promise((resolve) => {
-      // Use PNG for lossless image quality
-      resolve(canvas.toDataURL('image/png'));
+      // Use JPEG for lossy, smaller image files. 0.9 provides a good balance of quality and size.
+      resolve(canvas.toDataURL('image/jpeg', 0.9));
     });
   }
 
