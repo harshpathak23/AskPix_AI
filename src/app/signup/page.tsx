@@ -37,11 +37,14 @@ export default function SignupPage() {
     setError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      // Ensure the user object exists before trying to update the profile
       if (userCredential.user) {
         await updateProfile(userCredential.user, {
             displayName: data.name
         });
       }
+      // Manually reload the user to ensure the displayName is available on the next page
+      await auth.currentUser?.reload();
       router.push('/profile');
     } catch (e) {
       const authError = e as AuthError;

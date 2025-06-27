@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, FileText, LogOut, User, Loader2, Home } from "lucide-react";
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
@@ -82,7 +83,7 @@ export default function ProfilePage() {
         
         try {
             const imgData = solution.croppedImage;
-            const img = new Image();
+            const img = new window.Image();
             img.src = imgData;
             await new Promise(resolve => {
                 img.onload = resolve;
@@ -204,15 +205,21 @@ export default function ProfilePage() {
                 ) : (
                     <ul className="space-y-4">
                         {solutions.map((file) => (
-                            <li key={file.id} className="flex justify-between items-center p-4 rounded-lg bg-black/40 hover:bg-black/60 transition-colors">
+                            <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-black/40 hover:bg-black/60 transition-colors gap-4">
                                <div className="flex items-center gap-4">
-                                 <FileText className="w-6 h-6 text-primary"/>
-                                 <div>
+                                 <Image
+                                    src={file.croppedImage}
+                                    alt="Question thumbnail"
+                                    width={80}
+                                    height={45}
+                                    className="rounded-md object-cover aspect-video bg-slate-700"
+                                  />
+                                 <div className="flex-grow">
                                     <p className="font-semibold text-slate-100">{file.identifiedSubject} Question</p>
                                     <p className="text-sm text-slate-400">Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
                                  </div>
                                </div>
-                               <Button size="sm" onClick={() => handleDownload(file)}>
+                               <Button size="sm" onClick={() => handleDownload(file)} className="self-end sm:self-center">
                                     <Download className="mr-2 h-4 w-4"/>
                                     Download
                                </Button>
