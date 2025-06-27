@@ -80,6 +80,7 @@ export async function saveSolution(data: z.infer<typeof SaveSolutionSchema>): Pr
     const validatedFields = SaveSolutionSchema.safeParse(data);
 
     if (!validatedFields.success) {
+        console.error("SaveSolution validation error:", validatedFields.error.flatten());
         return { error: 'Invalid data provided for saving.' };
     }
 
@@ -91,6 +92,18 @@ export async function saveSolution(data: z.infer<typeof SaveSolutionSchema>): Pr
         return { success: true };
     } catch(e) {
         console.error("Error saving solution to Firestore: ", e);
-        return { error: 'Could not save the solution to your profile. Please try again.' };
+        if (e instanceof Error) {
+            if (e.message.includes('permission-denied') || e.message.includes('PERMISSION_DENIED')) {
+                 return { error: 'Permission denied. Please check your Firestore security rules to allow writes.' };
+            }
+            if (e.message.includes('1 MiB')) { // Catches the document size limit error
+                return { error: 'Image is too large to save. Please try cropping a smaller area.' };
+            }
+            if (e.message.includes('fetch failed')) {
+                return { error: 'Could not connect to the database. Please check your network and Firebase setup.' };
+            }
+            return { error: `A database error occurred: ${e.message}` };
+        }
+        return { error: 'An unexpected error occurred while saving. Please try again.' };
     }
 }
