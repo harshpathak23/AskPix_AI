@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, FileText, LogOut, User, Loader2 } from "lucide-react";
+import { Download, FileText, LogOut, User, Loader2, Home } from "lucide-react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
 import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
 import jsPDF from 'jspdf';
+import { Logo } from "@/components/icons/logo";
 
 
 interface SavedSolution {
@@ -163,17 +164,25 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
-            <div className="flex flex-col">
-                <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
-                    <User className="w-8 h-8"/>
-                    My Profile
-                </h1>
-                <p className="text-slate-400 mt-1 ml-1">{user?.email}</p>
+            <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
+                <Logo className="h-8 w-8" />
+                <span>ScanSolve AI</span>
+            </Link>
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                </Button>
             </div>
-            <Button variant="ghost" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" /> Logout
-            </Button>
         </header>
+        
+        <div className="flex items-center gap-4 mb-8">
+            <User className="w-12 h-12 p-2.5 rounded-full bg-primary/20 text-primary" />
+            <div>
+                <h1 className="text-3xl font-bold text-slate-100">My Profile</h1>
+                <p className="text-slate-400 mt-1">{user?.email}</p>
+            </div>
+        </div>
+
 
         <Card className="bg-slate-800/30 border-purple-900/50 text-slate-200 backdrop-blur-sm">
             <CardHeader>
@@ -207,9 +216,9 @@ export default function ProfilePage() {
                     </ul>
                 )}
                 {(!solutionsLoading && solutions.length === 0) && (
-                     <div className="text-center py-12 text-slate-400">
+                     <div className="text-center py-12 text-slate-400 flex flex-col items-center gap-4">
                         <p>You have no saved solutions yet.</p>
-                        <Button variant="link" asChild><Link href="/">Solve a question to get started!</Link></Button>
+                        <Button asChild><Link href="/"><Home className="mr-2 h-4 w-4" /> Solve a question to get started!</Link></Button>
                     </div>
                 )}
             </CardContent>

@@ -108,6 +108,11 @@ export default function LoginPage() {
               Sign up
             </Link>
           </div>
+          <div className="mt-2 text-center text-sm">
+            <Link href="/" className="underline text-slate-500 hover:text-primary transition-colors">
+              Back to Home
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

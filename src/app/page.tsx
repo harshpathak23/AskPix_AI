@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, User } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, User, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { signOut } from 'firebase/auth';
 
 
 import { Button } from '@/components/ui/button';
@@ -77,6 +78,17 @@ export default function Home() {
       videoElement.srcObject = null;
     }
   }, [appState]);
+
+  const handleLogout = async () => {
+    try {
+        await signOut(auth);
+        setAppState('welcome'); // Go back to welcome screen on logout
+        // No need to router.push, the onAuthStateChanged will handle user state
+    } catch (error) {
+        console.error("Error signing out: ", error);
+        toast({ title: "Logout Failed", description: "There was an error signing out.", variant: "destructive" });
+    }
+  };
 
   const startCamera = async () => {
     // Immediately switch to scanning view to show loading state
@@ -669,27 +681,20 @@ export default function Home() {
         </div>
 
         <div className="flex w-full gap-4">
-          <Button onClick={handleStartScanning} className="w-full whitespace-normal h-auto">
-              <RefreshCw className="h-4 w-4" />
-              Scan Another Question
+          <Button onClick={handleStartScanning} className="w-full text-base py-6">
+              <RefreshCw className="mr-2 h-5 w-5" />
+              Scan Another
           </Button>
-          {solutionSaved ? (
-            <Button asChild className="w-full h-auto">
-              <Link href="/profile">
-                <User className="h-4 w-4" />
-                View Profile
-              </Link>
-            </Button>
-          ) : user ? (
-            <Button onClick={handleSaveSolution} disabled={isSaving} className="w-full h-auto">
-              {isSaving ? <Loader2 className="animate-spin" /> : <Download className="h-4 w-4" />}
-              Save Solution
+          {user ? (
+            <Button onClick={handleSaveSolution} disabled={isSaving || solutionSaved} className="w-full text-base py-6">
+              {isSaving ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : <Download className="mr-2 h-5 w-5" />}
+              {isSaving ? 'Saving...' : solutionSaved ? 'Saved!' : 'Save Solution'}
             </Button>
           ) : (
-            <Button asChild className="w-full h-auto animate-pulse-glow">
+            <Button asChild className="w-full text-base py-6 animate-pulse-glow">
               <Link href="/login">
-                <Download className="h-4 w-4" />
-                Login to Save PDF
+                <Download className="mr-2 h-5 w-5" />
+                Login to Save
               </Link>
             </Button>
           )}
@@ -704,11 +709,40 @@ export default function Home() {
         ? "flex flex-col items-center justify-center p-4" 
         : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
     )}>
+       {appState !== 'welcome' && (
+         <header className="w-full max-w-3xl mx-auto py-4 px-4 sm:px-0 flex justify-between items-center text-slate-200">
+            <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => appState !== 'welcome' && setAppState('welcome')}>
+                <Logo className="h-8 w-8" />
+                <span className="hidden sm:inline">ScanSolve AI</span>
+            </Link>
+            <div>
+                {user ? (
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <Button asChild variant="ghost" className="px-2 sm:px-4">
+                            <Link href="/profile" className="flex items-center gap-2">
+                                <User className="h-5 w-5" />
+                                <span className="hidden sm:inline">{user.email}</span>
+                            </Link>
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={handleLogout}>
+                            <LogOut className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Logout</span>
+                        </Button>
+                    </div>
+                ) : (
+                    <Button asChild>
+                        <Link href="/login">Login / Sign Up</Link>
+                    </Button>
+                )}
+            </div>
+        </header>
+       )}
+
       {appState === 'welcome' && renderWelcomeScreen()}
       
       {appState !== 'welcome' && (
         <div className={cn(
-          "w-full shadow-sm flex flex-1 flex-col rounded-t-xl",
+          "w-full shadow-sm flex flex-1 flex-col rounded-t-xl mt-4",
           "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900"
         )}>
           {appState === 'scanning' && renderScanningScreen()}
