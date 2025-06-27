@@ -10,7 +10,7 @@ import { auth, db, storage } from "@/lib/firebase";
 import { signOut, updateProfile } from "firebase/auth";
 import { useEffect, useState, useRef } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
-import { collection, query, where, getDocs, Timestamp, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, Timestamp, onSnapshot } from "firebase/firestore";
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
 import { Input } from "@/components/ui/input";
@@ -46,51 +46,49 @@ export default function ProfilePage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+        const unsubscribe = auth.onAuthStateChanged((currentUser) => {
             if (currentUser) {
-                await currentUser.reload();
-                
                 if (!currentUser.emailVerified) {
                     router.push('/verify-email');
                     return;
                 }
-
+                
                 setUser(currentUser);
                 setNewName(currentUser.displayName || "");
 
-                try {
-                    setSolutionsLoading(true);
-                    // Fetch solutions without ordering from Firestore to avoid index requirement
-                    const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid));
-                    const querySnapshot = await getDocs(q);
+                const q = query(collection(db, "solutions"), where("userId", "==", currentUser.uid));
+                
+                const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
                     const fetchedSolutions = querySnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data(),
                     })) as SavedSolution[];
                     
-                    // Sort solutions by date on the client-side
-                    fetchedSolutions.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
-                    
+                    fetchedSolutions.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
                     setSolutions(fetchedSolutions);
-                } catch (error) {
-                    console.error("Error fetching solutions: ", error);
-                    toast({
-                        title: "Could not load solutions",
-                        description: "There was an error fetching your saved solutions. Please check your security rules and console for details.",
-                        variant: "destructive"
-                    });
-                } finally {
                     setSolutionsLoading(false);
-                }
+                }, (error) => {
+                     console.error("Error fetching solutions: ", error);
+                     toast({
+                         title: "Could not load solutions",
+                         description: "There was an error fetching your saved solutions. Please check your security rules and console for details.",
+                         variant: "destructive"
+                     });
+                     setSolutionsLoading(false);
+                });
+                
+                setLoading(false);
+                return () => unsubscribeSnapshot();
             } else {
                 router.push('/login');
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();
     }, [router, toast]);
-
+    
     const handleNameUpdate = async () => {
         if (!user || !newName.trim()) {
             toast({ title: "Error", description: "Name cannot be empty.", variant: "destructive" });
@@ -102,7 +100,7 @@ export default function ProfilePage() {
             setUser(prevUser => prevUser ? { ...prevUser, displayName: newName.trim() } : null);
             toast({ title: "Success", description: "Your name has been updated." });
             setIsEditingName(false);
-        } catch (error)_ {
+        } catch (error) {
             console.error("Error updating profile name:", error);
             toast({ title: "Error", description: "Failed to update your name.", variant: "destructive" });
         } finally {
@@ -124,7 +122,27 @@ export default function ProfilePage() {
             toast({ title: "Success", description: "Profile picture updated!" });
         } catch (error) {
             console.error("Error uploading profile picture:", error);
-            toast({ title: "Error", description: "Failed to upload picture. This is often a security rule issue.", variant: "destructive" });
+            let description = "Failed to upload picture. Please try again.";
+            const firebaseError = error as { code?: string };
+            if (firebaseError.code) {
+                switch (firebaseError.code) {
+                    case 'storage/unauthorized':
+                        description = "Permission denied. Please ensure your Storage security rules are correct and have been published successfully.";
+                        break;
+                    case 'storage/object-not-found':
+                        description = "Could not find the file path. This is an unexpected developer error.";
+                        break;
+                    case 'storage/canceled':
+                        description = "Upload was cancelled. Please try again.";
+                        break;
+                    case 'storage/quota-exceeded':
+                         description = "Storage quota exceeded. Please upgrade your Firebase plan or delete some files.";
+                         break;
+                    default:
+                        description = `An error occurred: ${firebaseError.code}. Please check the console for more details.`;
+                }
+            }
+            toast({ title: "Upload Failed", description, variant: "destructive" });
         } finally {
             setIsUploading(false);
         }
