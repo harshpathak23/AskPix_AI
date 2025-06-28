@@ -72,15 +72,13 @@ export default function ProfilePage() {
                     setSolutionsLoading(false);
                 }, (error: FirestoreError) => {
                      console.error("Error fetching solutions: ", error);
+                     let title = "Could Not Load Solutions";
                      let description = "An error occurred while fetching your solutions.";
                      if (error.code === 'permission-denied') {
-                         description = "Permission Denied. Please ensure your Firestore security rules are published correctly and allow access.";
+                         title = "Permission Denied";
+                         description = "Your security rules are not set up correctly. Please check your Firestore security rules to allow access.";
                      }
-                     toast({
-                         title: "Could Not Load Solutions",
-                         description: description,
-                         variant: "destructive"
-                     });
+                     toast({ title, description, variant: "destructive" });
                      setSolutionsLoading(false);
                 });
                 
@@ -249,124 +247,122 @@ export default function ProfilePage() {
         )
     }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex justify-between items-center mb-8">
-            <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
-                <Logo className="h-8 w-8" />
-            </Link>
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" /> Logout
-                </Button>
-            </div>
-        </header>
-        
-        <div className="flex items-center gap-6 mb-8">
-             <div className="relative group">
-                <Avatar className="w-20 h-20 text-lg border-2 border-primary/50">
-                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
-                    <AvatarFallback>
-                        <User className="w-10 h-10" />
-                    </AvatarFallback>
-                </Avatar>
-                <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    disabled={isUploading}
-                    aria-label="Upload profile picture"
-                >
-                    {isUploading ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Camera className="w-6 h-6 text-white" />}
-                </button>
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleImageUpload}
-                    className="hidden" 
-                    accept="image/png, image/jpeg" 
-                />
-            </div>
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
+        <div className="max-w-4xl mx-auto">
+            <header className="flex justify-between items-center mb-8">
+                <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
+                    <Logo className="h-8 w-8" />
+                </Link>
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" /> Logout
+                    </Button>
+                </div>
+            </header>
+            
+            <div className="flex items-center gap-6 mb-8">
+                <div className="relative group">
+                    <Avatar className="w-20 h-20 text-lg border-2 border-primary/50">
+                        <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                        <AvatarFallback>
+                            <User className="w-10 h-10" />
+                        </AvatarFallback>
+                    </Avatar>
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        disabled={isUploading}
+                        aria-label="Upload profile picture"
+                    >
+                        {isUploading ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Camera className="w-6 h-6 text-white" />}
+                    </button>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleImageUpload}
+                        className="hidden" 
+                        accept="image/png, image/jpeg" 
+                    />
+                </div>
 
-            <div>
-                 {isEditingName ? (
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                        <Input 
-                            type="text" 
-                            value={newName} 
-                            onChange={(e) => setNewName(e.target.value)}
-                            placeholder="Enter your name"
-                            className="bg-slate-800/70 border-slate-700 text-base"
-                            onKeyDown={(e) => e.key === 'Enter' && handleNameUpdate()}
-                        />
-                        <div className="flex gap-2">
-                            <Button onClick={handleNameUpdate} disabled={isSavingName} size="sm">
-                                {isSavingName ? <Loader2 className="animate-spin" /> : "Save"}
-                            </Button>
-                            <Button variant="ghost" onClick={() => setIsEditingName(false)} size="sm">Cancel</Button>
+                <div>
+                    {isEditingName ? (
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                            <Input 
+                                type="text" 
+                                value={newName} 
+                                onChange={(e) => setNewName(e.target.value)}
+                                placeholder="Enter your name"
+                                className="bg-slate-800/70 border-slate-700 text-base"
+                                onKeyDown={(e) => e.key === 'Enter' && handleNameUpdate()}
+                            />
+                            <div className="flex gap-2">
+                                <Button onClick={handleNameUpdate} disabled={isSavingName} size="sm">
+                                    {isSavingName ? <Loader2 className="animate-spin" /> : "Save"}
+                                </Button>
+                                <Button variant="ghost" onClick={() => setIsEditingName(false)} size="sm">Cancel</Button>
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditingName(true)}>
-                            <Pencil className="h-4 w-4" />
-                        </Button>
-                    </div>
-                )}
-                <p className="text-slate-400 mt-1">{user?.email}</p>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditingName(true)}>
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
+                    <p className="text-slate-400 mt-1">{user?.email}</p>
+                </div>
             </div>
+
+
+            <Card className="bg-slate-800/30 border-purple-900/50 text-slate-200 backdrop-blur-sm">
+                <CardHeader>
+                    <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
+                    <CardDescription className="text-slate-400">
+                        Download your previously solved questions as PDF.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {solutionsLoading ? (
+                        <div className="flex justify-center items-center py-12">
+                            <Loader2 className="w-8 h-8 animate-spin" />
+                        </div>
+                    ) : (
+                        <ul className="space-y-4">
+                            {solutions.map((file) => (
+                                <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-black/40 hover:bg-black/60 transition-colors gap-4">
+                                <div className="flex items-center gap-4">
+                                    <Image
+                                        src={file.croppedImage}
+                                        alt="Question thumbnail"
+                                        width={80}
+                                        height={45}
+                                        className="rounded-md object-cover aspect-video bg-slate-700"
+                                    />
+                                    <div className="flex-grow">
+                                        <p className="font-semibold text-slate-100">{file.identifiedSubject} Question</p>
+                                        <p className="text-sm text-slate-400">Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                                <Button size="sm" onClick={() => handleDownload(file)} className="self-end sm:self-center">
+                                        <Download className="mr-2 h-4 w-4"/>
+                                        Download Pdf
+                                </Button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    {(!solutionsLoading && solutions.length === 0) && (
+                        <div className="text-center py-12 text-slate-400 flex flex-col items-center gap-4">
+                            <p>You have no saved solutions yet.</p>
+                            <Button asChild><Link href="/"><Home className="mr-2 h-4 w-4" /> Solve a question to get started!</Link></Button>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
-
-
-        <Card className="bg-slate-800/30 border-purple-900/50 text-slate-200 backdrop-blur-sm">
-            <CardHeader>
-                <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
-                <CardDescription className="text-slate-400">
-                    Download your previously solved questions as PDF.
-                </Description>
-            </CardHeader>
-            <CardContent>
-                {solutionsLoading ? (
-                    <div className="flex justify-center items-center py-12">
-                        <Loader2 className="w-8 h-8 animate-spin" />
-                    </div>
-                ) : (
-                    <ul className="space-y-4">
-                        {solutions.map((file) => (
-                            <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-black/40 hover:bg-black/60 transition-colors gap-4">
-                               <div className="flex items-center gap-4">
-                                 <Image
-                                    src={file.croppedImage}
-                                    alt="Question thumbnail"
-                                    width={80}
-                                    height={45}
-                                    className="rounded-md object-cover aspect-video bg-slate-700"
-                                  />
-                                 <div className="flex-grow">
-                                    <p className="font-semibold text-slate-100">{file.identifiedSubject} Question</p>
-                                    <p className="text-sm text-slate-400">Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
-                                 </div>
-                               </div>
-                               <Button size="sm" onClick={() => handleDownload(file)} className="self-end sm:self-center">
-                                    <Download className="mr-2 h-4 w-4"/>
-                                    Download Pdf
-                               </Button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-                {(!solutionsLoading && solutions.length === 0) && (
-                     <div className="text-center py-12 text-slate-400 flex flex-col items-center gap-4">
-                        <p>You have no saved solutions yet.</p>
-                        <Button asChild><Link href="/"><Home className="mr-2 h-4 w-4" /> Solve a question to get started!</Link></Button>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
-
-    
