@@ -77,11 +77,6 @@ export default function ProfilePage() {
     useEffect(() => {
         const unsubscribeAuth = auth.onAuthStateChanged((currentUser) => {
             if (currentUser) {
-                if (!currentUser.emailVerified) {
-                    router.push('/verify-email');
-                    return;
-                }
-                
                 setUser(currentUser);
                 setLoading(false);
 
@@ -110,7 +105,6 @@ export default function ProfilePage() {
                 return () => unsubscribeSnapshot();
             } else {
                 router.push('/login');
-                setLoading(false);
             }
         });
 
@@ -136,13 +130,17 @@ export default function ProfilePage() {
             logoImg.src = logoDataUrl;
             await new Promise(resolve => { logoImg.onload = resolve; });
 
-            const logoWidth = 60; // Increased logo width for more prominence
+            const logoWidth = 60;
             const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
             const logoHeight = logoWidth / aspectRatio;
             const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
             
+            // Add a dark background rectangle to ensure the light parts of the logo are visible
+            doc.setFillColor(23, 23, 31); // A dark slate color, similar to the app's dark theme
+            doc.rect(logoX - 5, yPos - 5, logoWidth + 10, logoHeight + 10, 'F');
+
             doc.addImage(logoDataUrl, 'PNG', logoX, yPos, logoWidth, logoHeight);
-            yPos += logoHeight + 5;
+            yPos += logoHeight + 10;
         } catch (e) {
             console.error("Could not load logo for PDF", e);
         }
@@ -224,7 +222,7 @@ export default function ProfilePage() {
         doc.save(`solution-${solution.id}.pdf`);
     };
     
-    if (loading || !user) {
+    if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
                 <Loader2 className="h-8 w-8 animate-spin text-white" />
