@@ -35,11 +35,12 @@ A user has provided an image of a question.
 It is critical that your entire response is in the language with this code: {{{language}}}. For example, if the language code is 'hi', the entire response must be in Hindi.
 
 Your task:
-1.  **Analyze the image**: Understand the full question, including any text, diagrams, or formulas.
-2.  **Provide a solution**: Write a clear, comprehensive, and detailed step-by-step solution. Explain each step thoroughly as if you were teaching the concept to a student for the first time. Break down complex concepts into simple, easy-to-understand parts. Your goal is to leave no room for confusion.
+1.  **Identify the Topic**: First, identify the specific academic topic of the question. This should be a short, descriptive title (e.g., "Pythagorean Theorem", "Stoichiometry"). This topic must also be in the requested language. Put this in the 'topic' field.
+2.  **Analyze the image**: Understand the full question, including any text, diagrams, or formulas.
+3.  **Provide a solution**: Write a clear, comprehensive, and detailed step-by-step solution. Explain each step thoroughly as if you were teaching the concept to a student for the first time. Break down complex concepts into simple, easy-to-understand parts. Your goal is to leave no room for confusion.
     - Use LaTeX for all mathematical formulas (e.g., $...$ for inline, $$...$$ for block).
     - Use double newlines to separate paragraphs for better readability and structure.
-3.  **Provide relevant formulas**: In the 'formulas' field, provide a list of important formulas related to the question's topic.
+4.  **Provide relevant formulas**: In the 'formulas' field, provide a list of important formulas related to the question's topic.
     - Each formula must be formatted using LaTeX and be on a new line.
     - This section must also be in the requested language.
 

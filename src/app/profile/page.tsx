@@ -20,6 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 interface SavedSolution {
     id: string;
     croppedImage: string;
+    topic: string;
     solution: string;
     formulas?: string | null;
     subject: string;
@@ -289,8 +290,8 @@ export default function ProfilePage() {
                                     className="rounded-md object-cover aspect-video bg-slate-700"
                                 />
                                 <div className="flex-grow">
-                                    <p className="font-semibold text-slate-100">{file.identifiedSubject} Question</p>
-                                    <p className="text-sm text-slate-400">Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
+                                    <p className="font-semibold text-slate-100">{file.topic}</p>
+                                    <p className="text-sm text-slate-400">{file.identifiedSubject} &middot; Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
                                 </div>
                             </div>
                             <Button size="sm" onClick={() => handleDownload(file)} className="self-end sm:self-center">

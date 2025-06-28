@@ -38,6 +38,7 @@ type Language = 'en' | 'hi';
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('welcome');
   const [solution, setSolution] = useState<string | null>(null);
+  const [topic, setTopic] = useState<string | null>(null);
   const [formulas, setFormulas] = useState<string | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [identifiedSubject, setIdentifiedSubject] = useState<Subject | null>(null);
@@ -163,6 +164,7 @@ export default function Home() {
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
+    setTopic(null);
     setFormulas(null);
     setError(null);
     setLanguage('en');
@@ -240,6 +242,7 @@ export default function Home() {
         setError(response.error);
         setAppState('cropping');
       } else if (response.solution) {
+        setTopic(response.topic || null);
         setSolution(response.solution);
         setFormulas(response.formulas || null);
         setIdentifiedSubject(response.identifiedSubject || subject);
@@ -356,7 +359,7 @@ export default function Home() {
         toast({ title: "Login Required", description: "Please log in to save your solutions.", variant: "destructive" });
         return;
     }
-    if (!croppedImage || !solution) {
+    if (!croppedImage || !solution || !topic) {
         toast({ title: "Error", description: "No solution to save.", variant: "destructive" });
         return;
     }
@@ -366,6 +369,7 @@ export default function Home() {
         // NEW: Save to a subcollection under the user's ID
         await addDoc(collection(db, 'users', user.uid, 'solutions'), {
             croppedImage,
+            topic,
             solution,
             formulas,
             subject,

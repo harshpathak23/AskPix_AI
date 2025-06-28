@@ -12,6 +12,7 @@ const QuestionSchema = z.object({
 
 interface ActionState {
   error?: string | null;
+  topic?: string | null;
   solution?: string | null;
   formulas?: string | null;
   identifiedSubject?: 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' | 'General' | null;
@@ -38,12 +39,13 @@ export async function getSolution(data: { photoDataUri: string, language: 'en' |
       subject: identifiedSubject // Use the AI-detected subject for accuracy
     });
     
-    if (!result?.solution) {
+    if (!result?.solution || !result?.topic) {
       return { error: 'Could not generate a solution. Please try a different question or crop a different area.' };
     }
     
     // Return the solution, formulas, and the subject that was used to solve it
     return { 
+        topic: result.topic,
         solution: result.solution,
         formulas: result.formulas || null,
         identifiedSubject: identifiedSubject,

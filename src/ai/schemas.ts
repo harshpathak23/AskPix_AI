@@ -23,6 +23,7 @@ export const SolveQuestionInputSchema = z.object({
 export type SolveQuestionInput = z.infer<typeof SolveQuestionInputSchema>;
 
 export const SolveQuestionOutputSchema = z.object({
+  topic: z.string().describe('A short, descriptive topic for the question in the requested language (e.g., "Pythagorean Theorem", "Stoichiometry"). This should be a title, not a full sentence.'),
   solution: z.string().describe('A single block of text containing a detailed, step-by-step solution. Use double newline characters for paragraph breaks.'),
   formulas: z.string().optional().describe('A block of text containing important formulas related to the topic, formatted in LaTeX. Each formula should be on a new line.'),
 });
