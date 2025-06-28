@@ -10,7 +10,7 @@ import { auth, db, storage } from "@/lib/firebase";
 import { signOut, updateProfile } from "firebase/auth";
 import { useEffect, useState, useRef } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
-import { collection, query, onSnapshot, Timestamp, orderBy } from "firebase/firestore";
+import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError } from "firebase/firestore";
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
 import { Input } from "@/components/ui/input";
@@ -56,7 +56,6 @@ export default function ProfilePage() {
                 setNewName(currentUser.displayName || "");
                 setLoading(false);
 
-                // NEW: Fetch from the user's dedicated subcollection
                 const solutionsColl = collection(db, "users", currentUser.uid, "solutions");
                 const q = query(solutionsColl, orderBy("createdAt", "desc"));
                 
@@ -68,11 +67,15 @@ export default function ProfilePage() {
                     
                     setSolutions(fetchedSolutions);
                     setSolutionsLoading(false);
-                }, (error) => {
+                }, (error: FirestoreError) => {
                      console.error("Error fetching solutions: ", error);
+                     let description = "An error occurred while fetching your solutions.";
+                     if (error.code === 'permission-denied') {
+                         description = "Permission Denied. Please ensure your Firestore security rules are published correctly and allow access.";
+                     }
                      toast({
-                         title: "Could not load solutions",
-                         description: "There was an error fetching your saved solutions. Please check your security rules and console for details.",
+                         title: "Could Not Load Solutions",
+                         description: description,
                          variant: "destructive"
                      });
                      setSolutionsLoading(false);
