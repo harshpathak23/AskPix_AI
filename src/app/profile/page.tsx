@@ -16,7 +16,7 @@ import { Logo } from "@/components/icons/logo";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, type FirebaseStorageError } from "firebase/storage";
 
 interface SavedSolution {
     id: string;
@@ -27,6 +27,8 @@ interface SavedSolution {
     identifiedSubject: string;
     language: string;
     createdAt: Timestamp;
+    // Add the userId field
+    userId: string;
 }
 
 export default function ProfilePage() {
@@ -56,6 +58,7 @@ export default function ProfilePage() {
                 setNewName(currentUser.displayName || "");
                 setLoading(false);
 
+                // Use the new collection path: /users/{userId}/solutions
                 const solutionsColl = collection(db, "users", currentUser.uid, "solutions");
                 const q = query(solutionsColl, orderBy("createdAt", "desc"));
                 
@@ -124,25 +127,24 @@ export default function ProfilePage() {
             toast({ title: "Success", description: "Profile picture updated!" });
         } catch (error) {
             console.error("Error uploading profile picture:", error);
+            const storageError = error as FirebaseStorageError;
             let description = "Failed to upload picture. Please try again.";
-            const firebaseError = error as { code?: string };
-            if (firebaseError.code) {
-                switch (firebaseError.code) {
-                    case 'storage/unauthorized':
-                        description = "Permission denied. Please ensure your Storage security rules are correct and have been published successfully.";
-                        break;
-                    case 'storage/object-not-found':
-                        description = "Could not find the file path. This is an unexpected developer error.";
-                        break;
-                    case 'storage/canceled':
-                        description = "Upload was cancelled. Please try again.";
-                        break;
-                    case 'storage/quota-exceeded':
-                         description = "Storage quota exceeded. Please upgrade your Firebase plan or delete some files.";
-                         break;
-                    default:
-                        description = `An error occurred: ${firebaseError.code}. Please check the console for more details.`;
-                }
+
+            switch (storageError.code) {
+                case 'storage/unauthorized':
+                    description = "Permission denied. Please ensure your Storage security rules are correct and have been published successfully.";
+                    break;
+                case 'storage/object-not-found':
+                    description = "Could not find the file path. This is an unexpected developer error.";
+                    break;
+                case 'storage/canceled':
+                    description = "Upload was cancelled. Please try again.";
+                    break;
+                case 'storage/quota-exceeded':
+                     description = "Storage quota exceeded. Please upgrade your Firebase plan or delete some files.";
+                     break;
+                default:
+                    description = `An error occurred: ${storageError.code || 'UNKNOWN'}. Please check the console for more details.`;
             }
             toast({ title: "Upload Failed", description, variant: "destructive" });
         } finally {
@@ -322,7 +324,7 @@ export default function ProfilePage() {
                 <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
                 <CardDescription className="text-slate-400">
                     Download your previously solved questions as PDF.
-                </CardDescription>
+                </Description>
             </CardHeader>
             <CardContent>
                 {solutionsLoading ? (
@@ -366,3 +368,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
