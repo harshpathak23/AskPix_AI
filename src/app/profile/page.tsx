@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, LogOut, User, Loader2, Home, FileWarning } from "lucide-react";
+import { Download, LogOut, Loader2, Home, FileWarning } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
@@ -14,8 +14,8 @@ import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError } fro
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ProfileIcon } from "@/components/icons/profile-icon";
 
 interface SavedSolution {
     id: string;
@@ -302,11 +302,9 @@ export default function ProfilePage() {
         </header>
         
         <div className="flex items-center gap-6 mb-8">
-            <Avatar className="w-20 h-20 text-lg border-2 border-primary/50">
-                <AvatarFallback>
-                    <User className="w-10 h-10" />
-                </AvatarFallback>
-            </Avatar>
+            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/50">
+                <ProfileIcon />
+            </div>
 
             <div>
                 <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>

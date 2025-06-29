@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, User, LogOut } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -26,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { collection, addDoc, serverTimestamp, FirestoreError } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ProfileIcon } from '@/components/icons/profile-icon';
 
 
 // Define the states for our app's screen flow
@@ -734,11 +734,9 @@ export default function Home() {
                   {user ? (
                       <div className="flex items-center gap-2 sm:gap-4">
                           <Link href="/profile" className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2 px-2 sm:px-4 rounded-full")}>
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback>
-                                    <User className="h-5 w-5" />
-                                </AvatarFallback>
-                              </Avatar>
+                              <div className="h-8 w-8 rounded-full overflow-hidden">
+                                  <ProfileIcon />
+                              </div>
                               <span className="hidden sm:inline">{user.displayName || user.email}</span>
                           </Link>
                           <Button size="sm" onClick={handleLogout}>
