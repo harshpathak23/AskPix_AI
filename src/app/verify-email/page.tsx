@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo } from '@/components/icons/logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { MailCheck, Send, Loader2, LogOut } from 'lucide-react';
+import { MailCheck, Send, Loader2, LogOut, XCircle } from 'lucide-react';
 
 export default function VerifyEmailPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -104,7 +104,8 @@ export default function VerifyEmailPage() {
             </Alert>
           )}
           {error && (
-            <Alert variant="destructive" className="bg-red-900/50 border-red-500/50 text-white">
+            <Alert variant="destructive" className="bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
+              <XCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>

@@ -83,7 +83,7 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
            {error && (
-            <Alert variant="destructive" className="mb-4 bg-red-900/50 border-red-500/50 text-white">
+            <Alert variant="destructive" className="mb-4 bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
                 <XCircle className="h-4 w-4" />
                 <AlertTitle>Signup Failed</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>

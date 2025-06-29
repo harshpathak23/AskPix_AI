@@ -530,7 +530,7 @@ export default function Home() {
   const renderCroppingScreen = () => (
     <div className="w-full h-full flex flex-col items-center p-4 text-slate-200">
        {error && (
-          <Alert variant="destructive" className="mb-4 w-full bg-red-900/50 border-red-500/50 text-white">
+          <Alert variant="destructive" className="mb-4 w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
             <XCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
@@ -620,7 +620,7 @@ export default function Home() {
         )}
 
         {error && (
-            <Alert variant="destructive" className="w-full bg-red-900/50 border-red-500/50 text-white">
+            <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
               <XCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>

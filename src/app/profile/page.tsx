@@ -327,7 +327,7 @@ export default function ProfilePage() {
                         <Loader2 className="w-8 h-8 animate-spin" />
                     </div>
                 ) : error ? (
-                     <Alert variant="destructive">
+                     <Alert variant="destructive" className="bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
                         <FileWarning className="h-4 w-4" />
                         <AlertTitle>Could not load solutions</AlertTitle>
                         <AlertDescription>{error}</AlertDescription>
