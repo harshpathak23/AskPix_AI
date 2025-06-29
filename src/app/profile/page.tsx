@@ -26,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SavedSolution {
     id: string;
@@ -313,14 +314,6 @@ export default function ProfilePage() {
 
         doc.save(`solution-${solution.id}.pdf`);
     };
-    
-    if (loading) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
-            </div>
-        )
-    }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
@@ -342,14 +335,26 @@ export default function ProfilePage() {
         </header>
         
         <div className="flex items-center gap-6 mb-8">
-            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/50">
-                <ProfileIcon />
-            </div>
+            {loading ? (
+                <>
+                    <Skeleton className="w-20 h-20 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-8 w-48" />
+                        <Skeleton className="h-5 w-64" />
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/50">
+                        <ProfileIcon />
+                    </div>
 
-            <div>
-                <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
-                <p className="text-slate-400 mt-1">{user?.email}</p>
-            </div>
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
+                        <p className="text-slate-400 mt-1">{user?.email}</p>
+                    </div>
+                </>
+            )}
         </div>
 
         <Card className="bg-slate-800/30 border-purple-900/50 text-slate-200 backdrop-blur-sm">
