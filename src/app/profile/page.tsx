@@ -412,19 +412,24 @@ export default function ProfilePage() {
       </div>
 
        <AlertDialog open={!!solutionToDelete} onOpenChange={(open) => !open && setSolutionToDelete(null)}>
-            <AlertDialogContent>
+            <AlertDialogContent className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border-purple-900/50 text-slate-200">
                 <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogDescription className="text-slate-400">
                     This action cannot be undone. This will permanently delete the solution for "{solutionToDelete?.topic}" from your account.
                 </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setSolutionToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogCancel
+                    onClick={() => setSolutionToDelete(null)}
+                    className="bg-gradient-to-r from-purple-600 to-cyan-400 text-primary-foreground hover:opacity-90 border-transparent"
+                >
+                    Cancel
+                </AlertDialogCancel>
                 <AlertDialogAction
                     onClick={handleDeleteSolution}
                     disabled={isDeleting}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    className="bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white"
                 >
                     {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Delete Solution
