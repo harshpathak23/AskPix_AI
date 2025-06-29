@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, FC } from 'react';
 import Link from 'next/link';
 import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut } from 'lucide-react';
 import Image from 'next/image';
@@ -24,7 +24,7 @@ import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { collection, addDoc, serverTimestamp, FirestoreError } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
+import { useRouter, type AppRouterInstance } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
 import { ProfileIcon } from '@/components/icons/profile-icon';
 
@@ -34,6 +34,350 @@ type AppState = 'welcome' | 'scanning' | 'cropping' | 'solving' | 'result';
 
 type Subject = 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' | 'General';
 type Language = 'en' | 'hi';
+
+
+interface WelcomeScreenProps {
+  subject: Subject;
+  setSubject: (subject: Subject) => void;
+  handleStartScanning: () => void;
+}
+const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning }) => (
+    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
+      <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
+        <Logo animated className="h-[320px] w-[320px] mb-2" />
+        <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center space-y-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-100">Choose a subject</h1>
+        </div>
+        
+        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 gap-3 h-auto p-0 bg-transparent">
+              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                  <FunctionSquare className="h-4 w-4" />
+                  <span className="font-medium text-xs">Math</span>
+              </TabsTrigger>
+              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                  <Atom className="h-4 w-4" />
+                  <span className="font-medium text-xs">Physics</span>
+              </TabsTrigger>
+              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                  <TestTube className="h-4 w-4" />
+                  <span className="font-medium text-xs">Chemistry</span>
+              </TabsTrigger>
+              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                  <Dna className="h-4 w-4" />
+                  <span className="font-medium text-xs">Biology</span>
+              </TabsTrigger>
+              <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                  <BrainCircuit className="h-4 w-4" />
+                  <span className="font-medium text-xs">General Question</span>
+              </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="flex-shrink-0 pt-4 pb-2">
+        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-6 animate-pulse-glow">
+          <Camera className="mr-3 h-6 w-6" />
+          Start Scanning
+        </Button>
+      </div>
+    </div>
+)
+
+interface ScanningScreenProps {
+  hasCameraPermission: boolean | null;
+  videoRef: React.RefObject<HTMLVideoElement>;
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  error: string | null;
+  flashSupported: boolean;
+  isFlashOn: boolean;
+  toggleFlash: () => void;
+  zoomSupported: boolean;
+  handleZoomChange: (value: number[]) => void;
+  handleScan: () => void;
+}
+const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, canvasRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, handleScan }) => (
+    <div className="w-full h-full flex flex-col items-center justify-center p-4">
+      <div className="w-full h-full overflow-hidden relative flex items-center justify-center bg-black rounded-lg">
+        {hasCameraPermission === null && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-white bg-black/50">
+            <Camera className="h-16 w-16 mb-4 animate-pulse" />
+            <p className="text-xl font-medium">Initializing Camera...</p>
+            <p className="text-sm text-muted-foreground mt-2">Please allow camera permissions if prompted.</p>
+          </div>
+        )}
+        
+        <video ref={videoRef} className={cn("w-full h-full object-cover", hasCameraPermission !== true && "opacity-0")} autoPlay muted playsInline />
+        
+        {hasCameraPermission === true && (
+          <>
+            <div className="absolute top-0 left-0 w-full h-1 bg-primary/70 shadow-[0_0_20px_5px_hsl(var(--primary))] animate-scan-line pointer-events-none" />
+
+            <div className="absolute top-4 right-4 z-10 space-y-3">
+              {flashSupported && (
+                <Button onClick={toggleFlash} size="icon" variant={isFlashOn ? 'secondary' : 'ghost'} className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/20 hover:bg-black/40 text-white">
+                  <Zap className={cn(isFlashOn && "fill-yellow-300 text-yellow-300")} />
+                </Button>
+              )}
+            </div>
+             {zoomSupported && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-1/2 max-h-64 flex flex-col items-center space-y-2">
+                <ZoomIn className="text-white/80"/>
+                <Slider
+                  defaultValue={[1]}
+                  min={1}
+                  max={10}
+                  step={0.5}
+                  onValueChange={handleZoomChange}
+                  className="w-auto"
+                  orientation="vertical"
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {hasCameraPermission === false && (
+            <div className="absolute inset-0 flex items-center justify-center p-4">
+               <Alert variant="destructive" className="w-11/12">
+                  <Camera className="h-4 w-4" />
+                  <AlertTitle>Camera Access Required</AlertTitle>
+                  <AlertDescription>
+                    {error ? error : "Please allow camera access in your browser to use this feature."}
+                  </AlertDescription>
+                </Alert>
+            </div>
+        )}
+        <canvas ref={canvasRef} className="hidden" />
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+            <Button
+              onClick={handleScan}
+              size="icon"
+              className="h-16 w-16 rounded-full animate-pulse-glow border-4 border-white/50"
+              disabled={hasCameraPermission !== true}
+            >
+              <ScanLine className="h-8 w-8" />
+            </Button>
+        </div>
+      </div>
+    </div>
+)
+
+interface CroppingScreenProps {
+  error: string | null;
+  capturedImage: string | null;
+  crop: Crop | undefined;
+  setCrop: (crop: Crop) => void;
+  imgRef: React.RefObject<HTMLImageElement>;
+  onImageLoad: (e: React.SyntheticEvent<HTMLImageElement>) => void;
+  handleRetake: () => void;
+  handleGetSolution: () => void;
+}
+const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
+    <div className="w-full h-full flex flex-col items-center p-4 text-slate-200">
+       {error && (
+          <Alert variant="destructive" className="mb-4 w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
+            <XCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+       )}
+      <div className="text-center mb-4">
+        <h2 className="text-2xl font-bold text-slate-100">Crop Your Question</h2>
+        <p className="text-slate-400">Drag to select the area with the question you want to solve.</p>
+      </div>
+      <div className="w-full flex-1 bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+        {capturedImage && (
+          <ReactCrop
+            crop={crop}
+            onChange={(c, percentCrop) => setCrop(c)}
+            aspect={undefined}
+          >
+            <Image
+              ref={imgRef}
+              src={capturedImage}
+              alt="Captured question to crop"
+              width={1200}
+              height={675}
+              onLoad={onImageLoad}
+              className="w-full h-auto max-h-[70vh] object-contain"
+            />
+          </ReactCrop>
+        )}
+      </div>
+      <div className="flex w-full gap-4 mt-4">
+        <Button onClick={handleRetake} className="w-full text-lg py-6">
+          <RefreshCw className="mr-2 h-5 w-5" />
+          Retake
+        </Button>
+        <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
+          <Bot className="mr-2 h-5 w-5" />
+          Get Solution
+        </Button>
+      </div>
+    </div>
+)
+
+interface SolvingScreenProps {
+  croppedImage: string | null;
+  handleStartScanning: () => void;
+}
+const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage, handleStartScanning }) => (
+    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
+        </div>
+        
+        <div className="w-full">
+            <Card className="min-h-[200px] bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+                <CardHeader>
+                  <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LoadingDots className="justify-start" />
+                </CardContent>
+            </Card>
+        </div>
+
+        <Button onClick={handleStartScanning} className="w-full text-lg py-6" disabled>
+            <RefreshCw className="mr-2 h-5 w-5" />
+            Scan Another Question
+        </Button>
+    </div>
+)
+
+interface ResultScreenProps {
+  user: FirebaseUser | null;
+  croppedImage: string | null;
+  identifiedSubject: Subject | null;
+  subject: Subject;
+  error: string | null;
+  language: Language;
+  isTranslating: boolean;
+  handleLanguageChange: (newLang: Language) => void;
+  solution: string | null;
+  topic: string | null;
+  formulas: string | null;
+  handleStartScanning: () => void;
+  handleSaveSolution: () => void;
+  isSaving: boolean;
+  solutionSaved: boolean;
+  router: AppRouterInstance;
+}
+const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
+    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+        <div className="mb-3">
+            <div className="flex flex-col items-center text-center">
+                <Logo className="h-[220px] w-auto mt-2" animated />
+                <p className="text-xs text-slate-400 tracking-wider mt-2">Build By Harsh Pathak</p>
+            </div>
+        </div>
+        
+        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
+        </div>
+        
+        {identifiedSubject && identifiedSubject !== subject && (
+            <Alert className="bg-slate-800/50 border-slate-700 text-slate-200">
+              <BrainCircuit className="h-4 w-4 text-primary" />
+              <AlertTitle>Subject Correction</AlertTitle>
+              <AlertDescription>
+                You selected <strong>{subject}</strong>, but we detected a <strong>{identifiedSubject}</strong> question. We've provided the solution for {identifiedSubject}.
+              </AlertDescription>
+            </Alert>
+        )}
+
+        {error && (
+            <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
+              <XCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+        )}
+        
+        <div className="w-full">
+            <div className="flex items-center justify-center gap-4 mb-4">
+                <p className="text-slate-400">Language:</p>
+                <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
+                <TabsList className="bg-white/5 text-slate-300">
+                    <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white">English</TabsTrigger>
+                    <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white">Hindi</TabsTrigger>
+                </TabsList>
+                </Tabs>
+            </div>
+            {isTranslating ? (
+              <div className="space-y-6">
+                <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+                    <CardHeader>
+                      <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <LoadingDots className="justify-start" />
+                    </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-slate-100">
+                            <NotebookText />
+                            Key Formulas
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <LoadingDots className="justify-start" />
+                    </CardContent>
+                </Card>
+              </div>
+            ) : solution ? (
+                <div className="space-y-6">
+                    <SolutionDisplay solution={solution} />
+                    {formulas && (
+                        <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-slate-100">
+                                    <NotebookText />
+                                    Key Formulas
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <MathRenderer text={formulas} />
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            ) : !error ? (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-slate-800 border border-slate-700 shadow-sm min-h-[200px]">
+                    <Bot size={48} className="mb-4 text-primary" />
+                    <h3 className="text-xl font-semibold">Processing Error</h3>
+                    <p className="text-slate-400">Could not generate a solution. Please try scanning again.</p>
+                </div>
+            ) : null}
+        </div>
+
+        <div className="flex w-full gap-4">
+          <Button onClick={handleStartScanning} className="w-full text-base py-6">
+              <RefreshCw className="mr-2 h-5 w-5" />
+              Scan Another
+          </Button>
+          {user ? (
+            <Button onClick={handleSaveSolution} disabled={isSaving || solutionSaved} className="w-full text-base py-6">
+              {isSaving ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : <Download className="mr-2 h-5 w-5" />}
+              {isSaving ? 'Saving...' : solutionSaved ? 'Saved!' : 'Save Solution'}
+            </Button>
+          ) : (
+            <Button asChild className="w-full text-base py-6 animate-pulse-glow">
+              <Link href="/login">
+                <Download className="mr-2 h-5 w-5" />
+                Login to Save
+              </Link>
+            </Button>
+          )}
+        </div>
+    </div>
+)
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('welcome');
@@ -417,299 +761,6 @@ export default function Home() {
     }
   };
 
-  const renderWelcomeScreen = () => (
-    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-500 h-[95vh] min-h-[700px]">
-      <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
-        <Logo animated className="h-[320px] w-[320px] mb-2" />
-        <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
-      </div>
-
-      <div className="flex-1 flex flex-col justify-center space-y-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">Choose a subject</h1>
-        </div>
-        
-        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 gap-3 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <FunctionSquare className="h-4 w-4" />
-                  <span className="font-medium text-xs">Math</span>
-              </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <Atom className="h-4 w-4" />
-                  <span className="font-medium text-xs">Physics</span>
-              </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <TestTube className="h-4 w-4" />
-                  <span className="font-medium text-xs">Chemistry</span>
-              </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <Dna className="h-4 w-4" />
-                  <span className="font-medium text-xs">Biology</span>
-              </TabsTrigger>
-              <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <BrainCircuit className="h-4 w-4" />
-                  <span className="font-medium text-xs">General Question</span>
-              </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      <div className="flex-shrink-0 pt-4 pb-2">
-        <Button onClick={handleStartScanning} size="lg" className="w-full text-lg py-6 animate-pulse-glow">
-          <Camera className="mr-3 h-6 w-6" />
-          Start Scanning
-        </Button>
-      </div>
-    </div>
-  );
-  
-  const renderScanningScreen = () => (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-      <div className="w-full h-full overflow-hidden relative flex items-center justify-center bg-black rounded-lg">
-        {hasCameraPermission === null && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-white bg-black/50">
-            <Camera className="h-16 w-16 mb-4 animate-pulse" />
-            <p className="text-xl font-medium">Initializing Camera...</p>
-            <p className="text-sm text-muted-foreground mt-2">Please allow camera permissions if prompted.</p>
-          </div>
-        )}
-        
-        <video ref={videoRef} className={cn("w-full h-full object-cover", hasCameraPermission !== true && "opacity-0")} autoPlay muted playsInline />
-        
-        {hasCameraPermission === true && (
-          <>
-            <div className="absolute top-0 left-0 w-full h-1 bg-primary/70 shadow-[0_0_20px_5px_hsl(var(--primary))] animate-scan-line pointer-events-none" />
-
-            <div className="absolute top-4 right-4 z-10 space-y-3">
-              {flashSupported && (
-                <Button onClick={toggleFlash} size="icon" variant={isFlashOn ? 'secondary' : 'ghost'} className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/20 hover:bg-black/40 text-white">
-                  <Zap className={cn(isFlashOn && "fill-yellow-300 text-yellow-300")} />
-                </Button>
-              )}
-            </div>
-             {zoomSupported && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-1/2 max-h-64 flex flex-col items-center space-y-2">
-                <ZoomIn className="text-white/80"/>
-                <Slider
-                  defaultValue={[1]}
-                  min={1}
-                  max={10}
-                  step={0.5}
-                  onValueChange={handleZoomChange}
-                  className="w-auto"
-                  orientation="vertical"
-                />
-              </div>
-            )}
-          </>
-        )}
-
-        {hasCameraPermission === false && (
-            <div className="absolute inset-0 flex items-center justify-center p-4">
-               <Alert variant="destructive" className="w-11/12">
-                  <Camera className="h-4 w-4" />
-                  <AlertTitle>Camera Access Required</AlertTitle>
-                  <AlertDescription>
-                    {error ? error : "Please allow camera access in your browser to use this feature."}
-                  </AlertDescription>
-                </Alert>
-            </div>
-        )}
-        <canvas ref={canvasRef} className="hidden" />
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-            <Button
-              onClick={handleScan}
-              size="icon"
-              className="h-16 w-16 rounded-full animate-pulse-glow border-4 border-white/50"
-              disabled={hasCameraPermission !== true}
-            >
-              <ScanLine className="h-8 w-8" />
-            </Button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderCroppingScreen = () => (
-    <div className="w-full h-full flex flex-col items-center p-4 text-slate-200">
-       {error && (
-          <Alert variant="destructive" className="mb-4 w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
-            <XCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-       )}
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold text-slate-100">Crop Your Question</h2>
-        <p className="text-slate-400">Drag to select the area with the question you want to solve.</p>
-      </div>
-      <div className="w-full flex-1 bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-        {capturedImage && (
-          <ReactCrop
-            crop={crop}
-            onChange={(c, percentCrop) => setCrop(c)}
-            aspect={undefined}
-          >
-            <Image
-              ref={imgRef}
-              src={capturedImage}
-              alt="Captured question to crop"
-              width={1200}
-              height={675}
-              onLoad={onImageLoad}
-              className="w-full h-auto max-h-[70vh] object-contain"
-            />
-          </ReactCrop>
-        )}
-      </div>
-      <div className="flex w-full gap-4 mt-4">
-        <Button onClick={handleRetake} className="w-full text-lg py-6">
-          <RefreshCw className="mr-2 h-5 w-5" />
-          Retake
-        </Button>
-        <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
-          <Bot className="mr-2 h-5 w-5" />
-          Get Solution
-        </Button>
-      </div>
-    </div>
-  );
-  
-  const renderSolvingScreen = () => (
-    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
-        </div>
-        
-        <div className="w-full">
-            <Card className="min-h-[200px] bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-                <CardHeader>
-                  <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <LoadingDots className="justify-start" />
-                </CardContent>
-            </Card>
-        </div>
-
-        <Button onClick={handleStartScanning} className="w-full text-lg py-6" disabled>
-            <RefreshCw className="mr-2 h-5 w-5" />
-            Scan Another Question
-        </Button>
-    </div>
-  );
-  
-  const renderResultScreen = () => (
-    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="mb-3">
-            <div className="flex flex-col items-center text-center">
-                <Logo className="h-[220px] w-auto mt-2" animated />
-                <p className="text-xs text-slate-400 tracking-wider mt-2">Build By Harsh Pathak</p>
-            </div>
-        </div>
-        
-        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
-        </div>
-        
-        {identifiedSubject && identifiedSubject !== subject && (
-            <Alert className="bg-slate-800/50 border-slate-700 text-slate-200">
-              <BrainCircuit className="h-4 w-4 text-primary" />
-              <AlertTitle>Subject Correction</AlertTitle>
-              <AlertDescription>
-                You selected <strong>{subject}</strong>, but we detected a <strong>{identifiedSubject}</strong> question. We've provided the solution for {identifiedSubject}.
-              </AlertDescription>
-            </Alert>
-        )}
-
-        {error && (
-            <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
-              <XCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-        )}
-        
-        <div className="w-full">
-            <div className="flex items-center justify-center gap-4 mb-4">
-                <p className="text-slate-400">Language:</p>
-                <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                <TabsList className="bg-white/5 text-slate-300">
-                    <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white">English</TabsTrigger>
-                    <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white">Hindi</TabsTrigger>
-                </TabsList>
-                </Tabs>
-            </div>
-            {isTranslating ? (
-              <div className="space-y-6">
-                <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-                    <CardHeader>
-                      <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <LoadingDots className="justify-start" />
-                    </CardContent>
-                </Card>
-                <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-slate-100">
-                            <NotebookText />
-                            Key Formulas
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <LoadingDots className="justify-start" />
-                    </CardContent>
-                </Card>
-              </div>
-            ) : solution ? (
-                <div className="space-y-6">
-                    <SolutionDisplay solution={solution} />
-                    {formulas && (
-                        <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-slate-100">
-                                    <NotebookText />
-                                    Key Formulas
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <MathRenderer text={formulas} />
-                            </CardContent>
-                        </Card>
-                    )}
-                </div>
-            ) : !error ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-slate-800 border border-slate-700 shadow-sm min-h-[200px]">
-                    <Bot size={48} className="mb-4 text-primary" />
-                    <h3 className="text-xl font-semibold">Processing Error</h3>
-                    <p className="text-slate-400">Could not generate a solution. Please try scanning again.</p>
-                </div>
-            ) : null}
-        </div>
-
-        <div className="flex w-full gap-4">
-          <Button onClick={handleStartScanning} className="w-full text-base py-6">
-              <RefreshCw className="mr-2 h-5 w-5" />
-              Scan Another
-          </Button>
-          {user ? (
-            <Button onClick={handleSaveSolution} disabled={isSaving || solutionSaved} className="w-full text-base py-6">
-              {isSaving ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : <Download className="mr-2 h-5 w-5" />}
-              {isSaving ? 'Saving...' : solutionSaved ? 'Saved!' : 'Save Solution'}
-            </Button>
-          ) : (
-            <Button asChild className="w-full text-base py-6 animate-pulse-glow">
-              <Link href="/login">
-                <Download className="mr-2 h-5 w-5" />
-                Login to Save
-              </Link>
-            </Button>
-          )}
-        </div>
-    </div>
-  );
 
   return (
     <main className={cn(
@@ -718,7 +769,13 @@ export default function Home() {
         ? "flex flex-col items-center justify-center p-4" 
         : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
     )}>
-      {appState === 'welcome' && renderWelcomeScreen()}
+      {appState === 'welcome' && (
+        <WelcomeScreen 
+          subject={subject} 
+          setSubject={setSubject} 
+          handleStartScanning={handleStartScanning} 
+        />
+      )}
       
       {appState !== 'welcome' && (
         <div className={cn(
@@ -734,7 +791,7 @@ export default function Home() {
                   {user ? (
                       <div className="flex items-center gap-2 sm:gap-4">
                           <Link href="/profile" className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2 px-2 sm:px-4 rounded-full")}>
-                              <div className="h-8 w-8 rounded-full overflow-hidden">
+                              <div className="h-9 w-9 rounded-full overflow-hidden">
                                   <ProfileIcon />
                               </div>
                               <span className="hidden sm:inline">{user.displayName || user.email}</span>
@@ -752,10 +809,58 @@ export default function Home() {
               </div>
           </header>
           
-          {appState === 'scanning' && renderScanningScreen()}
-          {appState === 'cropping' && renderCroppingScreen()}
-          {appState === 'solving' && renderSolvingScreen()}
-          {appState === 'result' && renderResultScreen()}
+          {appState === 'scanning' && (
+            <ScanningScreen
+              hasCameraPermission={hasCameraPermission}
+              videoRef={videoRef}
+              canvasRef={canvasRef}
+              error={error}
+              flashSupported={flashSupported}
+              isFlashOn={isFlashOn}
+              toggleFlash={toggleFlash}
+              zoomSupported={zoomSupported}
+              handleZoomChange={handleZoomChange}
+              handleScan={handleScan}
+            />
+          )}
+          {appState === 'cropping' && (
+            <CroppingScreen
+              error={error}
+              capturedImage={capturedImage}
+              crop={crop}
+              setCrop={setCrop}
+              imgRef={imgRef}
+              onImageLoad={onImageLoad}
+              handleRetake={handleRetake}
+              handleGetSolution={handleGetSolution}
+            />
+          )}
+          {appState === 'solving' && (
+            <SolvingScreen
+              croppedImage={croppedImage}
+              handleStartScanning={handleStartScanning}
+            />
+          )}
+          {appState === 'result' && (
+            <ResultScreen
+              user={user}
+              croppedImage={croppedImage}
+              identifiedSubject={identifiedSubject}
+              subject={subject}
+              error={error}
+              language={language}
+              isTranslating={isTranslating}
+              handleLanguageChange={handleLanguageChange}
+              solution={solution}
+              topic={topic}
+              formulas={formulas}
+              handleStartScanning={handleStartScanning}
+              handleSaveSolution={handleSaveSolution}
+              isSaving={isSaving}
+              solutionSaved={solutionSaved}
+              router={router}
+            />
+          )}
         </div>
       )}
     </main>
