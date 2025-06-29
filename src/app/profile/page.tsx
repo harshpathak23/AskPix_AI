@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, LogOut, Loader2, Home, FileWarning } from "lucide-react";
+import { Download, LogOut, Loader2, Home, FileWarning, Trash2 } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
@@ -10,12 +10,22 @@ import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { useEffect, useState, useCallback } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
-import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError } from "firebase/firestore";
+import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError, doc, deleteDoc } from "firebase/firestore";
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ProfileIcon } from "@/components/icons/profile-icon";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SavedSolution {
     id: string;
@@ -62,6 +72,8 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [solutionsLoading, setSolutionsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [solutionToDelete, setSolutionToDelete] = useState<SavedSolution | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const { toast } = useToast();
 
     const handleLogout = useCallback(async () => {
@@ -110,6 +122,29 @@ export default function ProfilePage() {
 
         return () => unsubscribeAuth();
     }, [router]);
+
+    const handleDeleteSolution = async () => {
+        if (!solutionToDelete || !user) return;
+
+        setIsDeleting(true);
+        try {
+            await deleteDoc(doc(db, "users", user.uid, "solutions", solutionToDelete.id));
+            toast({
+                title: "Solution Deleted",
+                description: `"${solutionToDelete.topic}" has been removed.`,
+            });
+            setSolutionToDelete(null); // Close the dialog on success
+        } catch (e) {
+            console.error("Error deleting solution: ", e);
+            toast({
+                title: "Deletion Failed",
+                description: "Could not delete the solution. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     const handleDownload = async (solution: SavedSolution) => {
         if (solution.language === 'hi') {
@@ -294,7 +329,12 @@ export default function ProfilePage() {
             <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
                 <Logo className="h-[150px] w-auto aspect-[9/16]" />
             </Link>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+                <Button asChild>
+                    <Link href="/">
+                        <Home className="mr-2 h-4 w-4" /> Home
+                    </Link>
+                </Button>
                 <Button onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" /> Logout
                 </Button>
@@ -316,7 +356,7 @@ export default function ProfilePage() {
             <CardHeader>
                 <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
                 <CardDescription className="text-slate-400">
-                    Download your previously solved questions as PDF or HTML.
+                    Download or delete your previously solved questions.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -334,23 +374,29 @@ export default function ProfilePage() {
                     <ul className="space-y-4">
                         {solutions.map((file) => (
                             <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border border-purple-900/50 hover:brightness-110 transition-all gap-4">
-                            <div className="flex items-center gap-4">
-                                <Image
-                                    src={file.croppedImage}
-                                    alt="Question thumbnail"
-                                    width={80}
-                                    height={45}
-                                    className="rounded-md object-cover aspect-video bg-slate-700"
-                                />
-                                <div className="flex-grow">
-                                    <p className="font-semibold text-slate-100">{file.topic}</p>
-                                    <p className="text-sm text-slate-400">{file.identifiedSubject} &middot; Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
+                                <div className="flex items-center gap-4 flex-grow">
+                                    <Image
+                                        src={file.croppedImage}
+                                        alt="Question thumbnail"
+                                        width={80}
+                                        height={45}
+                                        className="rounded-md object-cover aspect-video bg-slate-700"
+                                    />
+                                    <div className="flex-grow">
+                                        <p className="font-semibold text-slate-100">{file.topic}</p>
+                                        <p className="text-sm text-slate-400">{file.identifiedSubject} &middot; Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <Button size="sm" onClick={() => handleDownload(file)} className="self-end sm:self-center">
-                                    <Download className="mr-2 h-4 w-4"/>
-                                    Download
-                            </Button>
+                                <div className="flex items-center gap-2 self-end sm:self-center">
+                                    <Button size="sm" onClick={() => handleDownload(file)}>
+                                        <Download className="mr-2 h-4 w-4"/>
+                                        Download
+                                    </Button>
+                                    <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
+                                        <Trash2 className="mr-2 h-4 w-4"/>
+                                        Delete
+                                    </Button>
+                                </div>
                             </li>
                         ))}
                     </ul>
@@ -364,6 +410,28 @@ export default function ProfilePage() {
             </CardContent>
         </Card>
       </div>
+
+       <AlertDialog open={!!solutionToDelete} onOpenChange={(open) => !open && setSolutionToDelete(null)}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the solution for "{solutionToDelete?.topic}" from your account.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setSolutionToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                    onClick={handleDeleteSolution}
+                    disabled={isDeleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Delete Solution
+                </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
     );
 }
