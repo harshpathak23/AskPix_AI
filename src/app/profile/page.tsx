@@ -112,6 +112,64 @@ export default function ProfilePage() {
     }, [router]);
 
     const handleDownload = async (solution: SavedSolution) => {
+        if (solution.language === 'hi') {
+            const htmlContent = `<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution: ${solution.topic}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVZs3OFDGU4awxMmuAyBCPRbNEOTNaEftGWhUbGasKceMn/bVCTX" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });">
+    </script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.6; background-color: #22272e; color: #cdd9e5; padding: 1rem; max-width: 800px; margin: auto; }
+        .container { background-color: #2d333b; border-radius: 8px; padding: 1rem 2rem 2rem 2rem; }
+        img { max-width: 100%; height: auto; display: block; margin: 1.5rem 0; border-radius: 6px; }
+        h1, h2 { color: #f0f6fc; border-bottom: 1px solid #484f58; padding-bottom: 0.5rem; }
+        h1 { font-size: 1.75rem; }
+        h2 { font-size: 1.5rem; }
+        .content-block { margin-top: 1.5rem; }
+        .text-content { white-space: pre-wrap; word-wrap: break-word; font-size: 1rem; }
+        .katex-display { padding: 1em 0; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Question</h1>
+        <img src="${solution.croppedImage}" alt="Question Image">
+        
+        <h2>Topic: ${solution.topic}</h2>
+        
+        <div class="content-block">
+            <h2>Solution</h2>
+            <div class="text-content">${solution.solution}</div>
+        </div>
+        
+        ${solution.formulas ? `
+        <div class="content-block">
+            <h2>Key Formulas</h2>
+            <div class="text-content">${solution.formulas}</div>
+        </div>
+        ` : ''}
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `solution-${solution.id}.html`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            return;
+        }
+
+        // Existing PDF logic for English solutions
         const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
         const margin = 15;
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -135,8 +193,7 @@ export default function ProfilePage() {
             const logoHeight = logoWidth / aspectRatio;
             const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
             
-            // Add a dark background rectangle to ensure the light parts of the logo are visible
-            doc.setFillColor(23, 23, 31); // A dark slate color, similar to the app's dark theme
+            doc.setFillColor(23, 23, 31);
             doc.rect(logoX - 5, yPos - 5, logoWidth + 10, logoHeight + 10, 'F');
 
             doc.addImage(logoDataUrl, 'PNG', logoX, yPos, logoWidth, logoHeight);
@@ -261,7 +318,7 @@ export default function ProfilePage() {
             <CardHeader>
                 <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
                 <CardDescription className="text-slate-400">
-                    Download your previously solved questions as PDF.
+                    Download your previously solved questions as PDF or HTML.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -294,7 +351,7 @@ export default function ProfilePage() {
                             </div>
                             <Button size="sm" onClick={() => handleDownload(file)} className="self-end sm:self-center">
                                     <Download className="mr-2 h-4 w-4"/>
-                                    Download Pdf
+                                    Download
                             </Button>
                             </li>
                         ))}
