@@ -335,7 +335,7 @@ export default function ProfilePage() {
                 ) : (
                     <ul className="space-y-4">
                         {solutions.map((file) => (
-                            <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-black/40 hover:bg-black/60 transition-colors gap-4">
+                            <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border border-purple-900/50 hover:brightness-110 transition-all gap-4">
                             <div className="flex items-center gap-4">
                                 <Image
                                     src={file.croppedImage}
