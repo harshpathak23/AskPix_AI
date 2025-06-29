@@ -427,23 +427,23 @@ export default function Home() {
         
         <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
           <TabsList className="grid w-full grid-cols-3 gap-3 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
+              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
                   <FunctionSquare className="h-4 w-4" />
                   <span className="font-medium text-xs">Math</span>
               </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
+              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
                   <Atom className="h-4 w-4" />
                   <span className="font-medium text-xs">Physics</span>
               </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
+              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
                   <TestTube className="h-4 w-4" />
                   <span className="font-medium text-xs">Chemistry</span>
               </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
+              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
                   <Dna className="h-4 w-4" />
                   <span className="font-medium text-xs">Biology</span>
               </TabsTrigger>
-              <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
+              <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
                   <BrainCircuit className="h-4 w-4" />
                   <span className="font-medium text-xs">General Question</span>
               </TabsTrigger>
@@ -632,8 +632,8 @@ export default function Home() {
                 <p className="text-slate-400">Language:</p>
                 <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
                 <TabsList className="bg-white/5 text-slate-300">
-                    <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">English</TabsTrigger>
-                    <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Hindi</TabsTrigger>
+                    <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white">English</TabsTrigger>
+                    <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white">Hindi</TabsTrigger>
                 </TabsList>
                 </Tabs>
             </div>
@@ -738,7 +738,7 @@ export default function Home() {
                               </Avatar>
                               <span className="hidden sm:inline">{user.displayName || user.email}</span>
                           </Link>
-                          <Button variant="secondary" size="sm" onClick={handleLogout}>
+                          <Button variant="secondary-gradient" size="sm" onClick={handleLogout}>
                               <LogOut className="h-4 w-4 sm:mr-2" />
                               <span className="hidden sm:inline">Logout</span>
                           </Button>
