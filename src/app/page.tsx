@@ -727,7 +727,7 @@ export default function Home() {
         )}>
            <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
               <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => appState !== 'welcome' && setAppState('welcome')}>
-                  <Logo className="h-8 w-8" />
+                  <Logo className="h-[150px] w-[85px]" />
                   <span className="hidden sm:inline">AskPix AI</span>
               </Link>
               <div>

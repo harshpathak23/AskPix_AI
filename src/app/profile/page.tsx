@@ -292,7 +292,7 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
             <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
-                <Logo className="h-8 w-8" />
+                <Logo className="h-[150px] w-[85px]" />
             </Link>
             <div className="flex items-center gap-4">
                 <Button onClick={handleLogout}>
