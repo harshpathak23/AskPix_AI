@@ -330,13 +330,13 @@ export default function ProfilePage() {
                 <Logo className="h-[150px] w-auto aspect-[9/16]" />
             </Link>
             <div className="flex items-center gap-2 sm:gap-4">
-                <Button asChild>
+                <Button asChild size="icon">
                     <Link href="/">
-                        <Home className="mr-2 h-4 w-4" /> Home
+                        <Home />
                     </Link>
                 </Button>
-                <Button onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                <Button onClick={handleLogout} size="icon">
+                    <LogOut />
                 </Button>
             </div>
         </header>
