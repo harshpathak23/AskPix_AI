@@ -14,7 +14,7 @@ import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError } fro
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface SavedSolution {
@@ -292,7 +292,7 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
             <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
-                <Logo className="h-[150px] w-[85px]" />
+                <Logo className="h-[150px] w-auto aspect-[9/16]" />
             </Link>
             <div className="flex items-center gap-4">
                 <Button onClick={handleLogout}>
@@ -303,6 +303,7 @@ export default function ProfilePage() {
         
         <div className="flex items-center gap-6 mb-8">
             <Avatar className="w-20 h-20 text-lg border-2 border-primary/50">
+                <AvatarImage src="/default-profile-icon.png" alt="User Profile Icon" />
                 <AvatarFallback>
                     <User className="w-10 h-10" />
                 </AvatarFallback>
