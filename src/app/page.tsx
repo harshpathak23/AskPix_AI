@@ -790,7 +790,7 @@ export default function Home() {
               <div>
                   {user ? (
                       <div className="flex items-center gap-2 sm:gap-4">
-                          <Link href="/profile" className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2 px-2 sm:px-4 rounded-full")}>
+                          <Link href="/profile" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "flex items-center gap-2 px-2 sm:px-4 rounded-full")}>
                               <div className="h-9 w-9 rounded-full overflow-hidden">
                                   <ProfileIcon />
                               </div>
