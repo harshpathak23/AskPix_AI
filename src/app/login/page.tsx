@@ -159,7 +159,7 @@ export default function LoginPage() {
               </div>
               {errors.password && <p className="text-sm text-red-400 mt-1">{errors.password.message}</p>}
             </div>
-            <Button type="submit" variant="secondary-gradient" className="w-full text-base py-6" disabled={isSubmitting}>
+            <Button type="submit" className="w-full text-base py-6" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               Login
             </Button>

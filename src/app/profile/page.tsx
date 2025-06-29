@@ -295,7 +295,7 @@ export default function ProfilePage() {
                 <Logo className="h-8 w-8" />
             </Link>
             <div className="flex items-center gap-4">
-                <Button variant="secondary-gradient" onClick={handleLogout}>
+                <Button onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" /> Logout
                 </Button>
             </div>

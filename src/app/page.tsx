@@ -738,13 +738,13 @@ export default function Home() {
                               </Avatar>
                               <span className="hidden sm:inline">{user.displayName || user.email}</span>
                           </Link>
-                          <Button variant="secondary-gradient" size="sm" onClick={handleLogout}>
+                          <Button size="sm" onClick={handleLogout}>
                               <LogOut className="h-4 w-4 sm:mr-2" />
                               <span className="hidden sm:inline">Logout</span>
                           </Button>
                       </div>
                   ) : (
-                      <Button asChild variant="secondary-gradient">
+                      <Button asChild>
                           <Link href="/login">Login / Sign Up</Link>
                       </Button>
                   )}
