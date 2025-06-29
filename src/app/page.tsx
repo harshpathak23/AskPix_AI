@@ -744,7 +744,7 @@ export default function Home() {
                           </Button>
                       </div>
                   ) : (
-                      <Button asChild>
+                      <Button asChild variant="secondary-gradient">
                           <Link href="/login">Login / Sign Up</Link>
                       </Button>
                   )}
