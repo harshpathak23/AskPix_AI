@@ -378,11 +378,15 @@ export default function Home() {
             createdAt: serverTimestamp(),
         });
         setSolutionSaved(true);
-        toast({ 
+        toast({
             title: "Success!", 
             description: "Solution saved to your profile.",
             action: (
-              <ToastAction altText="View Profile" onClick={() => router.push('/profile')}>
+              <ToastAction
+                altText="View Profile"
+                onClick={() => router.push('/profile')}
+                className="bg-gradient-to-r from-purple-500 to-cyan-400 text-primary-foreground border-transparent hover:opacity-90"
+              >
                 View Profile
               </ToastAction>
             ),
