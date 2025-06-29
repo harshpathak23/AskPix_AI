@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { useEffect, useState, useCallback } from "react";
-import type { User as FirebaseUser } from "firebase/auth";
 import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError, doc, deleteDoc } from "firebase/firestore";
 import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
@@ -27,6 +26,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/context/auth-context";
 
 interface SavedSolution {
     id: string;
@@ -68,9 +68,8 @@ const cleanupTextForPdf = (text: string | null | undefined): string => {
 
 export default function ProfilePage() {
     const router = useRouter();
-    const [user, setUser] = useState<FirebaseUser | null>(null);
+    const { user, loading } = useAuth();
     const [solutions, setSolutions] = useState<SavedSolution[]>([]);
-    const [loading, setLoading] = useState(true);
     const [solutionsLoading, setSolutionsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [solutionToDelete, setSolutionToDelete] = useState<SavedSolution | null>(null);
@@ -88,41 +87,41 @@ export default function ProfilePage() {
     }, [router, toast]);
 
     useEffect(() => {
-        const unsubscribeAuth = auth.onAuthStateChanged((currentUser) => {
-            if (currentUser) {
-                setUser(currentUser);
-                setLoading(false);
+        // If auth is done loading and there's no user, redirect.
+        if (!loading && !user) {
+            router.push('/login');
+            return;
+        }
 
-                const solutionsColl = collection(db, "users", currentUser.uid, "solutions");
-                const q = query(solutionsColl, orderBy("createdAt", "desc"));
+        // If we have a user, fetch their solutions.
+        if (user) {
+            const solutionsColl = collection(db, "users", user.uid, "solutions");
+            const q = query(solutionsColl, orderBy("createdAt", "desc"));
+            
+            const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
+                const fetchedSolutions = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                })) as SavedSolution[];
                 
-                const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
-                    const fetchedSolutions = querySnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data(),
-                    })) as SavedSolution[];
-                    
-                    setSolutions(fetchedSolutions);
-                    setSolutionsLoading(false);
-                    setError(null);
-                }, (e: FirestoreError) => {
-                     console.error("Error fetching solutions: ", e);
-                     let description = "An error occurred while fetching your solutions.";
-                     if (e.code === 'permission-denied') {
-                         description = "Permission denied. Please check your Firestore security rules to allow access.";
-                     }
-                     setError(description);
-                     setSolutionsLoading(false);
-                });
-                
-                return () => unsubscribeSnapshot();
-            } else {
-                router.push('/login');
-            }
-        });
+                setSolutions(fetchedSolutions);
+                setSolutionsLoading(false);
+                setError(null);
+            }, (e: FirestoreError) => {
+                 console.error("Error fetching solutions: ", e);
+                 let description = "An error occurred while fetching your solutions.";
+                 if (e.code === 'permission-denied') {
+                     description = "Permission denied. Please check your Firestore security rules to allow access.";
+                 }
+                 setError(description);
+                 setSolutionsLoading(false);
+            });
+            
+            // Cleanup function for the snapshot listener
+            return () => unsubscribeSnapshot();
+        }
+    }, [user, loading, router]);
 
-        return () => unsubscribeAuth();
-    }, [router]);
 
     const handleDeleteSolution = async () => {
         if (!solutionToDelete || !user) return;

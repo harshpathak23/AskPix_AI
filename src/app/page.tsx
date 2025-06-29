@@ -21,12 +21,13 @@ import { MathRenderer } from '@/components/math-renderer';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { LoadingDots } from '@/components/loading-dots';
 import { auth, db } from '@/lib/firebase';
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { type User as FirebaseUser } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { collection, addDoc, serverTimestamp, FirestoreError } from 'firebase/firestore';
 import { useRouter, type AppRouterInstance } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
 import { ProfileIcon } from '@/components/icons/profile-icon';
+import { useAuth } from '@/context/auth-context';
 
 
 // Define the states for our app's screen flow
@@ -397,7 +398,7 @@ export default function Home() {
   const [zoomSupported, setZoomSupported] = useState(false);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [solutionSaved, setSolutionSaved] = useState(false);
   const { toast } = useToast();
@@ -407,13 +408,6 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
 
   // This effect now ONLY handles cleaning up the camera stream when leaving the scanning screen.
   useEffect(() => {
