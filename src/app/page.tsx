@@ -735,7 +735,6 @@ export default function Home() {
                       <div className="flex items-center gap-2 sm:gap-4">
                           <Link href="/profile" className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2 px-2 sm:px-4 rounded-full")}>
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src="/default-profile-icon.png" alt="User Profile Icon" />
                                 <AvatarFallback>
                                     <User className="h-5 w-5" />
                                 </AvatarFallback>

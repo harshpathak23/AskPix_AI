@@ -303,7 +303,6 @@ export default function ProfilePage() {
         
         <div className="flex items-center gap-6 mb-8">
             <Avatar className="w-20 h-20 text-lg border-2 border-primary/50">
-                <AvatarImage src="/default-profile-icon.png" alt="User Profile Icon" />
                 <AvatarFallback>
                     <User className="w-10 h-10" />
                 </AvatarFallback>
