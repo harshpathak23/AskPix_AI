@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, FC } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -86,7 +86,7 @@ const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStar
         </Button>
       </div>
     </div>
-)
+);
 
 interface ScanningScreenProps {
   hasCameraPermission: boolean | null;
@@ -165,7 +165,7 @@ const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef
         </div>
       </div>
     </div>
-)
+);
 
 interface CroppingScreenProps {
   error: string | null;
@@ -220,7 +220,7 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
         </Button>
       </div>
     </div>
-)
+);
 
 interface SolvingScreenProps {
   croppedImage: string | null;
@@ -248,7 +248,7 @@ const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage, handleStartScanni
             Scan Another Question
         </Button>
     </div>
-)
+);
 
 interface ResultScreenProps {
   user: FirebaseUser | null;
@@ -377,7 +377,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
           )}
         </div>
     </div>
-)
+);
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('welcome');
@@ -790,12 +790,12 @@ export default function Home() {
               <div>
                   {user ? (
                       <div className="flex items-center gap-2 sm:gap-4">
-                          <Link href="/profile" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "flex items-center gap-2 px-2 sm:px-4 rounded-full")}>
-                              <div className="h-9 w-9 rounded-full overflow-hidden">
-                                  <ProfileIcon />
-                              </div>
-                              <span className="hidden sm:inline">{user.displayName || user.email}</span>
-                          </Link>
+                          <Button asChild size="sm">
+                              <Link href="/profile">
+                                  <User className="h-4 w-4 sm:mr-2" />
+                                  <span className="hidden sm:inline">View Profile</span>
+                              </Link>
+                          </Button>
                           <Button size="sm" onClick={handleLogout}>
                               <LogOut className="h-4 w-4 sm:mr-2" />
                               <span className="hidden sm:inline">Logout</span>
