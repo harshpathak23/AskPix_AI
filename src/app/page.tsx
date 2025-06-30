@@ -19,14 +19,12 @@ import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { MathRenderer } from '@/components/math-renderer';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { LoadingDots } from '@/components/loading-dots';
 import { auth, db } from '@/lib/firebase';
 import { type User as FirebaseUser } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { collection, addDoc, serverTimestamp, FirestoreError } from 'firebase/firestore';
 import { useRouter, type AppRouterInstance } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
-import { ProfileIcon } from '@/components/icons/profile-icon';
 import { useAuth } from '@/context/auth-context';
 
 
@@ -288,6 +286,58 @@ const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage }) => {
   );
 };
 
+
+const translationSteps = [
+  { text: 'Preparing content for translation...', icon: <Bot className="h-5 w-5 text-slate-400" /> },
+  { text: 'Generating solution in new language...', icon: <BrainCircuit className="h-5 w-5 text-slate-400" /> },
+  { text: 'Formatting final answer...', icon: <NotebookText className="h-5 w-5 text-slate-400" /> },
+];
+
+const TranslatingScreen: FC = () => {
+  const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    const timers = translationSteps.map((_, index) =>
+      setTimeout(() => {
+        setActiveStep(index + 1);
+      }, (index + 1) * 800)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+        <CardHeader>
+          <CardTitle className="text-slate-100 flex items-center gap-2">
+            <Loader2 className="animate-spin" /> Translating Solution
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {translationSteps.map((step, index) => (
+              <li key={index} className="flex items-center gap-4 transition-opacity duration-300" style={{ opacity: activeStep >= index ? 1 : 0.4 }}>
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-800 border border-slate-700 shrink-0">
+                  {activeStep > index ? (
+                    <Check className="h-5 w-5 text-green-400" />
+                  ) : activeStep === index ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  ) : (
+                    step.icon
+                  )}
+                </div>
+                <span className={cn("font-medium", activeStep > index ? "text-slate-400 line-through" : "text-slate-200")}>
+                  {step.text}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 interface ResultScreenProps {
   user: FirebaseUser | null;
   croppedImage: string | null;
@@ -348,27 +398,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                 </Tabs>
             </div>
             {isTranslating ? (
-              <div className="space-y-6">
-                <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-                    <CardHeader>
-                      <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <LoadingDots className="justify-start" />
-                    </CardContent>
-                </Card>
-                <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-slate-100">
-                            <NotebookText />
-                            Key Formulas
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <LoadingDots className="justify-start" />
-                    </CardContent>
-                </Card>
-              </div>
+              <TranslatingScreen />
             ) : solution ? (
                 <div className="space-y-6">
                     <SolutionDisplay solution={solution} />
@@ -438,6 +468,7 @@ export default function Home() {
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [solutionSaved, setSolutionSaved] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -456,15 +487,17 @@ export default function Home() {
     }
   }, [appState]);
 
-  const handleLogout = async () => {
-    try {
-        await signOut(auth);
-        setAppState('welcome'); // Go back to welcome screen on logout
-        // No need to router.push, the onAuthStateChanged will handle user state
-    } catch (error) {
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    // Don't wait for signOut to complete. Navigate immediately for a faster user experience.
+    setAppState('welcome');
+    signOut(auth).catch(error => {
+        // Log error but don't block user. The onAuthStateChanged listener is the source of truth.
         console.error("Error signing out: ", error);
         toast({ title: "Logout Failed", description: "There was an error signing out.", variant: "destructive" });
-    }
+    }).finally(() => {
+        setIsLoggingOut(false);
+    });
   };
 
   const startCamera = async () => {
@@ -828,8 +861,8 @@ export default function Home() {
                                     <span className="hidden sm:inline">View Profile</span>
                                 </Link>
                             </Button>
-                            <Button size="sm" onClick={handleLogout}>
-                                <LogOut className="h-4 w-4 sm:mr-2" />
+                            <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
+                                {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
                                 <span className="hidden sm:inline">Logout</span>
                             </Button>
                         </div>

@@ -74,16 +74,19 @@ export default function ProfilePage() {
     const [error, setError] = useState<string | null>(null);
     const [solutionToDelete, setSolutionToDelete] = useState<SavedSolution | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { toast } = useToast();
 
-    const handleLogout = useCallback(async () => {
-        try {
-            await signOut(auth);
-            router.push('/login');
-        } catch (error) {
+    const handleLogout = useCallback(() => {
+        setIsLoggingOut(true);
+        // Navigate immediately for a faster experience. The auth listener will handle the state.
+        router.push('/login');
+        signOut(auth).catch(error => {
             console.error("Error signing out: ", error);
             toast({ title: "Logout Failed", description: "There was an error signing out.", variant: "destructive" });
-        }
+        }).finally(() => {
+            setIsLoggingOut(false);
+        });
     }, [router, toast]);
 
     useEffect(() => {
@@ -327,8 +330,8 @@ export default function ProfilePage() {
                         <Home />
                     </Link>
                 </Button>
-                <Button onClick={handleLogout} size="icon">
-                    <LogOut />
+                <Button onClick={handleLogout} size="icon" disabled={isLoggingOut}>
+                    {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
                 </Button>
             </div>
         </header>
@@ -365,8 +368,10 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent>
                 {solutionsLoading ? (
-                    <div className="flex justify-center items-center py-12">
-                        <Loader2 className="w-8 h-8 animate-spin" />
+                    <div className="space-y-4">
+                        <Skeleton className="h-20 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                        <Skeleton className="h-20 w-full" />
                     </div>
                 ) : error ? (
                      <Alert variant="destructive" className="bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">

@@ -90,6 +90,10 @@ export default {
           '0%, 100%': { opacity: '0.4' },
           '50%': { opacity: '1' },
         },
+        'shimmer': {
+          'from': { transform: 'translateX(-100%)' },
+          'to': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -97,6 +101,7 @@ export default {
         'shine': 'shine 4s ease-out 2s infinite',
         'scan-line': 'scan-line 3s linear infinite',
         'fade-in-out': 'fade-in-out 3s ease-in-out infinite',
+        'shimmer': 'shimmer 2s linear infinite',
       },
     },
   },
