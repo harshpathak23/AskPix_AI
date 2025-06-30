@@ -14,7 +14,6 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
       <div className="animate-pulse-and-fade">
           <Logo className="h-64 w-64" animated />
       </div>
-      <p className="mt-4 text-3xl font-bold text-slate-100 animate-fade-in-slow">AskPix AI</p>
     </div>
   );
 };
