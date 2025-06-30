@@ -13,7 +13,7 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
       <div className="animate-pulse-and-fade">
         <div className="relative h-64 w-64">
           <img
-            src="/icon.png?v=3"
+            src="/images/icon.png"
             alt="AskPix AI App Icon"
             className="object-contain w-full h-full"
           />
