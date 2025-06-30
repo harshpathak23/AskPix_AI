@@ -43,7 +43,7 @@ interface WelcomeScreenProps {
   handleStartScanning: () => void;
 }
 const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning }) => (
-    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-50 duration-100 h-[95vh] min-h-[700px] border border-purple-900/50">
+    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-10 h-[95vh] min-h-[700px] border border-purple-900/50">
       <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
         <Logo animated className="h-[320px] w-[320px] mb-2" />
         <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
@@ -840,7 +840,7 @@ export default function Home() {
     <>
       <SplashScreen isVisible={showSplash} />
       <main className={cn(
-        "min-h-screen transition-opacity duration-500",
+        "min-h-screen transition-opacity duration-100",
         showSplash ? "opacity-0" : "opacity-100",
         appState === 'welcome' 
           ? "flex flex-col items-center justify-center p-4" 
