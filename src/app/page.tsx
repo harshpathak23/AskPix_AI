@@ -26,6 +26,7 @@ import { collection, addDoc, serverTimestamp, FirestoreError } from 'firebase/fi
 import { useRouter, type AppRouterInstance } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
 import { useAuth } from '@/context/auth-context';
+import { SplashScreen } from '@/components/splash-screen';
 
 
 // Define the states for our app's screen flow
@@ -448,6 +449,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
 );
 
 export default function Home() {
+  const [showSplash, setShowSplash] = useState(true);
   const [appState, setAppState] = useState<AppState>('welcome');
   const [solution, setSolution] = useState<string | null>(null);
   const [topic, setTopic] = useState<string | null>(null);
@@ -476,6 +478,13 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        setShowSplash(false);
+    }, 2800); // Animation is 2.5s, so 2.8s is a good time to hide it.
+    return () => clearTimeout(timer);
+  }, []);
 
   // This effect now ONLY handles cleaning up the camera stream when leaving the scanning screen.
   useEffect(() => {
@@ -827,107 +836,111 @@ export default function Home() {
 
 
   return (
-    <main className={cn(
-      "min-h-screen",
-      appState === 'welcome' 
-        ? "flex flex-col items-center justify-center p-4" 
-        : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
-    )}>
-      {appState === 'welcome' && (
-        <WelcomeScreen 
-          subject={subject} 
-          setSubject={setSubject} 
-          handleStartScanning={handleStartScanning} 
-        />
-      )}
-      
-      {appState !== 'welcome' && (
-        <div className={cn(
-          "w-full shadow-sm flex flex-1 flex-col mt-4",
-          "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-t-xl"
-        )}>
-           {(appState !== 'scanning' && appState !== 'cropping') && (
-            <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
-                <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => appState !== 'welcome' && setAppState('welcome')}>
-                    <Logo className="h-[150px] w-auto aspect-[9/16]" />
-                    <span className="hidden sm:inline">AskPix AI</span>
-                </Link>
-                <div>
-                    {user ? (
-                        <div className="flex items-center gap-2 sm:gap-4">
-                            <Button asChild size="sm">
-                                <Link href="/profile">
-                                    <User className="h-4 w-4 sm:mr-2" />
-                                    <span className="hidden sm:inline">View Profile</span>
-                                </Link>
-                            </Button>
-                            <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
-                                {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
-                                <span className="hidden sm:inline">Logout</span>
-                            </Button>
-                        </div>
-                    ) : (
-                        <Button asChild>
-                            <Link href="/login">Login / Sign Up</Link>
-                        </Button>
-                    )}
-                </div>
-            </header>
-           )}
-          
-          {appState === 'scanning' && (
-            <ScanningScreen
-              hasCameraPermission={hasCameraPermission}
-              videoRef={videoRef}
-              canvasRef={canvasRef}
-              error={error}
-              flashSupported={flashSupported}
-              isFlashOn={isFlashOn}
-              toggleFlash={toggleFlash}
-              zoomSupported={zoomSupported}
-              handleZoomChange={handleZoomChange}
-              handleScan={handleScan}
-            />
-          )}
-          {appState === 'cropping' && (
-            <CroppingScreen
-              error={error}
-              capturedImage={capturedImage}
-              crop={crop}
-              setCrop={setCrop}
-              imgRef={imgRef}
-              onImageLoad={onImageLoad}
-              handleRetake={handleRetake}
-              handleGetSolution={handleGetSolution}
-            />
-          )}
-          {appState === 'solving' && (
-            <SolvingScreen
-              croppedImage={croppedImage}
-            />
-          )}
-          {appState === 'result' && (
-            <ResultScreen
-              user={user}
-              croppedImage={croppedImage}
-              identifiedSubject={identifiedSubject}
-              subject={subject}
-              error={error}
-              language={language}
-              isTranslating={isTranslating}
-              handleLanguageChange={handleLanguageChange}
-              solution={solution}
-              topic={topic}
-              formulas={formulas}
-              handleStartScanning={handleStartScanning}
-              handleSaveSolution={handleSaveSolution}
-              isSaving={isSaving}
-              solutionSaved={solutionSaved}
-              router={router}
-            />
-          )}
-        </div>
-      )}
-    </main>
+    <>
+      <SplashScreen isVisible={showSplash} />
+      <main className={cn(
+        "min-h-screen transition-opacity duration-500",
+        showSplash ? "opacity-0" : "opacity-100",
+        appState === 'welcome' 
+          ? "flex flex-col items-center justify-center p-4" 
+          : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
+      )}>
+        {appState === 'welcome' && (
+          <WelcomeScreen 
+            subject={subject} 
+            setSubject={setSubject} 
+            handleStartScanning={handleStartScanning} 
+          />
+        )}
+        
+        {appState !== 'welcome' && (
+          <div className={cn(
+            "w-full shadow-sm flex flex-1 flex-col mt-4",
+            "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-t-xl"
+          )}>
+            {(appState !== 'scanning' && appState !== 'cropping') && (
+              <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
+                  <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => appState !== 'welcome' && setAppState('welcome')}>
+                      <Logo className="h-[150px] w-auto aspect-[9/16]" />
+                      <span className="hidden sm:inline">AskPix AI</span>
+                  </Link>
+                  <div>
+                      {user ? (
+                          <div className="flex items-center gap-2 sm:gap-4">
+                              <Button asChild size="sm">
+                                  <Link href="/profile">
+                                      <User className="h-4 w-4 sm:mr-2" />
+                                      <span className="hidden sm:inline">View Profile</span>
+                                  </Link>
+                              </Button>
+                              <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
+                                  {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
+                                  <span className="hidden sm:inline">Logout</span>
+                              </Button>
+                          </div>
+                      ) : (
+                          <Button asChild>
+                              <Link href="/login">Login / Sign Up</Link>
+                          </Button>
+                      )}
+                  </div>
+              </header>
+            )}
+            
+            {appState === 'scanning' && (
+              <ScanningScreen
+                hasCameraPermission={hasCameraPermission}
+                videoRef={videoRef}
+                canvasRef={canvasRef}
+                error={error}
+                flashSupported={flashSupported}
+                isFlashOn={isFlashOn}
+                toggleFlash={toggleFlash}
+                zoomSupported={zoomSupported}
+                handleZoomChange={handleZoomChange}
+                handleScan={handleScan}
+              />
+            )}
+            {appState === 'cropping' && (
+              <CroppingScreen
+                error={error}
+                capturedImage={capturedImage}
+                crop={crop}
+                setCrop={setCrop}
+                imgRef={imgRef}
+                onImageLoad={onImageLoad}
+                handleRetake={handleRetake}
+                handleGetSolution={handleGetSolution}
+              />
+            )}
+            {appState === 'solving' && (
+              <SolvingScreen
+                croppedImage={croppedImage}
+              />
+            )}
+            {appState === 'result' && (
+              <ResultScreen
+                user={user}
+                croppedImage={croppedImage}
+                identifiedSubject={identifiedSubject}
+                subject={subject}
+                error={error}
+                language={language}
+                isTranslating={isTranslating}
+                handleLanguageChange={handleLanguageChange}
+                solution={solution}
+                topic={topic}
+                formulas={formulas}
+                handleStartScanning={handleStartScanning}
+                handleSaveSolution={handleSaveSolution}
+                isSaving={isSaving}
+                solutionSaved={solutionSaved}
+                router={router}
+              />
+            )}
+          </div>
+        )}
+      </main>
+    </>
   );
 }

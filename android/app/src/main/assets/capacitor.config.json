@@ -1,0 +1,8 @@
+{
+	"appId": "com.askpix.ai",
+	"appName": "AskPix AI",
+	"webDir": "out",
+	"server": {
+		"androidScheme": "https"
+	}
+}

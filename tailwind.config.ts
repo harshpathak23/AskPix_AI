@@ -94,6 +94,16 @@ export default {
           'from': { transform: 'translateX(-100%)' },
           'to': { transform: 'translateX(100%)' },
         },
+        'pulse-and-fade': {
+          '0%': { transform: 'scale(0.95)', opacity: '0.8' },
+          '50%': { transform: 'scale(1.05)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'fade-in-slow': {
+          '0%': { opacity: '0' },
+          '50%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -102,6 +112,8 @@ export default {
         'scan-line': 'scan-line 3s linear infinite',
         'fade-in-out': 'fade-in-out 3s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
+        'pulse-and-fade': 'pulse-and-fade 2.5s cubic-bezier(0.4, 0, 0.6, 1) forwards',
+        'fade-in-slow': 'fade-in-slow 2.5s ease-out forwards',
       },
     },
   },
