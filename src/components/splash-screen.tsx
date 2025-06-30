@@ -10,15 +10,12 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       )}
     >
-      <div className="animate-pulse-and-fade">
-        <div className="relative h-64 w-64">
-          <img
-            src="/images/icon.png"
-            alt="AskPix AI App Icon"
-            className="object-contain w-full h-full"
-          />
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine" />
-        </div>
+      <div className="relative h-64 w-64">
+        <img
+          src="/images/icon.png"
+          alt="AskPix AI App Icon"
+          className="object-contain w-full h-full"
+        />
       </div>
     </div>
   );
