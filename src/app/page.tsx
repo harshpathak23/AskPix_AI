@@ -483,7 +483,7 @@ export default function Home() {
   useEffect(() => {
     const timer = setTimeout(() => {
         setShowSplash(false);
-    }, 2800); // Animation is 2.5s, so 2.8s is a good time to hide it.
+    }, 800); // Animation is 0.6s, so 0.8s is a good time to hide it.
     return () => clearTimeout(timer);
   }, []);
 
