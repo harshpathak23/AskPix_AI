@@ -6,7 +6,7 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
   return (
     <div
       className={cn(
-        'fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-r from-purple-600 to-cyan-400 transition-opacity duration-300 ease-in-out',
+        'fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-r from-purple-600 to-cyan-400 transition-opacity duration-200 ease-in-out',
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       )}
     >
