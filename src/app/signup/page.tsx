@@ -25,7 +25,7 @@ const SignupSchema = z.object({
 type SignupFormValues = z.infer<typeof SignupSchema>;
 
 const SignupProgress = () => (
-    <div className="flex flex-col items-center justify-center p-8 text-center">
+    <div className="flex flex-col items-center justify-center p-8 text-center animate-in fade-in-50">
         <Loader2 className="w-12 h-12 animate-spin text-primary mb-6" />
         <h2 className="text-2xl font-bold text-slate-100 mb-2">Creating Your Account</h2>
         <p className="text-slate-400 mb-6">Please wait while we get everything ready for you.</p>
@@ -141,8 +141,7 @@ export default function SignupPage() {
                     {errors.password && <p className="text-sm text-red-400 mt-1">{errors.password.message}</p>}
                     </div>
                     <Button type="submit" className="w-full text-base py-6" disabled={isSubmitting}>
-                    {isSubmitting && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                    Create Account
+                      Create Account
                     </Button>
                 </form>
                 <div className="mt-4 text-center text-sm text-slate-400">
