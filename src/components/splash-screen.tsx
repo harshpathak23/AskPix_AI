@@ -27,6 +27,17 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
           }}
         />
       </div>
+      <p
+        className={cn(
+          'text-white/80 text-sm tracking-wider mt-4 opacity-0', // Start with opacity-0 to prevent FOUC
+          isVisible && 'animate-pop-in'
+        )}
+        style={{
+          animationDuration: isVisible ? '0.4s' : '0s',
+        }}
+      >
+        Build By Harsh Pathak
+      </p>
     </div>
   );
 };
