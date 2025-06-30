@@ -1,6 +1,6 @@
 'use client';
 
-import { Logo } from '@/components/icons/logo';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
@@ -12,7 +12,16 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
       )}
     >
       <div className="animate-pulse-and-fade">
-          <Logo className="h-64 w-64" animated />
+        <div className="relative h-64 w-64 overflow-hidden">
+          <Image
+            src="/icon.png"
+            alt="AskPix AI App Icon"
+            fill
+            priority
+            className="object-contain"
+          />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine" />
+        </div>
       </div>
     </div>
   );
