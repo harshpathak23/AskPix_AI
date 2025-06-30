@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, FC } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -225,31 +225,68 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
 
 interface SolvingScreenProps {
   croppedImage: string | null;
-  handleStartScanning: () => void;
 }
-const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage, handleStartScanning }) => (
-    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
-        </div>
-        
-        <div className="w-full">
-            <Card className="min-h-[200px] bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-                <CardHeader>
-                  <CardTitle className="text-slate-100">Detailed Solution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <LoadingDots className="justify-start" />
-                </CardContent>
-            </Card>
-        </div>
 
-        <Button onClick={handleStartScanning} className="w-full text-lg py-6" disabled>
-            <RefreshCw className="mr-2 h-5 w-5" />
-            Scan Another Question
-        </Button>
+const solvingSteps = [
+  { text: 'Analyzing image content...', icon: <ScanLine className="h-5 w-5 text-slate-400" /> },
+  { text: 'Identifying academic subject...', icon: <BrainCircuit className="h-5 w-5 text-slate-400" /> },
+  { text: 'Formulating step-by-step solution...', icon: <Bot className="h-5 w-5 text-slate-400" /> },
+  { text: 'Formatting final answer...', icon: <NotebookText className="h-5 w-5 text-slate-400" /> },
+];
+
+const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage }) => {
+  const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    // This timer simulates the AI "thinking" through steps.
+    const timers = solvingSteps.map((_, index) =>
+      setTimeout(() => {
+        setActiveStep(index + 1);
+      }, (index + 1) * 1200) // Stagger the "completion" of each step
+    );
+
+    // Cleanup timers if the component unmounts
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+
+  return (
+    <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+      <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+        {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
+      </div>
+
+      <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+        <CardHeader>
+          <CardTitle className="text-slate-100 flex items-center gap-2">
+            <Bot className="animate-pulse" /> Generating Solution
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {solvingSteps.map((step, index) => (
+              <li key={index} className="flex items-center gap-4 transition-opacity duration-300" style={{ opacity: activeStep >= index ? 1 : 0.4 }}>
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-800 border border-slate-700 shrink-0">
+                  {activeStep > index ? (
+                    <Check className="h-5 w-5 text-green-400" />
+                  ) : activeStep === index ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  ) : (
+                    step.icon
+                  )}
+                </div>
+                <span className={cn("font-medium", activeStep > index ? "text-slate-400 line-through" : "text-slate-200")}>
+                  {step.text}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
-);
+  );
+};
 
 interface ResultScreenProps {
   user: FirebaseUser | null;
@@ -834,7 +871,6 @@ export default function Home() {
           {appState === 'solving' && (
             <SolvingScreen
               croppedImage={croppedImage}
-              handleStartScanning={handleStartScanning}
             />
           )}
           {appState === 'result' && (
