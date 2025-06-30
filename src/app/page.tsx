@@ -737,7 +737,7 @@ export default function Home() {
         if (e instanceof FirestoreError) {
             switch(e.code) {
                 case 'permission-denied':
-                    description = 'Permission denied. Please check your Firestore security rules.';
+                    description = "Permission denied. Please check your Firestore security rules.";
                     break;
                 case 'resource-exhausted':
                 case 'invalid-argument': // Firestore uses invalid-argument for too large documents
