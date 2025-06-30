@@ -1,7 +1,5 @@
-
 'use client';
 
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
@@ -13,13 +11,11 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
       )}
     >
       <div className="animate-pulse-and-fade">
-        <div className="relative h-64 w-64 overflow-hidden">
-          <Image
+        <div className="relative h-64 w-64">
+          <img
             src="/icon.png"
             alt="AskPix AI App Icon"
-            fill
-            priority
-            className="object-contain"
+            className="object-contain w-full h-full"
           />
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine" />
         </div>
