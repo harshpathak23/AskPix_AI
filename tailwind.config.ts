@@ -105,6 +105,16 @@ export default {
           '50%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        'pop-in': {
+          '0%': {
+            transform: 'scale(0.8)',
+            opacity: '0',
+          },
+          '100%': {
+            transform: 'scale(1)',
+            opacity: '1',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -115,6 +125,7 @@ export default {
         'shimmer': 'shimmer 2s linear infinite',
         'pulse-and-fade': 'pulse-and-fade 2.5s cubic-bezier(0.4, 0, 0.6, 1) forwards',
         'fade-in-slow': 'fade-in-slow 2.5s ease-out forwards',
+        'pop-in': 'pop-in 0.6s ease-out forwards',
       },
     },
   },

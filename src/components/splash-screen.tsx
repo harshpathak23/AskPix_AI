@@ -14,7 +14,11 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
         <img
           src="/images/icon.png"
           alt="AskPix AI App Icon"
-          className="object-contain w-full h-full"
+          className={cn(
+            'object-contain w-full h-full',
+            // Add pop-in animation when the splash screen is visible
+            isVisible && 'animate-pop-in'
+          )}
         />
       </div>
     </div>
