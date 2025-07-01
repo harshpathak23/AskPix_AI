@@ -1,9 +1,8 @@
 
-import type {NextConfig} from 'next';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const webpack = require('webpack');
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   experimental: {
@@ -50,7 +49,7 @@ const nextConfig: NextConfig = {
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
           /^node:/,
-          (resource: { request: string }) => {
+          (resource) => {
             resource.request = resource.request.replace(/^node:/, '');
           }
         )
@@ -60,4 +59,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
