@@ -1,5 +1,7 @@
 
 import type {NextConfig} from 'next';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const webpack = require('webpack');
 
 const nextConfig: NextConfig = {
   output: 'export',
@@ -38,6 +40,16 @@ const nextConfig: NextConfig = {
         http2: false,
         async_hooks: false,
       };
+
+      // This plugin strips the 'node:' prefix from imports, allowing the fallbacks to work.
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /^node:/,
+          (resource: { request: string }) => {
+            resource.request = resource.request.replace(/^node:/, '');
+          }
+        )
+      );
     }
     return config;
   },
