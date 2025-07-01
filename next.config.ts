@@ -35,6 +35,7 @@ const nextConfig: NextConfig = {
         tls: false,
         net: false,
         dns: false,
+        http2: false,
       };
     }
     return config;
