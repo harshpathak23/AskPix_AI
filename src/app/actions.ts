@@ -1,3 +1,4 @@
+'use server';
 
 import { z } from 'zod';
 import { solveQuestion } from '@/ai/flows/solve-question';
