@@ -1,4 +1,3 @@
-'use server';
 
 /**
  * @fileOverview A question processor AI agent.
