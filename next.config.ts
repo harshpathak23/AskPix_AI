@@ -36,6 +36,7 @@ const nextConfig: NextConfig = {
         net: false,
         dns: false,
         http2: false,
+        async_hooks: false,
       };
     }
     return config;
