@@ -11,7 +11,6 @@ import { signOut } from 'firebase/auth';
 
 
 import { Button, buttonVariants } from '@/components/ui/button';
-import { getSolution } from './actions';
 import { Logo } from '@/components/icons/logo';
 import { SolutionDisplay } from '@/components/solution-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -650,14 +649,20 @@ export default function Home() {
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
 
-      const response = await getSolution({ 
-        photoDataUri: croppedDataUri, 
-        language,
-        subject 
+      const apiResponse = await fetch('/api/solve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          photoDataUri: croppedDataUri,
+          language,
+          subject,
+        }),
       });
-      
-      if (response.error) {
-        setError(response.error);
+
+      const response = await apiResponse.json();
+
+      if (!apiResponse.ok || response.error) {
+        setError(response.error || 'Failed to get a solution from the server.');
         setAppState('cropping');
       } else if (response.solution) {
         setTopic(response.topic || null);
@@ -667,8 +672,8 @@ export default function Home() {
         setAppState('result');
       }
     } catch (e) {
-      console.error("Cropping or solving failed", e);
-      setError("Failed to process the image. Please try again.");
+      console.error("API call or cropping failed", e);
+      setError("Failed to connect to the server. Please try again.");
       setAppState('cropping');
     }
   };
@@ -685,21 +690,31 @@ export default function Home() {
 
     const subjectForTranslation = identifiedSubject || subject;
 
-    const response = await getSolution({ 
-      photoDataUri: croppedImage, 
-      language: newLang, 
-      subject: subjectForTranslation
-    });
-    
-    if (response.error) {
-      setError(response.error);
-      // Keep previous solution steps visible on translation error
-    } else if (response.solution) {
-      setSolution(response.solution);
-      setFormulas(response.formulas || null);
+    try {
+      const apiResponse = await fetch('/api/solve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          photoDataUri: croppedImage,
+          language: newLang,
+          subject: subjectForTranslation,
+        }),
+      });
+      
+      const response = await apiResponse.json();
+
+      if (!apiResponse.ok || response.error) {
+        setError(response.error || 'Failed to translate the solution.');
+      } else if (response.solution) {
+        setSolution(response.solution);
+        setFormulas(response.formulas || null);
+      }
+    } catch (e) {
+      console.error("Translation API call failed", e);
+      setError("Failed to connect to the server for translation.");
+    } finally {
+      setIsTranslating(false);
     }
-    
-    setIsTranslating(false);
   };
 
   const handleScan = () => {
