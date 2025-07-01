@@ -4,7 +4,7 @@ import type {NextConfig} from 'next';
 const webpack = require('webpack');
 
 const nextConfig: NextConfig = {
-  output: 'export',
+  
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
