@@ -1,13 +1,7 @@
-
-const webpack = require('webpack');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  experimental: {
-    appDir: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -30,32 +24,6 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  webpack: (config, {isServer}) => {
-    if (!isServer) {
-      // Don't resolve Node.js built-in modules on the client to prevent build errors.
-      config.resolve.fallback = {
-        fs: false,
-        tls: false,
-        net: false,
-        dns: false,
-        http2: false,
-        async_hooks: require.resolve('../../src/lib/async-hooks-mock.js'),
-        perf_hooks: false,
-        express: require.resolve('../../src/lib/express-mock.js'),
-      };
-
-      // This plugin strips the 'node:' prefix from imports, allowing the fallbacks to work.
-      config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /^node:/,
-          (resource) => {
-            resource.request = resource.request.replace(/^node:/, '');
-          }
-        )
-      );
-    }
-    return config;
   },
 };
 
