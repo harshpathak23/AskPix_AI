@@ -39,6 +39,7 @@ const nextConfig: NextConfig = {
         dns: false,
         http2: false,
         async_hooks: false,
+        perf_hooks: false,
       };
 
       // This plugin strips the 'node:' prefix from imports, allowing the fallbacks to work.
