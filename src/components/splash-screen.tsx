@@ -1,3 +1,4 @@
+
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -22,9 +23,6 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
             // Add pop-in animation when the splash screen is visible
             isVisible && 'animate-pop-in'
           )}
-          style={{
-            animationDuration: isVisible ? '0.4s' : '0s',
-          }}
         />
       </div>
       <p
@@ -32,9 +30,6 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
           'text-white/80 text-sm tracking-wider mt-4 opacity-0', // Start with opacity-0 to prevent FOUC
           isVisible && 'animate-pop-in'
         )}
-        style={{
-          animationDuration: isVisible ? '0.4s' : '0s',
-        }}
       >
         Build By Harsh Pathak
       </p>

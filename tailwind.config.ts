@@ -125,7 +125,7 @@ export default {
         'shimmer': 'shimmer 2s linear infinite',
         'pulse-and-fade': 'pulse-and-fade 2.5s cubic-bezier(0.4, 0, 0.6, 1) forwards',
         'fade-in-slow': 'fade-in-slow 2.5s ease-out forwards',
-        'pop-in': 'pop-in 0.4s ease-out forwards',
+        'pop-in': 'pop-in 0.8s ease-out forwards',
       },
     },
   },
