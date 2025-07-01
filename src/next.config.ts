@@ -5,7 +5,10 @@ const webpack = require('webpack');
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  /* config options here */
+  reactStrictMode: true,
+  experimental: {
+    appDir: true,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
