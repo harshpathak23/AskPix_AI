@@ -27,6 +27,13 @@ const nextConfig = {
       },
     ],
   },
+  exportPathMap: async function () {
+    return {
+      '/': { page: '/' },
+      '/login': { page: '/login' },
+      '/signup': { page: '/signup' },
+    };
+  },
   webpack: (config, { isServer }) => {
     // For client-side bundles (which is what a static export is),
     // replace server-side packages with mock files.
