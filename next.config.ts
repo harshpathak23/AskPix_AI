@@ -40,6 +40,7 @@ const nextConfig: NextConfig = {
         http2: false,
         async_hooks: require.resolve('./src/lib/async-hooks-mock.js'),
         perf_hooks: false,
+        express: require.resolve('./src/lib/express-mock.js'),
       };
 
       // This plugin strips the 'node:' prefix from imports, allowing the fallbacks to work.
