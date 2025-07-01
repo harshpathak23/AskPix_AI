@@ -1,3 +1,4 @@
+'use client';
 
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
