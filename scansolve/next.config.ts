@@ -38,7 +38,7 @@ const nextConfig: NextConfig = {
         net: false,
         dns: false,
         http2: false,
-        async_hooks: false,
+        async_hooks: require.resolve('../src/lib/async-hooks-mock.js'),
         perf_hooks: false,
       };
 
