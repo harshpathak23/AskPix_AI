@@ -4,7 +4,7 @@ import type {NextConfig} from 'next';
 const webpack = require('webpack');
 
 const nextConfig: NextConfig = {
-  
+  output: 'standalone',
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
