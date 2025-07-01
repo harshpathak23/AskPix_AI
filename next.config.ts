@@ -2,7 +2,7 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  output: 'standalone',
   reactStrictMode: true,
   typescript: {
     ignoreBuildErrors: true,
@@ -26,13 +26,6 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  exportPathMap: async function () {
-    return {
-      '/': { page: '/' },
-      '/login': { page: '/login' },
-      '/signup': { page: '/signup' },
-    };
   },
   webpack: (config, { isServer }) => {
     // For client-side bundles (which is what a static export is),
