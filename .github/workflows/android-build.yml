@@ -19,11 +19,13 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: gradle
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
+        cache: 'npm'
 
     - name: Install dependencies
       run: npm install
@@ -31,11 +33,11 @@ jobs:
     - name: Sync Capacitor project
       run: npm run cap:sync
 
-    - name: Build Android App
+    - name: Build Android App with stacktrace
       run: |
         cd android
         chmod +x ./gradlew
-        ./gradlew assembleDebug --no-daemon
+        ./gradlew assembleDebug --no-daemon --stacktrace
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
