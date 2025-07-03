@@ -14,7 +14,8 @@
     "ionic:build": "npm run build",
     "ionic:serve": "npm run dev",
     "cap:sync": "npm run build && npx cap sync",
-    "android:add": "npx cap add android"
+    "android:add": "npx cap add android",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@capacitor/android": "6.0.0",
