@@ -1,4 +1,3 @@
-
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -16,7 +15,7 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
     >
       <div className="relative h-64 w-64">
         <img
-          src="/logo.png"
+          src="/images/icon.png"
           alt="AskPix AI App Icon"
           className={cn(
             'object-contain w-full h-full',
