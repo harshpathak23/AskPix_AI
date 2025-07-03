@@ -3,7 +3,7 @@
 /**
  * @fileOverview An AI agent that identifies the subject of and solves a question from an image.
  *
- * - solveQuestion - A function that handles the question-solving process.
+ * - solveQuestionFlow - The Genkit flow that handles the question-solving process.
  */
 
 import {ai} from '@/ai/genkit';
@@ -13,10 +13,6 @@ import {
   SolveQuestionOutputSchema,
   type SolveQuestionOutput,
 } from '@/ai/schemas';
-
-export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  return solveQuestionFlow(input);
-}
 
 // It specifies a stable vision model and requests a specific JSON output format.
 const solveQuestionPrompt = ai.definePrompt({
@@ -51,7 +47,7 @@ User's subject hint: {{{subject}}}
 `,
 });
 
-const solveQuestionFlow = ai.defineFlow(
+export const solveQuestionFlow = ai.defineFlow(
   {
     name: 'solveQuestionFlow',
     inputSchema: SolveQuestionInputSchema,

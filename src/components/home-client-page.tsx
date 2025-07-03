@@ -27,7 +27,7 @@ import { useRouter, type AppRouterInstance } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
 import { useAuth } from '@/context/auth-context';
 import { SplashScreen } from '@/components/splash-screen';
-import { solveQuestion } from '@/ai/flows/solve-question';
+import { solveQuestion } from '@/app/actions';
 
 
 // Define the states for our app's screen flow
