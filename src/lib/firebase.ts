@@ -12,6 +12,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Check if all required Firebase config values are present
+const appIsValid =
+  firebaseConfig.apiKey &&
+  firebaseConfig.authDomain &&
+  firebaseConfig.projectId &&
+  firebaseConfig.storageBucket &&
+  firebaseConfig.messagingSenderId &&
+  firebaseConfig.appId;
+
 // Initialize Firebase and export the services.
 // This structure prevents the app from crashing if config is missing.
 let app: FirebaseApp | null = null;
@@ -19,7 +28,8 @@ let auth: Auth | null = null;
 let db: Firestore | null = null;
 let storage: Storage | null = null;
 
-if (typeof window !== 'undefined' && firebaseConfig.apiKey) {
+// Only initialize Firebase on the client-side and if the config is valid
+if (typeof window !== 'undefined' && appIsValid) {
   try {
     app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     auth = getAuth(app);
@@ -34,7 +44,7 @@ if (typeof window !== 'undefined' && firebaseConfig.apiKey) {
     storage = null;
   }
 } else if (typeof window !== 'undefined') {
-    console.warn("Firebase API key is not available. Firebase services will be disabled.");
+    console.warn("Firebase configuration is incomplete or missing. Firebase services will be disabled.");
 }
 
 export { app, auth, db, storage };
