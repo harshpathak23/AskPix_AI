@@ -1,3 +1,4 @@
+'use server';
 
 /**
  * @fileOverview An AI agent that identifies the subject of a question from an image.

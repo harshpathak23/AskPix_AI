@@ -1,3 +1,4 @@
+'use server';
 
 /**
  * @fileOverview An AI agent that identifies the subject of and solves a question from an image.
@@ -35,11 +36,10 @@ It is critical that your entire response is in the language with this code: {{{l
 Your task has multiple steps:
 1.  **Analyze the Image**: Examine the image and understand the full question, including any text, diagrams, or formulas.
 2.  **Identify the Subject**: First, you MUST determine the academic subject of the question. Choose from the following options: Mathematics, Physics, Chemistry, Biology, General. The user may have provided a hint, but you should make your own determination based on the image content. Put this in the 'identifiedSubject' field.
-3.  **Identify the Topic**: Based on your subject identification, identify the specific academic topic of the question. This should be a short, descriptive title (e.g., "Pythagorean Theorem", "Stoichiometry") in the requested language. Put this in the 'topic' field.
-4.  **Provide a Solution**: Write a clear, comprehensive, and detailed step-by-step solution for the identified subject and topic. Explain each step thoroughly as if you were teaching the concept to a student for the first time. Break down complex concepts into simple, easy-to-understand parts. Your goal is to leave no room for confusion.
+3.  **Provide a Solution**: Write a clear, comprehensive, and detailed step-by-step solution for the identified subject and topic. Explain each step thoroughly as if you were teaching the concept to a student for the first time. Break down complex concepts into simple, easy-to-understand parts. Your goal is to leave no room for confusion.
     - Use LaTeX for all mathematical formulas (e.g., $...$ for inline, $$...$$ for block).
     - Use double newlines to separate paragraphs for better readability and structure.
-5.  **Provide relevant formulas**: In the 'formulas' field, provide a list of important formulas related to the question's topic.
+4.  **Provide relevant formulas**: In the 'formulas' field, provide a list of important formulas related to the question's topic.
     - Each formula must be formatted using LaTeX and be on a new line.
     - This section must also be in the requested language.
 
