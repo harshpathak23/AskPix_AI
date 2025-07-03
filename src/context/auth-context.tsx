@@ -19,8 +19,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If Firebase auth is not initialized, we can't check for a user.
-    // Set loading to false and user to null.
+    // If Firebase auth is not initialized (e.g., during build), we can't check for a user.
+    // Set loading to false and user to null to prevent the app from crashing.
     if (!auth) {
       setLoading(false);
       return;
