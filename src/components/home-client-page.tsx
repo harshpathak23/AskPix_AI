@@ -798,6 +798,10 @@ export default function HomeClientPage() {
         toast({ title: "Error", description: "No solution to save.", variant: "destructive" });
         return;
     }
+    if (!db) {
+        toast({ title: "Save Failed", description: "Could not connect to the database. Please check your configuration.", variant: "destructive" });
+        return;
+    }
 
     setIsSaving(true);
     try {

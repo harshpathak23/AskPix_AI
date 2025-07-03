@@ -99,6 +99,12 @@ export default function ProfileClientPage() {
 
         // If we have a user, fetch their solutions.
         if (user) {
+            if (!db) {
+                setError("Firebase is not configured correctly. Saved solutions cannot be loaded.");
+                setSolutionsLoading(false);
+                return;
+            }
+
             const solutionsColl = collection(db, "users", user.uid, "solutions");
             const q = query(solutionsColl, orderBy("createdAt", "desc"));
             
@@ -129,6 +135,15 @@ export default function ProfileClientPage() {
 
     const handleDeleteSolution = async () => {
         if (!solutionToDelete || !user) return;
+        
+        if (!db) {
+            toast({
+                title: "Deletion Failed",
+                description: "Could not connect to the database.",
+                variant: "destructive",
+            });
+            return;
+        }
 
         setIsDeleting(true);
         try {
