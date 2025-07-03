@@ -12,21 +12,29 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// This check ensures firebase is only initialized on the client side.
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-let storage: Storage;
+// Initialize Firebase and export the services.
+// This structure prevents the app from crashing if config is missing.
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
+let storage: Storage | null = null;
 
-if (typeof window !== 'undefined') {
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApp();
+if (typeof window !== 'undefined' && firebaseConfig.apiKey) {
+  try {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+  } catch (e) {
+    console.error("Firebase initialization failed:", e);
+    // Reset to null if initialization fails
+    app = null;
+    auth = null;
+    db = null;
+    storage = null;
   }
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
+} else if (typeof window !== 'undefined') {
+    console.warn("Firebase API key is not available. Firebase services will be disabled.");
 }
 
 export { app, auth, db, storage };
