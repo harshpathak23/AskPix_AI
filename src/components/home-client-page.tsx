@@ -27,6 +27,7 @@ import { useRouter, type AppRouterInstance } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
 import { useAuth } from '@/context/auth-context';
 import { SplashScreen } from '@/components/splash-screen';
+import { solveQuestion } from '@/ai/flows/solve-question';
 
 
 // Define the states for our app's screen flow
@@ -649,31 +650,34 @@ export default function HomeClientPage() {
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
 
-      const apiResponse = await fetch('/api/solve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          photoDataUri: croppedDataUri,
-          language,
-          subject,
-        }),
+      // Direct server action call
+      const result = await solveQuestion({
+        photoDataUri: croppedDataUri,
+        language,
+        subject,
       });
 
-      const response = await apiResponse.json();
-
-      if (!apiResponse.ok || response.error) {
-        setError(response.error || 'Failed to get a solution from the server.');
+      if (!result?.solution || !result?.topic || !result.identifiedSubject) {
+        setError('Could not generate a solution. Please try a different question or crop a different area.');
         setAppState('cropping');
-      } else if (response.solution) {
-        setTopic(response.topic || null);
-        setSolution(response.solution);
-        setFormulas(response.formulas || null);
-        setIdentifiedSubject(response.identifiedSubject || subject);
+      } else {
+        setTopic(result.topic || null);
+        setSolution(result.solution);
+        setFormulas(result.formulas || null);
+        setIdentifiedSubject(result.identifiedSubject || subject);
         setAppState('result');
       }
     } catch (e) {
-      console.error("API call or cropping failed", e);
-      setError("Failed to connect to the server. Please try again.");
+      console.error("Server Action call failed", e);
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (e instanceof Error) {
+        if (e.message.includes('API key not valid')) {
+            errorMessage = 'Your Gemini API key is not valid. Please check your key and try again.';
+        } else {
+            errorMessage = e.message;
+        }
+      }
+      setError(errorMessage);
       setAppState('cropping');
     }
   };
@@ -691,27 +695,25 @@ export default function HomeClientPage() {
     const subjectForTranslation = identifiedSubject || subject;
 
     try {
-      const apiResponse = await fetch('/api/solve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          photoDataUri: croppedImage,
-          language: newLang,
-          subject: subjectForTranslation,
-        }),
+      const result = await solveQuestion({
+        photoDataUri: croppedImage,
+        language: newLang,
+        subject: subjectForTranslation,
       });
       
-      const response = await apiResponse.json();
-
-      if (!apiResponse.ok || response.error) {
-        setError(response.error || 'Failed to translate the solution.');
-      } else if (response.solution) {
-        setSolution(response.solution);
-        setFormulas(response.formulas || null);
+      if (!result?.solution) {
+        setError('Failed to translate the solution.');
+      } else {
+        setSolution(result.solution);
+        setFormulas(result.formulas || null);
       }
     } catch (e) {
-      console.error("Translation API call failed", e);
-      setError("Failed to connect to the server for translation.");
+      console.error("Translation Server Action failed", e);
+      let errorMessage = 'An unexpected error occurred during translation.';
+      if (e instanceof Error) {
+          errorMessage = e.message;
+      }
+      setError(errorMessage);
     } finally {
       setIsTranslating(false);
     }
