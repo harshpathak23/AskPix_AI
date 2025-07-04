@@ -655,7 +655,7 @@ export default function HomeClientPage() {
         // Mobile App: Call the deployed API endpoint
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         if (!apiBaseUrl) {
-          throw new Error("API URL is not configured. Please set NEXT_PUBLIC_API_BASE_URL in your environment.");
+          throw new Error("Could not connect to the AI service. The app has not been configured with a server address.");
         }
         
         const response = await fetch(`${apiBaseUrl}/api/solve`, {
@@ -735,7 +735,7 @@ export default function HomeClientPage() {
         // Mobile App: Call the deployed API endpoint
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         if (!apiBaseUrl) {
-            throw new Error("API URL is not configured. Please set NEXT_PUBLIC_API_BASE_URL in your environment.");
+            throw new Error("Could not connect to the AI service. The app has not been configured with a server address.");
         }
 
         const response = await fetch(`${apiBaseUrl}/api/solve`, {
