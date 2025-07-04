@@ -647,9 +647,8 @@ export default function HomeClientPage() {
       let result;
 
       if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call an API endpoint.
-        // Use the production URL if available, otherwise fall back to the debug URL for local testing.
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL_DEBUG;
+        // Mobile App: Call the deployed API endpoint
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         if (!apiBaseUrl) {
           throw new Error("Could not connect to the AI service. Please deploy the web app and set the NEXT_PUBLIC_API_BASE_URL environment variable.");
         }
@@ -728,11 +727,10 @@ export default function HomeClientPage() {
       };
 
       if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call an API endpoint.
-        // Use the production URL if available, otherwise fall back to the debug URL for local testing.
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL_DEBUG;
+        // Mobile App: Call the deployed API endpoint
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         if (!apiBaseUrl) {
-            throw new Error("Could not connect to the AI service. Please deploy the web app and set the NEXT_PUBLIC_API_BASE_URL environment variable.");
+            throw new Error("Could not connect to the AI service. The app has not been configured with a server address.");
         }
 
         const response = await fetch(`${apiBaseUrl}/api/solve`, {
