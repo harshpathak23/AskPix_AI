@@ -645,23 +645,50 @@ export default function HomeClientPage() {
     setAppState('solving');
     setError(null);
 
-    if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        setError("AI features are not available in the mobile app. Please use the web version.");
-        setAppState('result');
-        return;
-    }
-    
     try {
-      const { solveQuestion } = await import('@/app/actions');
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
 
-      // Direct server action call
-      const result = await solveQuestion({
-        photoDataUri: croppedDataUri,
-        language,
-        subject,
-      });
+      let result;
+
+      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
+        // Mobile App: Call the deployed API endpoint
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!apiBaseUrl) {
+          throw new Error("API URL is not configured. Please set NEXT_PUBLIC_API_BASE_URL in your environment.");
+        }
+        
+        const response = await fetch(`${apiBaseUrl}/api/solve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photoDataUri: croppedDataUri,
+            language,
+            subject,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `API request failed with status ${response.status}`);
+        }
+        result = await response.json();
+
+      } else {
+        // Web App: Use the direct server action call
+        const { solveQuestion } = await import('@/app/actions');
+        result = await solveQuestion({
+          photoDataUri: croppedDataUri,
+          language,
+          subject,
+        });
+      }
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
 
       if (!result?.solution || !result?.topic || !result.identifiedSubject) {
         setError('Could not generate a solution. Please try a different question or crop a different area.');
@@ -674,17 +701,13 @@ export default function HomeClientPage() {
         setAppState('result');
       }
     } catch (e) {
-      console.error("Server Action call failed", e);
+      console.error("Solution retrieval failed", e);
       let errorMessage = 'An unexpected error occurred. Please try again.';
       if (e instanceof Error) {
-        if (e.message.includes('API key not valid')) {
-            errorMessage = 'Your Gemini API key is not valid. Please check your key and try again.';
-        } else {
-            errorMessage = e.message;
-        }
+        errorMessage = e.message;
       }
       setError(errorMessage);
-      setAppState('cropping');
+      setAppState('result'); // Go to result screen to show the error
     }
   };
 
@@ -694,10 +717,6 @@ export default function HomeClientPage() {
       return;
     }
     
-    if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        return; // AI features are disabled, so do nothing.
-    }
-
     setIsTranslating(true);
     setError(null);
     setLanguage(newLang);
@@ -705,13 +724,41 @@ export default function HomeClientPage() {
     const subjectForTranslation = identifiedSubject || subject;
 
     try {
-      const { solveQuestion } = await import('@/app/actions');
-      const result = await solveQuestion({
-        photoDataUri: croppedImage,
-        language: newLang,
-        subject: subjectForTranslation,
-      });
+      let result;
+      const payload = {
+          photoDataUri: croppedImage,
+          language: newLang,
+          subject: subjectForTranslation,
+      };
+
+      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
+        // Mobile App: Call the deployed API endpoint
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!apiBaseUrl) {
+            throw new Error("API URL is not configured. Please set NEXT_PUBLIC_API_BASE_URL in your environment.");
+        }
+
+        const response = await fetch(`${apiBaseUrl}/api/solve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `API request failed with status ${response.status}`);
+        }
+        result = await response.json();
+      } else {
+        // Web App: Use the direct server action call
+        const { solveQuestion } = await import('@/app/actions');
+        result = await solveQuestion(payload);
+      }
       
+      if (result.error) {
+          throw new Error(result.error);
+      }
+
       if (!result?.solution) {
         setError('Failed to translate the solution.');
       } else {
@@ -719,7 +766,7 @@ export default function HomeClientPage() {
         setFormulas(result.formulas || null);
       }
     } catch (e) {
-      console.error("Translation Server Action failed", e);
+      console.error("Translation failed", e);
       let errorMessage = 'An unexpected error occurred during translation.';
       if (e instanceof Error) {
           errorMessage = e.message;
