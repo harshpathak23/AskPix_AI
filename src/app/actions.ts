@@ -1,10 +1,16 @@
-// Note: The 'use server' directive has been removed.
-// Server Actions are not compatible with the static export (`output: 'export'`)
-// required for this application's build process. A different backend approach
-// (like Firebase Functions) is needed to implement this functionality.
 
+'use server';
+
+import { solveQuestion as solveQuestionFlow } from '@/ai/flows/solve-question';
 import { type SolveQuestionInput, type SolveQuestionOutput } from '@/ai/schemas';
 
+/**
+ * This Server Action calls the Genkit flow to solve the question.
+ * The 'use server' directive ensures this code only runs on the server.
+ * @param input The question data including the image and other parameters.
+ * @returns The solution from the AI.
+ */
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  throw new Error('AI feature is temporarily disabled. Server Actions are not supported in this app\'s build configuration.');
+  // The actual AI processing is in the imported flow.
+  return solveQuestionFlow(input);
 }
