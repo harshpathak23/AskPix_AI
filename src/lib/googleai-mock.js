@@ -1,4 +1,18 @@
-// A browser-compatible mock for the '@genkit-ai/googleai' package.
-// This allows the Next.js static build to succeed by providing an empty module
-// for the client-side bundle, preventing server-only code from causing errors.
-module.exports = {};
+/**
+ * @fileoverview A browser-compatible mock for the '@genkit-ai/googleai' package.
+ * This mock provides a function that can be called without error on the client,
+ * allowing the static build to succeed.
+ */
+
+// The googleAI() function is called to configure the plugin. In the mock,
+// it doesn't need to do anything.
+const googleAI = () => {
+  return {
+    // Return a simple object that represents a plugin.
+    name: 'mock-google-ai',
+  };
+};
+
+module.exports = {
+  googleAI: googleAI,
+};
