@@ -38,11 +38,35 @@ type Language = 'en' | 'hi';
 
 
 interface WelcomeScreenProps {
+  user: FirebaseUser | null;
   subject: Subject;
   setSubject: (subject: Subject) => void;
   handleStartScanning: () => void;
 }
-const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning }) => (
+const WelcomeScreen: FC<WelcomeScreenProps> = ({ user, subject, setSubject, handleStartScanning }) => {
+  if (!user) {
+    // Special welcome screen for logged-out users, directing them to log in.
+    return (
+      <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-10 h-[95vh] min-h-[700px] border border-purple-900/50">
+        <div className="flex-1 flex flex-col justify-center items-center text-center space-y-6">
+          <Logo animated className="h-[220px] w-[220px]" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-100">Welcome to AskPix AI</h1>
+            <p className="text-slate-400 mt-2">Scan any question and get instant answers.</p>
+          </div>
+        </div>
+        <div className="flex-shrink-0 pt-4 pb-2">
+           <Button asChild size="lg" className="w-full text-lg py-6 animate-pulse-glow">
+              <Link href="/login">Login / Sign Up</Link>
+           </Button>
+           <p className="text-xs text-slate-400 tracking-wider text-center mt-4">Build By Harsh Pathak</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Default welcome screen for logged-in users.
+  return (
     <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-10 h-[95vh] min-h-[700px] border border-purple-900/50">
       <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
         <Logo animated className="h-[320px] w-[320px] mb-2" />
@@ -87,7 +111,8 @@ const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStar
         </Button>
       </div>
     </div>
-);
+  );
+}
 
 interface ScanningScreenProps {
   hasCameraPermission: boolean | null;
@@ -869,6 +894,7 @@ export default function HomeClientPage() {
       )}>
         {appState === 'welcome' && (
           <WelcomeScreen 
+            user={user}
             subject={subject} 
             setSubject={setSubject} 
             handleStartScanning={handleStartScanning} 
