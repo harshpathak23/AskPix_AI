@@ -909,7 +909,7 @@ export default function HomeClientPage() {
             {(appState !== 'scanning' && appState !== 'cropping') && (
               <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
                   <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => appState !== 'welcome' && setAppState('welcome')}>
-                      <Logo className="h-[150px] w-auto aspect-[9/16]" />
+                      {appState !== 'result' && <Logo className="h-[150px] w-auto aspect-[9/16]" />}
                       <span className="hidden sm:inline">AskPix AI</span>
                   </Link>
                   <div>
@@ -992,3 +992,5 @@ export default function HomeClientPage() {
     </>
   );
 }
+
+    
