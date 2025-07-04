@@ -27,7 +27,6 @@ import { useRouter, type AppRouterInstance } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
 import { useAuth } from '@/context/auth-context';
 import { SplashScreen } from '@/components/splash-screen';
-import { solveQuestion } from '@/app/actions';
 
 
 // Define the states for our app's screen flow
@@ -645,8 +644,15 @@ export default function HomeClientPage() {
 
     setAppState('solving');
     setError(null);
+
+    if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
+        setError("AI features are not available in the mobile app. Please use the web version.");
+        setAppState('result');
+        return;
+    }
     
     try {
+      const { solveQuestion } = await import('@/app/actions');
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
 
@@ -688,6 +694,10 @@ export default function HomeClientPage() {
       return;
     }
     
+    if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
+        return; // AI features are disabled, so do nothing.
+    }
+
     setIsTranslating(true);
     setError(null);
     setLanguage(newLang);
@@ -695,6 +705,7 @@ export default function HomeClientPage() {
     const subjectForTranslation = identifiedSubject || subject;
 
     try {
+      const { solveQuestion } = await import('@/app/actions');
       const result = await solveQuestion({
         photoDataUri: croppedImage,
         language: newLang,

@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
 
+const isStatic = process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true';
+
 const nextConfig = {
-  output: 'export',
+  output: isStatic ? 'export' : undefined,
   reactStrictMode: true,
   typescript: {
     ignoreBuildErrors: true,
