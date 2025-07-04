@@ -38,34 +38,11 @@ type Language = 'en' | 'hi';
 
 
 interface WelcomeScreenProps {
-  user: FirebaseUser | null;
   subject: Subject;
   setSubject: (subject: Subject) => void;
   handleStartScanning: () => void;
 }
-const WelcomeScreen: FC<WelcomeScreenProps> = ({ user, subject, setSubject, handleStartScanning }) => {
-  if (!user) {
-    // Special welcome screen for logged-out users, directing them to log in.
-    return (
-      <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-10 h-[95vh] min-h-[700px] border border-purple-900/50">
-        <div className="flex-1 flex flex-col justify-center items-center text-center space-y-6">
-          <Logo animated className="h-[220px] w-[220px]" />
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-100">Welcome to AskPix AI</h1>
-            <p className="text-slate-400 mt-2">Scan any question and get instant answers.</p>
-          </div>
-        </div>
-        <div className="flex-shrink-0 pt-4 pb-2">
-           <Button asChild size="lg" className="w-full text-lg py-6 animate-pulse-glow">
-              <Link href="/login">Login / Sign Up</Link>
-           </Button>
-           <p className="text-xs text-slate-400 tracking-wider text-center mt-4">Build By Harsh Pathak</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Default welcome screen for logged-in users.
+const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning }) => {
   return (
     <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-10 h-[95vh] min-h-[700px] border border-purple-900/50">
       <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
@@ -385,13 +362,6 @@ interface ResultScreenProps {
 }
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="mb-3">
-            <div className="flex flex-col items-center text-center">
-                <Logo className="h-[220px] w-auto mt-2" animated />
-                <p className="text-xs text-slate-400 tracking-wider mt-2">Build By Harsh Pathak</p>
-            </div>
-        </div>
-        
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
@@ -894,7 +864,6 @@ export default function HomeClientPage() {
       )}>
         {appState === 'welcome' && (
           <WelcomeScreen 
-            user={user}
             subject={subject} 
             setSubject={setSubject} 
             handleStartScanning={handleStartScanning} 
@@ -906,64 +875,32 @@ export default function HomeClientPage() {
             "w-full shadow-sm flex flex-1 flex-col mt-4",
             "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-t-xl"
           )}>
-            {(appState !== 'scanning' && appState !== 'cropping' && appState !== 'result') && (
-              <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
-                  <button className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
-                      <Logo className="h-[150px] w-auto aspect-[9/16]" />
-                      <span className="hidden sm:inline">AskPix AI</span>
-                  </button>
-                  <div>
-                      {user ? (
-                          <div className="flex items-center gap-2 sm:gap-4">
-                              <Button asChild size="sm">
-                                  <Link href="/profile">
-                                      <User className="h-4 w-4 sm:mr-2" />
-                                      <span className="hidden sm:inline">View Profile</span>
-                                  </Link>
-                              </Button>
-                              <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
-                                  {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
-                                  <span className="hidden sm:inline">Logout</span>
-                              </Button>
-                          </div>
-                      ) : (
-                          <Button asChild>
-                              <Link href="/login">Login / Sign Up</Link>
-                          </Button>
-                      )}
-                  </div>
-              </header>
-            )}
-            
-            {(appState === 'result') && (
-              <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
-                  <button className="invisible font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
-                      <Logo className="h-[150px] w-auto aspect-[9/16]" />
-                      <span className="hidden sm:inline">AskPix AI</span>
-                  </button>
-                  <div>
-                      {user ? (
-                          <div className="flex items-center gap-2 sm:gap-4">
-                              <Button asChild size="sm">
-                                  <Link href="/profile">
-                                      <User className="h-4 w-4 sm:mr-2" />
-                                      <span className="hidden sm:inline">View Profile</span>
-                                  </Link>
-                              </Button>
-                              <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
-                                  {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
-                                  <span className="hidden sm:inline">Logout</span>
-                              </Button>
-                          </div>
-                      ) : (
-                           <Button asChild>
-                              <Link href="/login">Login / Sign Up</Link>
-                          </Button>
-                      )}
-                  </div>
-              </header>
-            )}
-
+            <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
+                <button className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
+                    <Logo className="h-[150px] w-auto aspect-[9/16]" />
+                    <span className="hidden sm:inline">AskPix AI</span>
+                </button>
+                <div>
+                    {user ? (
+                        <div className="flex items-center gap-2 sm:gap-4">
+                            <Button asChild size="sm">
+                                <Link href="/profile">
+                                    <User className="h-4 w-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">View Profile</span>
+                                </Link>
+                            </Button>
+                            <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
+                                {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
+                                <span className="hidden sm:inline">Logout</span>
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button asChild>
+                            <Link href="/login">Login / Sign Up</Link>
+                        </Button>
+                    )}
+                </div>
+            </header>
 
             {appState === 'scanning' && (
               <ScanningScreen
