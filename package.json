@@ -16,7 +16,7 @@
     "cap:sync": "npm run build:mobile && npx cap sync",
     "android:add": "npx cap add android",
     "postinstall": "patch-package",
-    "deploy": "npm run build && firebase deploy --only hosting"
+    "deploy": "npx firebase experiments:enable webframeworks && next build && firebase deploy --only hosting"
   },
   "dependencies": {
     "@capacitor/android": "6.0.0",
