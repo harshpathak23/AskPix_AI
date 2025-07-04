@@ -11,9 +11,9 @@ import { type SolveQuestionInput, type SolveQuestionOutput } from '@/ai/schemas'
  */
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
   // Lazily import the flow to prevent it from running at build time.
-  const { solveQuestionFlow } = await import('@/ai/flows/solve-question');
+  const { solveQuestion: runFlow } = await import('@/ai/flows/solve-question');
   
   // The Genkit flow handles input validation and will throw an error on failure.
   // We simply call it and return the result.
-  return solveQuestionFlow(input);
+  return runFlow(input);
 }
