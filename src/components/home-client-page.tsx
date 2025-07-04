@@ -362,6 +362,11 @@ interface ResultScreenProps {
 }
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+        <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
+            <Logo animated className="h-[320px] w-[320px] mb-2" />
+            <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
+        </div>
+
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
