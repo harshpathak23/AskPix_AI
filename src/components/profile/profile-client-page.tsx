@@ -11,7 +11,6 @@ import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { useEffect, useState, useCallback } from "react";
 import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError, doc, deleteDoc } from "firebase/firestore";
-import jsPDF from 'jspdf';
 import { Logo } from "@/components/icons/logo";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -40,32 +39,6 @@ interface SavedSolution {
     language: string;
     createdAt: Timestamp;
 }
-
-const cleanupTextForPdf = (text: string | null | undefined): string => {
-  if (!text) return '';
-
-  // Remove LaTeX delimiters and markdown bold markers
-  let processedText = text.replace(/\$|(\*\*)/g, '');
-
-  // Convert single-digit superscripts (e.g., a^2) to Unicode
-  processedText = processedText.replace(/\^(\d)/g, (_, digit) => {
-    const superscripts: { [key: string]: string } = {
-      '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
-    };
-    return superscripts[digit] || `^${digit}`;
-  });
-
-  // Convert bracketed superscripts (e.g., a^{10}) to Unicode
-  processedText = processedText.replace(/\^\{([^}]+)\}/g, (_, content) => {
-    const superscripts: { [key: string]: string } = {
-      '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-      '+': '⁺', '-': '⁻'
-    };
-    return Array.from(content as string).map((char: string) => superscripts[char] || char).join('');
-  });
-  
-  return processedText;
-};
 
 export default function ProfileClientPage() {
     const router = useRouter();
@@ -166,9 +139,8 @@ export default function ProfileClientPage() {
     };
 
     const handleDownload = async (solution: SavedSolution) => {
-        if (solution.language === 'hi') {
-            const htmlContent = `<!DOCTYPE html>
-<html lang="hi">
+        const htmlContent = `<!DOCTYPE html>
+<html lang="${solution.language}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -212,125 +184,14 @@ export default function ProfileClientPage() {
 </body>
 </html>`;
 
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", `solution-${solution.id}.html`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-            return;
-        }
-
-        // Existing PDF logic for English solutions
-        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const margin = 15;
-        const pageHeight = doc.internal.pageSize.getHeight();
-        let yPos = 15;
-
-        try {
-            const response = await fetch('/logo.png');
-            const blob = await response.blob();
-            const reader = new FileReader();
-            const logoDataUrl = await new Promise<string>((resolve) => {
-                reader.onload = () => resolve(reader.result as string);
-                reader.readAsDataURL(blob);
-            });
-            
-            const logoImg = new window.Image();
-            logoImg.src = logoDataUrl;
-            await new Promise(resolve => { logoImg.onload = resolve; });
-
-            const logoWidth = 60;
-            const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
-            const logoHeight = logoWidth / aspectRatio;
-            const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
-            
-            doc.setFillColor(23, 23, 31);
-            doc.rect(logoX - 5, yPos - 5, logoWidth + 10, logoHeight + 10, 'F');
-
-            doc.addImage(logoDataUrl, 'PNG', logoX, yPos, logoWidth, logoHeight);
-            yPos += logoHeight + 10;
-        } catch (e) {
-            console.error("Could not load logo for PDF", e);
-        }
-        
-        doc.setFontSize(10).text("Build By Harsh Pathak", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
-        yPos += 10;
-        
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, yPos, doc.internal.pageSize.getWidth() - margin, yPos);
-        yPos += 15;
-
-        doc.setFontSize(16).text("Question:", margin, yPos);
-        yPos += 10;
-        
-        try {
-            const imgData = solution.croppedImage;
-            const img = new window.Image();
-            img.src = imgData;
-            await new Promise(resolve => {
-                img.onload = resolve;
-                img.onerror = () => resolve(null);
-            });
-            
-            const imgWidth = doc.internal.pageSize.getWidth() - (margin * 2);
-            const imgHeight = (img.height * imgWidth) / img.width;
-
-            if (yPos + imgHeight > pageHeight - margin) {
-                doc.addPage();
-                yPos = 20;
-            }
-            doc.addImage(imgData, 'PNG', margin, yPos, imgWidth, imgHeight);
-            yPos += imgHeight + 15;
-
-        } catch (e) {
-            console.error("Error adding image to PDF", e);
-            doc.text("Could not load question image.", margin, yPos);
-            yPos += 10;
-        }
-
-        const checkPageBreak = () => {
-          if (yPos > pageHeight - margin) {
-            doc.addPage();
-            yPos = 20;
-          }
-        };
-
-        checkPageBreak();
-
-        doc.setFontSize(16).text("Solution:", margin, yPos);
-        yPos += 10;
-        
-        doc.setFontSize(12);
-        const sanitizedSolution = cleanupTextForPdf(solution.solution);
-        const solutionLines = doc.splitTextToSize(sanitizedSolution, doc.internal.pageSize.getWidth() - (margin * 2));
-        
-        for (const line of solutionLines) {
-            checkPageBreak();
-            doc.text(line, margin, yPos);
-            yPos += 7;
-        }
-        
-        yPos += 10;
-
-        if (solution.formulas) {
-            checkPageBreak();
-            doc.setFontSize(16).text("Key Formulas:", margin, yPos);
-            yPos += 10;
-
-            doc.setFontSize(12);
-            const sanitizedFormulas = cleanupTextForPdf(solution.formulas);
-            const formulaLines = doc.splitTextToSize(sanitizedFormulas, doc.internal.pageSize.getWidth() - (margin * 2));
-            for (const line of formulaLines) {
-                checkPageBreak();
-                doc.text(line, margin, yPos);
-                yPos += 7;
-            }
-        }
-
-        doc.save(`solution-${solution.id}.pdf`);
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `solution-${solution.id}.html`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
     };
 
   return (
