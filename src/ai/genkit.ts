@@ -1,4 +1,3 @@
-'use server';
 // This file is now designed to be run only on the server.
 // The dynamic import in actions.ts ensures this code only runs when an action is called,
 // not during the build process.

@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview An AI agent that identifies the subject of and solves a question from an image.
  * This file uses a lazy-initialization pattern to prevent server-only Genkit code
