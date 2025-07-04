@@ -23,13 +23,13 @@ let solveQuestionFlow: any;
  * which could crash the build process.
  * @returns The initialized Genkit flow function.
  */
-function getSolveQuestionFlow() {
+async function getSolveQuestionFlow() {
   if (solveQuestionFlow) {
     return solveQuestionFlow;
   }
   
   // First, get the lazily-initialized Genkit instance.
-  const ai = getGenkit();
+  const ai = await getGenkit();
 
   // It specifies a stable vision model and requests a specific JSON output format.
   const solveQuestionPrompt = ai.definePrompt({
@@ -90,6 +90,6 @@ User's subject hint: {{{subject}}}
  * @returns The solution output.
  */
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  const flow = getSolveQuestionFlow();
+  const flow = await getSolveQuestionFlow();
   return flow(input);
 }
