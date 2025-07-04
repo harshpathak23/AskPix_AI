@@ -3,7 +3,7 @@
  * It is kept separate from the flow definitions to avoid issues with the 'use server' directive.
  */
 
-import {z} from 'genkit';
+import {z} from 'zod';
 
 // Schemas for solve-question.ts
 export const SolveQuestionInputSchema = z.object({
