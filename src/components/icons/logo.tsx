@@ -5,7 +5,7 @@ export function Logo({className, animated = false}: {className?: string, animate
   return (
     <div className={cn("flex justify-center relative overflow-hidden", className)}>
       <Image
-        src="/logo.png"
+        src="/images/icon.png"
         alt="AskPix AI Logo"
         width={320}
         height={320}
