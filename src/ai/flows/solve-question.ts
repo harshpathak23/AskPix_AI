@@ -5,8 +5,7 @@
  *
  * - solveQuestion - The function to call to execute the question-solving flow.
  */
-import type { Flow } from 'genkit';
-import { getGenkit } from '@/ai/genkit';
+import { ai } from '@/ai/genkit';
 import {
   SolveQuestionInputSchema,
   type SolveQuestionInput,
@@ -14,35 +13,18 @@ import {
   type SolveQuestionOutput,
 } from '@/ai/schemas';
 
-// We use a cached, lazily-initialized flow to ensure that the Genkit instance
-// and all associated AI components are only created when the server action is
-// actually executed, not during the Next.js build process. This is critical
-// for compatibility with `output: 'export'`.
-let solveQuestionFlow: Flow<typeof SolveQuestionInputSchema, typeof SolveQuestionOutputSchema> | null = null;
-
-/**
- * Initializes and returns the question-solving flow, caching it after the first run.
- */
-function getSolveQuestionFlow() {
-  if (solveQuestionFlow) {
-    return solveQuestionFlow;
-  }
-
-  // This code runs only once, the first time the action is called.
-  const ai = getGenkit();
-
-  const solveQuestionPrompt = ai.definePrompt({
-    name: 'solveQuestionPrompt',
-    model: 'googleai/gemini-2.0-flash',
-    input: {schema: SolveQuestionInputSchema},
-    output: {
-      format: 'json',
-      schema: SolveQuestionOutputSchema
-    },
-    config: {
-      temperature: 0.2,
-    },
-    prompt: `You are an expert tutor system. Your task is to analyze an image of an academic question and provide a comprehensive solution.
+const solveQuestionPrompt = ai.definePrompt({
+  name: 'solveQuestionPrompt',
+  model: 'googleai/gemini-2.0-flash',
+  input: {schema: SolveQuestionInputSchema},
+  output: {
+    format: 'json',
+    schema: SolveQuestionOutputSchema
+  },
+  config: {
+    temperature: 0.2,
+  },
+  prompt: `You are an expert tutor system. Your task is to analyze an image of an academic question and provide a comprehensive solution.
 It is critical that your entire response is in the language with this code: {{{language}}}. For example, if the language code is 'hi', the entire response must be in Hindi.
 
 Your task has multiple steps:
@@ -61,26 +43,22 @@ Image of the question is below:
 User's subject hint: {{{subject}}}
 {{/if}}
 `,
-  });
+});
 
-  solveQuestionFlow = ai.defineFlow(
-    {
-      name: 'solveQuestionFlow',
-      inputSchema: SolveQuestionInputSchema,
-      outputSchema: SolveQuestionOutputSchema,
-    },
-    async (input) => {
-      const {output} = await solveQuestionPrompt(input);
-      if (!output) {
-        throw new Error('Failed to process the image. The AI could not generate a response. Please try again.');
-      }
-      return output;
-    },
-  );
-
-  return solveQuestionFlow;
-}
-
+const solveQuestionFlow = ai.defineFlow(
+  {
+    name: 'solveQuestionFlow',
+    inputSchema: SolveQuestionInputSchema,
+    outputSchema: SolveQuestionOutputSchema,
+  },
+  async (input) => {
+    const {output} = await solveQuestionPrompt(input);
+    if (!output) {
+      throw new Error('Failed to process the image. The AI could not generate a response. Please try again.');
+    }
+    return output;
+  },
+);
 
 /**
  * The main exported function to run the question solving flow.
@@ -88,6 +66,5 @@ User's subject hint: {{{subject}}}
  * @returns The solution output.
  */
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  const flow = getSolveQuestionFlow();
-  return flow(input);
+  return solveQuestionFlow(input);
 }
