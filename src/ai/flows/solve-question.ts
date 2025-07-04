@@ -14,36 +14,23 @@ import {
   type SolveQuestionOutput,
 } from '@/ai/schemas';
 
-// Cached flow to avoid re-defining it on every call in the same server instance.
-let solveQuestionFlow: any;
+// Get the Genkit instance. This file is server-only.
+const ai = getGenkit();
 
-/**
- * Initializes the Genkit flow on demand.
- * This lazy initialization prevents the flow from being defined at module-load time,
- * which could crash the build process.
- * @returns The initialized Genkit flow function.
- */
-async function getSolveQuestionFlow() {
-  if (solveQuestionFlow) {
-    return solveQuestionFlow;
-  }
-  
-  // First, get the lazily-initialized Genkit instance.
-  const ai = await getGenkit();
-
-  // It specifies a stable vision model and requests a specific JSON output format.
-  const solveQuestionPrompt = ai.definePrompt({
-    name: 'solveQuestionPrompt',
-    model: 'googleai/gemini-2.0-flash',
-    input: {schema: SolveQuestionInputSchema},
-    output: {
-      format: 'json',
-      schema: SolveQuestionOutputSchema
-    },
-    config: {
-      temperature: 0.2,
-    },
-    prompt: `You are an expert tutor system. Your task is to analyze an image of an academic question and provide a comprehensive solution.
+// Define the prompt and flow at the top level.
+// The 'use server' directive ensures this only happens on the server.
+const solveQuestionPrompt = ai.definePrompt({
+  name: 'solveQuestionPrompt',
+  model: 'googleai/gemini-2.0-flash',
+  input: {schema: SolveQuestionInputSchema},
+  output: {
+    format: 'json',
+    schema: SolveQuestionOutputSchema
+  },
+  config: {
+    temperature: 0.2,
+  },
+  prompt: `You are an expert tutor system. Your task is to analyze an image of an academic question and provide a comprehensive solution.
 It is critical that your entire response is in the language with this code: {{{language}}}. For example, if the language code is 'hi', the entire response must be in Hindi.
 
 Your task has multiple steps:
@@ -62,34 +49,28 @@ Image of the question is below:
 User's subject hint: {{{subject}}}
 {{/if}}
 `,
-  });
+});
 
-  solveQuestionFlow = ai.defineFlow(
-    {
-      name: 'solveQuestionFlow',
-      inputSchema: SolveQuestionInputSchema,
-      outputSchema: SolveQuestionOutputSchema,
-    },
-    async (input) => {
-      const {output} = await solveQuestionPrompt(input);
-      if (!output) {
-        throw new Error('Failed to process the image. The AI could not generate a response. Please try again.');
-      }
-      return output;
-    },
-  );
-
-  return solveQuestionFlow;
-}
-
+const solveQuestionFlow = ai.defineFlow(
+  {
+    name: 'solveQuestionFlow',
+    inputSchema: SolveQuestionInputSchema,
+    outputSchema: SolveQuestionOutputSchema,
+  },
+  async (input) => {
+    const {output} = await solveQuestionPrompt(input);
+    if (!output) {
+      throw new Error('Failed to process the image. The AI could not generate a response. Please try again.');
+    }
+    return output;
+  },
+);
 
 /**
  * The main exported function to run the question solving flow.
- * It ensures the flow is initialized and then executes it.
  * @param input The question data.
  * @returns The solution output.
  */
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  const flow = await getSolveQuestionFlow();
-  return flow(input);
+  return solveQuestionFlow(input);
 }
