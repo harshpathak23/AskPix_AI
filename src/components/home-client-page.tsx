@@ -906,12 +906,12 @@ export default function HomeClientPage() {
             "w-full shadow-sm flex flex-1 flex-col mt-4",
             "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-t-xl"
           )}>
-            {(appState !== 'scanning' && appState !== 'cropping') && (
+            {(appState !== 'scanning' && appState !== 'cropping' && appState !== 'result') && (
               <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
-                  <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => appState !== 'welcome' && setAppState('welcome')}>
-                      {appState !== 'result' && <Logo className="h-[150px] w-auto aspect-[9/16]" />}
+                  <button className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
+                      <Logo className="h-[150px] w-auto aspect-[9/16]" />
                       <span className="hidden sm:inline">AskPix AI</span>
-                  </Link>
+                  </button>
                   <div>
                       {user ? (
                           <div className="flex items-center gap-2 sm:gap-4">
@@ -935,6 +935,36 @@ export default function HomeClientPage() {
               </header>
             )}
             
+            {(appState === 'result') && (
+              <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
+                  <button className="invisible font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
+                      <Logo className="h-[150px] w-auto aspect-[9/16]" />
+                      <span className="hidden sm:inline">AskPix AI</span>
+                  </button>
+                  <div>
+                      {user ? (
+                          <div className="flex items-center gap-2 sm:gap-4">
+                              <Button asChild size="sm">
+                                  <Link href="/profile">
+                                      <User className="h-4 w-4 sm:mr-2" />
+                                      <span className="hidden sm:inline">View Profile</span>
+                                  </Link>
+                              </Button>
+                              <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
+                                  {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
+                                  <span className="hidden sm:inline">Logout</span>
+                              </Button>
+                          </div>
+                      ) : (
+                           <Button asChild>
+                              <Link href="/login">Login / Sign Up</Link>
+                          </Button>
+                      )}
+                  </div>
+              </header>
+            )}
+
+
             {appState === 'scanning' && (
               <ScanningScreen
                 hasCameraPermission={hasCameraPermission}
@@ -992,5 +1022,3 @@ export default function HomeClientPage() {
     </>
   );
 }
-
-    
