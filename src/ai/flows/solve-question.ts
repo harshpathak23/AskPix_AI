@@ -5,7 +5,7 @@
  *
  * - solveQuestion - The function to call to execute the question-solving flow.
  */
-
+import type { Flow } from 'genkit';
 import { getGenkit } from '@/ai/genkit';
 import {
   SolveQuestionInputSchema,
@@ -14,23 +14,35 @@ import {
   type SolveQuestionOutput,
 } from '@/ai/schemas';
 
-// Get the Genkit instance. This file is server-only.
-const ai = getGenkit();
+// We use a cached, lazily-initialized flow to ensure that the Genkit instance
+// and all associated AI components are only created when the server action is
+// actually executed, not during the Next.js build process. This is critical
+// for compatibility with `output: 'export'`.
+let solveQuestionFlow: Flow<typeof SolveQuestionInputSchema, typeof SolveQuestionOutputSchema> | null = null;
 
-// Define the prompt and flow at the top level.
-// The 'use server' directive ensures this only happens on the server.
-const solveQuestionPrompt = ai.definePrompt({
-  name: 'solveQuestionPrompt',
-  model: 'googleai/gemini-2.0-flash',
-  input: {schema: SolveQuestionInputSchema},
-  output: {
-    format: 'json',
-    schema: SolveQuestionOutputSchema
-  },
-  config: {
-    temperature: 0.2,
-  },
-  prompt: `You are an expert tutor system. Your task is to analyze an image of an academic question and provide a comprehensive solution.
+/**
+ * Initializes and returns the question-solving flow, caching it after the first run.
+ */
+function getSolveQuestionFlow() {
+  if (solveQuestionFlow) {
+    return solveQuestionFlow;
+  }
+
+  // This code runs only once, the first time the action is called.
+  const ai = getGenkit();
+
+  const solveQuestionPrompt = ai.definePrompt({
+    name: 'solveQuestionPrompt',
+    model: 'googleai/gemini-2.0-flash',
+    input: {schema: SolveQuestionInputSchema},
+    output: {
+      format: 'json',
+      schema: SolveQuestionOutputSchema
+    },
+    config: {
+      temperature: 0.2,
+    },
+    prompt: `You are an expert tutor system. Your task is to analyze an image of an academic question and provide a comprehensive solution.
 It is critical that your entire response is in the language with this code: {{{language}}}. For example, if the language code is 'hi', the entire response must be in Hindi.
 
 Your task has multiple steps:
@@ -49,22 +61,26 @@ Image of the question is below:
 User's subject hint: {{{subject}}}
 {{/if}}
 `,
-});
+  });
 
-const solveQuestionFlow = ai.defineFlow(
-  {
-    name: 'solveQuestionFlow',
-    inputSchema: SolveQuestionInputSchema,
-    outputSchema: SolveQuestionOutputSchema,
-  },
-  async (input) => {
-    const {output} = await solveQuestionPrompt(input);
-    if (!output) {
-      throw new Error('Failed to process the image. The AI could not generate a response. Please try again.');
-    }
-    return output;
-  },
-);
+  solveQuestionFlow = ai.defineFlow(
+    {
+      name: 'solveQuestionFlow',
+      inputSchema: SolveQuestionInputSchema,
+      outputSchema: SolveQuestionOutputSchema,
+    },
+    async (input) => {
+      const {output} = await solveQuestionPrompt(input);
+      if (!output) {
+        throw new Error('Failed to process the image. The AI could not generate a response. Please try again.');
+      }
+      return output;
+    },
+  );
+
+  return solveQuestionFlow;
+}
+
 
 /**
  * The main exported function to run the question solving flow.
@@ -72,5 +88,6 @@ const solveQuestionFlow = ai.defineFlow(
  * @returns The solution output.
  */
 export async function solveQuestion(input: SolveQuestionInput): Promise<SolveQuestionOutput> {
-  return solveQuestionFlow(input);
+  const flow = getSolveQuestionFlow();
+  return flow(input);
 }
