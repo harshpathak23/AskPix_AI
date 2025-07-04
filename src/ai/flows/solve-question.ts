@@ -6,7 +6,7 @@
  * - solveQuestion - The function to call to execute the question-solving flow.
  */
 
-import {ai} from '@/ai/genkit';
+import { getGenkit } from '@/ai/genkit';
 import {
   SolveQuestionInputSchema,
   type SolveQuestionInput,
@@ -18,14 +18,18 @@ import {
 let solveQuestionFlow: any;
 
 /**
- * Initializes the Genkit flow if it hasn't been already.
+ * Initializes the Genkit flow on demand.
  * This lazy initialization prevents the flow from being defined at module-load time,
- * which was causing the build process to crash.
+ * which could crash the build process.
+ * @returns The initialized Genkit flow function.
  */
 function getSolveQuestionFlow() {
   if (solveQuestionFlow) {
     return solveQuestionFlow;
   }
+  
+  // First, get the lazily-initialized Genkit instance.
+  const ai = getGenkit();
 
   // It specifies a stable vision model and requests a specific JSON output format.
   const solveQuestionPrompt = ai.definePrompt({
