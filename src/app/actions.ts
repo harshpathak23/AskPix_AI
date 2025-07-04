@@ -1,4 +1,3 @@
-'use server';
 
 import { solveQuestion as solveQuestionFlow } from '@/ai/flows/solve-question';
 import { type SolveQuestionInput, type SolveQuestionOutput } from '@/ai/schemas';
