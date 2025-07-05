@@ -17,7 +17,7 @@
     "cap:sync": "npm run build:mobile && npx cap sync",
     "android:add": "npx cap add android",
     "postinstall": "patch-package",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy --project scansolve-d1nh8"
   },
   "engines": {
     "node": "18"
