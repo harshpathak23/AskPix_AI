@@ -7,7 +7,7 @@
     "dev": "next dev",
     "genkit:dev": "npx genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "npx genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build",
+    "build": "NEXT_PUBLIC_IS_STATIC_BUILD=true next build",
     "build:mobile": "NEXT_PUBLIC_IS_STATIC_BUILD=true next build",
     "start": "next start",
     "lint": "next lint",
