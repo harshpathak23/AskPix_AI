@@ -30,3 +30,17 @@ export const SolveQuestionOutputSchema = z.object({
   formulas: z.string().optional().describe('A block of text containing important formulas related to the topic, formatted in LaTeX. Each formula should be on a new line.'),
 });
 export type SolveQuestionOutput = z.infer<typeof SolveQuestionOutputSchema>;
+
+// Schemas for assistant-flow.ts
+export const AssistantInputSchema = z.object({
+  prompt: z
+    .string()
+    .max(30000, { message: 'Input cannot exceed 30,000 characters.' })
+    .describe('The user prompt for the assistant.'),
+});
+export type AssistantInput = z.infer<typeof AssistantInputSchema>;
+
+export const AssistantOutputSchema = z.object({
+  response: z.string().describe("The assistant's generated response."),
+});
+export type AssistantOutput = z.infer<typeof AssistantOutputSchema>;
