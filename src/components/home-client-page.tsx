@@ -650,7 +650,7 @@ export default function HomeClientPage() {
         // Mobile App: Call the deployed API endpoint
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         if (!apiBaseUrl) {
-          setError("This version of the app requires a backend server for AI features, which has not been configured. Please use the mobile app or deploy the full version on a compatible plan.");
+          setError("This mobile app cannot connect to the AI service. The app has not been configured with a server address.");
           setAppState('result'); // Go to result screen to show the error
           return;
         }
@@ -732,7 +732,7 @@ export default function HomeClientPage() {
         // Mobile App: Call the deployed API endpoint
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         if (!apiBaseUrl) {
-            setError("This version of the app requires a backend server for AI features, which has not been configured. Please use the mobile app or deploy the full version on a compatible plan.");
+            setError("This mobile app cannot connect to the AI service. The app has not been configured with a server address.");
             setIsTranslating(false);
             return;
         }
