@@ -650,7 +650,7 @@ export default function HomeClientPage() {
         // Mobile App: Call the deployed API endpoint
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         if (!apiBaseUrl) {
-          throw new Error("Could not connect to the AI service. Please deploy the web app and set the NEXT_PUBLIC_API_BASE_URL environment variable.");
+          throw new Error("The application is not configured with a server URL. Please build the mobile app with a NEXT_PUBLIC_API_BASE_URL environment variable pointing to your deployed web app.");
         }
         
         const response = await fetch(`${apiBaseUrl}/api/solve`, {
@@ -730,7 +730,7 @@ export default function HomeClientPage() {
         // Mobile App: Call the deployed API endpoint
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         if (!apiBaseUrl) {
-            throw new Error("Could not connect to the AI service. The app has not been configured with a server address.");
+            throw new Error("The application is not configured with a server URL. Translation is not possible.");
         }
 
         const response = await fetch(`${apiBaseUrl}/api/solve`, {
