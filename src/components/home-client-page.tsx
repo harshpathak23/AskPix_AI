@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect, FC } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Sparkles } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Sparkles, FileWarning } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -290,91 +290,23 @@ const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage }) => {
 };
 
 
-const translationSteps = [
-  { text: 'Preparing content for translation...', icon: <Bot className="h-5 w-5 text-slate-400" /> },
-  { text: 'Generating solution in new language...', icon: <BrainCircuit className="h-5 w-5 text-slate-400" /> },
-  { text: 'Formatting final answer...', icon: <NotebookText className="h-5 w-5 text-slate-400" /> },
-];
-
-const TranslatingScreen: FC = () => {
-  const [activeStep, setActiveStep] = useState(0);
-
-  useEffect(() => {
-    const timers = translationSteps.map((_, index) =>
-      setTimeout(() => {
-        setActiveStep(index + 1);
-      }, (index + 1) * 800)
-    );
-    return () => timers.forEach(clearTimeout);
-  }, []);
-
-  return (
-    <div className="space-y-6">
-      <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-        <CardHeader>
-          <CardTitle className="text-slate-100 flex items-center gap-2">
-            <Loader2 className="animate-spin" /> Translating Solution
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-4">
-            {translationSteps.map((step, index) => (
-              <li key={index} className="flex items-center gap-4 transition-opacity duration-300" style={{ opacity: activeStep >= index ? 1 : 0.4 }}>
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-800 border border-slate-700 shrink-0">
-                  {activeStep > index ? (
-                    <Check className="h-5 w-5 text-green-400" />
-                  ) : activeStep === index ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                  ) : (
-                    step.icon
-                  )}
-                </div>
-                <span className={cn("font-medium", activeStep > index ? "text-slate-400 line-through" : "text-slate-200")}>
-                  {step.text}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
 interface ResultScreenProps {
   user: FirebaseUser | null;
   croppedImage: string | null;
-  identifiedSubject: Subject | null;
-  subject: Subject;
   error: string | null;
-  language: Language;
-  isTranslating: boolean;
-  handleLanguageChange: (newLang: Language) => void;
   solution: string | null;
-  topic: string | null;
-  formulas: string | null;
   handleStartScanning: () => void;
   handleSaveSolution: () => void;
   isSaving: boolean;
   solutionSaved: boolean;
   router: AppRouterInstance;
 }
-const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
+const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, error, solution, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
         
-        {identifiedSubject && identifiedSubject !== subject && (
-            <Alert className="bg-slate-800/50 border-slate-700 text-slate-200">
-              <BrainCircuit className="h-4 w-4 text-primary" />
-              <AlertTitle>Subject Correction</AlertTitle>
-              <AlertDescription>
-                You selected <strong>{subject}</strong>, but we detected a <strong>{identifiedSubject}</strong> question. We've provided the solution for {identifiedSubject}.
-              </AlertDescription>
-            </Alert>
-        )}
-
         {error && (
             <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
               <XCircle className="h-4 w-4" />
@@ -382,57 +314,31 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
               <AlertDescription>{error}</AlertDescription>
             </Alert>
         )}
-        
-        <div className="w-full">
-            <div className="flex items-center justify-center gap-4 mb-4">
-                <p className="text-slate-400">Language:</p>
-                <Tabs defaultValue={language} onValueChange={(value) => handleLanguageChange(value as Language)} className="w-auto">
-                <TabsList className="bg-white/5 text-slate-300">
-                    <TabsTrigger value="en" disabled={isTranslating} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white">English</TabsTrigger>
-                    <TabsTrigger value="hi" disabled={isTranslating} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white">Hindi</TabsTrigger>
-                </TabsList>
-                </Tabs>
-            </div>
-            {isTranslating ? (
-              <TranslatingScreen />
-            ) : solution ? (
-                <div className="space-y-6">
-                    <SolutionDisplay solution={solution} />
-                    {formulas && (
-                        <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-slate-100">
-                                    <NotebookText />
-                                    Key Formulas
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <MathRenderer text={formulas} />
-                            </CardContent>
-                        </Card>
-                    )}
-                </div>
-            ) : !error ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-slate-800 border border-slate-700 shadow-sm min-h-[200px]">
-                    <Bot size={48} className="mb-4 text-primary" />
-                    <h3 className="text-xl font-semibold">Processing Error</h3>
-                    <p className="text-slate-400">Could not generate a solution. Please try scanning again.</p>
-                </div>
-            ) : null}
-        </div>
 
+        {solution && <SolutionDisplay solution={solution} />}
+
+        {!solution && !error && (
+          <Alert className="bg-slate-800/50 border-slate-700 text-slate-200">
+            <FileWarning className="h-4 w-4 text-primary" />
+            <AlertTitle>AI Feature Unavailable</AlertTitle>
+            <AlertDescription>
+              The AI question-solving feature has been disabled to ensure this application can be hosted for free.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="flex w-full gap-4">
           <Button onClick={handleStartScanning} className="w-full text-base py-6">
               <RefreshCw className="mr-2 h-5 w-5" />
               Scan Another
           </Button>
           {user ? (
-            <Button onClick={handleSaveSolution} disabled={isSaving || solutionSaved} className="w-full text-base py-6">
+            <Button onClick={handleSaveSolution} disabled={isSaving || solutionSaved || !solution} className="w-full text-base py-6">
               {isSaving ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : <Download className="mr-2 h-5 w-5" />}
               {isSaving ? 'Saving...' : solutionSaved ? 'Saved!' : 'Save Solution'}
             </Button>
           ) : (
-            <Button asChild className="w-full text-base py-6 animate-pulse-glow">
+            <Button asChild className="w-full text-base py-6 animate-pulse-glow" disabled={!solution}>
               <Link href="/login">
                 <Download className="mr-2 h-5 w-5" />
                 Login to Save
@@ -450,18 +356,14 @@ export default function HomeClientPage() {
   const [topic, setTopic] = useState<string | null>(null);
   const [formulas, setFormulas] = useState<string | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
-  const [identifiedSubject, setIdentifiedSubject] = useState<Subject | null>(null);
-  const [language, setLanguage] = useState<Language>('en');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
   const [crop, setCrop] = useState<Crop>();
   const [flashSupported, setFlashSupported] = useState(false);
   const [zoomSupported, setZoomSupported] = useState(false);
   const [isFlashOn, setIsFlashOn] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [solutionSaved, setSolutionSaved] = useState(false);
@@ -514,7 +416,6 @@ export default function HomeClientPage() {
     setFlashSupported(false);
     setZoomSupported(false);
     setIsFlashOn(false);
-    setZoomLevel(1);
 
 
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -579,9 +480,7 @@ export default function HomeClientPage() {
     setTopic(null);
     setFormulas(null);
     setError(null);
-    setLanguage('en');
     setCrop(undefined);
-    setIdentifiedSubject(null);
     setSolutionSaved(false);
     await startCamera();
   };
@@ -639,137 +538,17 @@ export default function HomeClientPage() {
 
     setAppState('solving');
     setError(null);
+    setSolution(null);
 
-    try {
-      const croppedDataUri = await getCroppedImg(imgRef.current, crop);
-      setCroppedImage(croppedDataUri);
+    const croppedDataUri = await getCroppedImg(imgRef.current, crop);
+    setCroppedImage(croppedDataUri);
 
-      let result;
-
-      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call the deployed API endpoint
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!apiBaseUrl) {
-          throw new Error("Could not connect to the AI service. Please deploy the web app and set the NEXT_PUBLIC_API_BASE_URL environment variable.");
-        }
-        
-        const response = await fetch(`${apiBaseUrl}/api/solve`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photoDataUri: croppedDataUri,
-            language,
-            subject,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `API request failed with status ${response.status}`);
-        }
-        result = await response.json();
-
-      } else {
-        // Web App: Use the direct server action call
-        const { solveQuestion } = await import('@/app/actions');
-        result = await solveQuestion({
-          photoDataUri: croppedDataUri,
-          language,
-          subject,
-        });
-      }
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      if (!result?.solution || !result?.topic || !result.identifiedSubject) {
-        setError('Could not generate a solution. Please try a different question or crop a different area.');
-        setAppState('cropping');
-      } else {
-        setTopic(result.topic || null);
-        setSolution(result.solution);
-        setFormulas(result.formulas || null);
-        setIdentifiedSubject(result.identifiedSubject || subject);
-        setAppState('result');
-      }
-    } catch (e) {
-      console.error("Solution retrieval failed", e);
-      let errorMessage = 'An unexpected error occurred. Please try again.';
-      if (e instanceof Error) {
-        errorMessage = e.message;
-      }
-      setError(errorMessage);
-      setAppState('result'); // Go to result screen to show the error
-    }
-  };
-
-  const handleLanguageChange = async (newLang: Language) => {
-    if (!croppedImage) {
-      setError("Cannot change language without a solved question.");
-      return;
-    }
-    
-    setIsTranslating(true);
-    setError(null);
-    setLanguage(newLang);
-
-    const subjectForTranslation = identifiedSubject || subject;
-
-    try {
-      let result;
-      const payload = {
-          photoDataUri: croppedImage,
-          language: newLang,
-          subject: subjectForTranslation,
-      };
-
-      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call the deployed API endpoint
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!apiBaseUrl) {
-            throw new Error("Could not connect to the AI service. The app has not been configured with a server address.");
-        }
-
-        const response = await fetch(`${apiBaseUrl}/api/solve`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `API request failed with status ${response.status}`);
-        }
-        result = await response.json();
-      } else {
-        // Web App: Use the direct server action call
-        const { solveQuestion } = await import('@/app/actions');
-        result = await solveQuestion(payload);
-      }
-      
-      if (result.error) {
-          throw new Error(result.error);
-      }
-
-      if (!result?.solution) {
-        setError('Failed to translate the solution.');
-      } else {
-        setSolution(result.solution);
-        setFormulas(result.formulas || null);
-      }
-    } catch (e) {
-      console.error("Translation failed", e);
-      let errorMessage = 'An unexpected error occurred during translation.';
-      if (e instanceof Error) {
-          errorMessage = e.message;
-      }
-      setError(errorMessage);
-    } finally {
-      setIsTranslating(false);
-    }
+    // Simulate a short delay to make the "Solving" screen visible
+    setTimeout(() => {
+      setAppState('result');
+      setTopic('AI Disabled');
+      // No solution is set, the ResultScreen will show the "AI Feature Unavailable" message.
+    }, 1500);
   };
 
   const handleScan = () => {
@@ -787,7 +566,6 @@ export default function HomeClientPage() {
         setCroppedImage(null);
         setSolution(null);
         setError(null);
-        setLanguage('en');
         setAppState('cropping');
       }
     }
@@ -819,7 +597,6 @@ export default function HomeClientPage() {
         await track.applyConstraints({
           advanced: [{ zoom: scaledZoom }],
         });
-        setZoomLevel(newZoom);
       }
     }
   };
@@ -858,15 +635,13 @@ export default function HomeClientPage() {
 
     setIsSaving(true);
     try {
-        // NEW: Save to a subcollection under the user's ID
         await addDoc(collection(db, 'users', user.uid, 'solutions'), {
             croppedImage,
             topic,
             solution,
             formulas,
             subject,
-            identifiedSubject: identifiedSubject || subject,
-            language,
+            language: 'en',
             createdAt: serverTimestamp(),
         });
         setSolutionSaved(true);
@@ -942,7 +717,7 @@ export default function HomeClientPage() {
                   <div>
                       {user ? (
                           <div className="flex items-center gap-2 sm:gap-4">
-                              <Button asChild size="sm" variant="ghost">
+                              <Button asChild size="sm" variant="ghost" disabled>
                                   <Link href="/assistant">
                                       <Sparkles className="h-4 w-4 sm:mr-2" />
                                       <span className="hidden sm:inline">Assistant</span>
@@ -1003,15 +778,8 @@ export default function HomeClientPage() {
               <ResultScreen
                 user={user}
                 croppedImage={croppedImage}
-                identifiedSubject={identifiedSubject}
-                subject={subject}
                 error={error}
-                language={language}
-                isTranslating={isTranslating}
-                handleLanguageChange={handleLanguageChange}
                 solution={solution}
-                topic={topic}
-                formulas={formulas}
                 handleStartScanning={handleStartScanning}
                 handleSaveSolution={handleSaveSolution}
                 isSaving={isSaving}

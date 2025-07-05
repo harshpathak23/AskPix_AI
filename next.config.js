@@ -29,20 +29,6 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    // For client-side builds (including static export), replace server-only
-    // Genkit packages with their mock counterparts. This prevents build errors.
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'async_hooks': path.resolve(__dirname, 'src/lib/async-hooks-mock.js'),
-        'express': path.resolve(__dirname, 'src/lib/express-mock.js'),
-        'genkit': path.resolve(__dirname, 'src/lib/genkit-mock.js'),
-        '@genkit-ai/googleai': path.resolve(__dirname, 'src/lib/googleai-mock.js'),
-      };
-    }
-    return config;
-  },
 };
 
 module.exports = nextConfig;
