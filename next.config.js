@@ -4,7 +4,7 @@ const path = require('path');
 const isStatic = process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true';
 
 const nextConfig = {
-  output: isStatic ? 'export' : undefined,
+  // Removed output: 'export' to enable server-side features on Vercel
   reactStrictMode: true,
   typescript: {
     ignoreBuildErrors: true,
@@ -13,7 +13,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    unoptimized: true,
+    unoptimized: isStatic ? true : false,
     remotePatterns: [
       {
         protocol: 'https',
