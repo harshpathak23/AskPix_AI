@@ -17,7 +17,7 @@
     "cap:sync": "npm run build:mobile && npx cap sync",
     "android:add": "npx cap add android",
     "postinstall": "patch-package",
-    "deploy": "firebase deploy --only apphosting"
+    "deploy": "firebase deploy"
   },
   "engines": {
     "node": "18"
