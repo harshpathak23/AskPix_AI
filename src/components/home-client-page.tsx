@@ -647,13 +647,9 @@ export default function HomeClientPage() {
       let result;
 
       if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call the deployed API endpoint
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!apiBaseUrl) {
-          setError("This mobile app cannot connect to the AI service. The app has not been configured with a server address.");
-          setAppState('result'); // Go to result screen to show the error
-          return;
-        }
+        // Mobile App: Call the deployed API endpoint.
+        // The URL is hardcoded here to prevent build configuration issues.
+        const apiBaseUrl = "https://scansolve-d1nh8.web.app";
         
         const response = await fetch(`${apiBaseUrl}/api/solve`, {
           method: 'POST',
@@ -668,6 +664,10 @@ export default function HomeClientPage() {
         });
 
         if (!response.ok) {
+          // Provide a more specific error if the server isn't found (which happens on the Spark plan)
+          if (response.status === 404) {
+            throw new Error("AI server not found. The app's backend may not be deployed or requires the Blaze plan on Firebase.");
+          }
           const errorData = await response.json();
           throw new Error(errorData.error || `API request failed with status ${response.status}`);
         }
@@ -730,12 +730,7 @@ export default function HomeClientPage() {
 
       if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
         // Mobile App: Call the deployed API endpoint
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!apiBaseUrl) {
-            setError("This mobile app cannot connect to the AI service. The app has not been configured with a server address.");
-            setIsTranslating(false);
-            return;
-        }
+        const apiBaseUrl = "https://scansolve-d1nh8.web.app";
 
         const response = await fetch(`${apiBaseUrl}/api/solve`, {
             method: 'POST',
@@ -744,6 +739,9 @@ export default function HomeClientPage() {
         });
 
         if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error("AI server not found. The app's backend may not be deployed or requires the Blaze plan on Firebase.");
+            }
             const errorData = await response.json();
             throw new Error(errorData.error || `API request failed with status ${response.status}`);
         }
