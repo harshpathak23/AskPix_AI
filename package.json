@@ -15,7 +15,8 @@
     "ionic:serve": "npm run dev",
     "cap:sync": "npm run build:mobile && npx cap sync",
     "android:add": "npx cap add android",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "deploy": "firebase deploy"
   },
   "dependencies": {
     "@capacitor/android": "6.0.0",
@@ -70,6 +71,7 @@
     "@types/react-dom": "^18",
     "@types/react-katex": "^3.0.4",
     "dotenv": "^16.5.0",
+    "firebase-tools": "^13.13.2",
     "genkit": "1.5.0",
     "genkit-cli": "1.5.0",
     "postcss": "^8",
