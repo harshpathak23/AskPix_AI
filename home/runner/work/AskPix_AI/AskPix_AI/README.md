@@ -19,10 +19,10 @@ The web version of this application, which includes the AI server, can be deploy
 The Android app is a native shell that loads your deployed Vercel web app. It requires the web app to be deployed first.
 
 1.  **Deploy to Vercel:** Follow the steps above to deploy the web app and get your public URL.
-2.  **Configure API URL:** You need to tell the Android build where your live AI server is. Open a terminal and run the following command, using your specific Vercel URL (`https://ask-pix-ai.vercel.app`).
+2.  **Configure API URL:** You need to tell the Android build where your live AI server is. Open a terminal and run the following command, replacing `<your-vercel-url>` with the URL you got from Vercel:
 
     ```bash
-    NEXT_PUBLIC_API_BASE_URL=https://ask-pix-ai.vercel.app npm run cap:sync
+    NEXT_PUBLIC_API_BASE_URL=https://<your-vercel-url> npm run cap:sync
     ```
     This command rebuilds the app with the correct server URL and syncs it with the Android project.
 3.  **Build in Android Studio:**

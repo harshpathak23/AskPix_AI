@@ -40,6 +40,9 @@ export default function AssistantClientPage() {
     setResponse(null);
     try {
       const result = await chatWithAssistant({ prompt: data.prompt });
+      if (result.error) {
+        throw new Error(result.error);
+      }
       setResponse(result.response);
     } catch (e) {
       console.error('Assistant Error:', e);

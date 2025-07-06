@@ -7,6 +7,7 @@
 
 import { solveQuestionFlow } from '@/ai/flows/solve-question-flow';
 import type { SolveQuestionInput, SolveQuestionOutput } from '@/ai/schemas';
+import { chatAssistantFlow } from '@/ai/flows/chat-assistant-flow';
 
 /**
  * Solves a question based on the provided input.
@@ -31,6 +32,26 @@ export async function solveQuestion(
       topic: 'Error',
       solution: '',
       formulas: '',
+    };
+  }
+}
+
+/**
+ * Chats with the assistant based on a user prompt.
+ * @param input - An object containing the user's prompt.
+ * @returns A promise that resolves to the assistant's response or an error object.
+ */
+export async function chatWithAssistant(input: {
+  prompt: string;
+}): Promise<{ response: string; error?: string }> {
+  try {
+    const result = await chatAssistantFlow(input);
+    return result;
+  } catch (e: any) {
+    console.error('Error in chatWithAssistant action:', e);
+    return {
+      error: e.message || 'An unexpected error occurred.',
+      response: '',
     };
   }
 }

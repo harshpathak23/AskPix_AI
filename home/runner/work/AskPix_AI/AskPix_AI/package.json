@@ -74,7 +74,7 @@
     "@types/react-dom": "^18",
     "@types/react-katex": "^3.0.4",
     "dotenv": "^16.5.0",
-    "firebase-tools": "^13.13.2",
+    "firebase-tools": "^13.11.2",
     "genkit": "1.5.0",
     "genkit-cli": "1.5.0",
     "postcss": "^8",
