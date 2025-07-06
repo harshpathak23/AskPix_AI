@@ -14,21 +14,22 @@ The web version of this application, which includes the AI server, can be deploy
 4.  **Deploy:** Click the "Deploy" button. Vercel will build and deploy your application.
 5.  **Get URL:** Once deployed, Vercel will provide you with a public URL (e.g., `https://your-project-name.vercel.app`). You will need this for the Android app build.
 
-## Building the Android App
+## Building the Android App (via GitHub)
 
-The Android app is a native shell that loads your deployed Vercel web app. It requires the web app to be deployed first.
+The Android app can be built automatically using GitHub Actions. This is the recommended method and does not require a local computer with Android Studio.
 
 1.  **Deploy to Vercel:** Follow the steps above to deploy the web app and get your public URL.
-2.  **Configure API URL:** You need to tell the Android build where your live AI server is. Open a terminal and run the following command, using your specific Vercel URL (`https://ask-pix-ai.vercel.app`).
-
-    ```bash
-    NEXT_PUBLIC_API_BASE_URL=https://ask-pix-ai.vercel.app npm run cap:sync
-    ```
-    This command rebuilds the app with the correct server URL and syncs it with the Android project.
-3.  **Build in Android Studio:**
-    *   Open Android Studio.
-    *   Choose "Open an existing project".
-    *   Navigate to your project's `android` folder and open it.
-    *   Wait for Gradle to sync.
-    *   Build the app using "Build" > "Build Bundle(s) / APK(s)" > "Build APK(s)".
-    *   The final `app-debug.apk` file can be found in `android/app/build/outputs/apk/debug/`.
+2.  **Add GitHub Secret:** You must provide your Vercel URL to the GitHub build process.
+    *   In your GitHub repository, go to "Settings" > "Secrets and variables" > "Actions".
+    *   Click "New repository secret".
+    *   For the "Name", enter `VERCEL_URL`.
+    *   For the "Value", paste your full Vercel deployment URL (e.g., `https://ask-pix-ai.vercel.app`).
+    *   Click "Add secret".
+3.  **Run the Build Workflow:**
+    *   Go to the "Actions" tab in your GitHub repository.
+    *   In the left sidebar, click on "Build Android APK for Testing".
+    *   Click the "Run workflow" button on the right, and then click the green "Run workflow" button in the dropdown.
+4.  **Download the APK:**
+    *   The build will take a few minutes. Once it's complete, click on the completed workflow run.
+    *   Under the "Artifacts" section, you will see `app-debug`. Click it to download the `app-debug.apk` file.
+    *   You can then transfer and install this APK file on your Android device.

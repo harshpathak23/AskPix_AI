@@ -30,18 +30,18 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build Next.js project
+    - name: Configure App and Sync Capacitor
+      env:
+        # Pass the Vercel URL from GitHub secrets to the build script.
+        # This is required so the Android app knows where to send AI requests.
+        NEXT_PUBLIC_API_BASE_URL: ${{ secrets.VERCEL_URL }}
       run: |
-        NEXT_PUBLIC_FIREBASE_API_KEY=dummy_key_for_build \
-        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=dummy.firebaseapp.com \
-        NEXT_PUBLIC_FIREBASE_PROJECT_ID=dummy-project \
-        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=dummy.appspot.com \
-        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1234567890 \
-        NEXT_PUBLIC_FIREBASE_APP_ID=1:1234567890:web:dummyappid \
-        npm run build:mobile
-
-    - name: Sync Capacitor project
-      run: npx cap sync android
+        if [ -z "$NEXT_PUBLIC_API_BASE_URL" ]; then
+          echo "Error: VERCEL_URL secret is not set."
+          echo "Please add it to your repository secrets in GitHub Settings."
+          exit 1
+        fi
+        npm run cap:sync
 
     - name: Build Android App with stacktrace
       run: |
