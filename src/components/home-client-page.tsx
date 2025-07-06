@@ -8,6 +8,8 @@ import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -180,38 +182,43 @@ interface CroppingScreenProps {
   handleGetSolution: () => void;
 }
 const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
-    <div className="w-full h-full flex flex-col items-center p-4 text-slate-200">
+    <div className="w-full h-full flex flex-col text-slate-200">
+      {/* Main content area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
        {error && (
-          <Alert variant="destructive" className="mb-4 w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
+          <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
             <XCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
        )}
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold text-slate-100">Crop Your Question</h2>
-        <p className="text-slate-400">Drag to select the area with the question you want to solve.</p>
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-100">Crop Your Question</h2>
+          <p className="text-slate-400">Drag to select the area with the question you want to solve.</p>
+        </div>
+        <div className="w-full bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+          {capturedImage && (
+            <ReactCrop
+              crop={crop}
+              onChange={(c, percentCrop) => setCrop(c)}
+              aspect={undefined}
+            >
+              <Image
+                ref={imgRef}
+                src={capturedImage}
+                alt="Captured question to crop"
+                width={1200}
+                height={675}
+                onLoad={onImageLoad}
+                className="w-full h-auto object-contain"
+              />
+            </ReactCrop>
+          )}
+        </div>
       </div>
-      <div className="w-full flex-1 bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-        {capturedImage && (
-          <ReactCrop
-            crop={crop}
-            onChange={(c, percentCrop) => setCrop(c)}
-            aspect={undefined}
-          >
-            <Image
-              ref={imgRef}
-              src={capturedImage}
-              alt="Captured question to crop"
-              width={1200}
-              height={675}
-              onLoad={onImageLoad}
-              className="w-full h-auto max-h-[70vh] object-contain"
-            />
-          </ReactCrop>
-        )}
-      </div>
-      <div className="flex w-full gap-4 mt-4">
+      
+      {/* Sticky footer */}
+      <div className="flex-shrink-0 flex w-full gap-4 p-4 border-t border-slate-800">
         <Button onClick={handleRetake} className="w-full text-lg py-6">
           <RefreshCw className="mr-2 h-5 w-5" />
           Retake
