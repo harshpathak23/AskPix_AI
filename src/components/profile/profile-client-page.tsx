@@ -12,7 +12,7 @@ import { signOut } from "firebase/auth";
 import { useEffect, useState, useCallback } from "react";
 import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError, doc, deleteDoc } from "firebase/firestore";
 import { Logo } from "@/components/icons/logo";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ProfileIcon } from "@/components/icons/profile-icon";
 import {
@@ -49,7 +49,7 @@ export default function ProfileClientPage() {
     const [solutionToDelete, setSolutionToDelete] = useState<SavedSolution | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-    const { toast } = useToast();
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const handleLogout = useCallback(() => {
         setIsLoggingOut(true);
@@ -61,7 +61,7 @@ export default function ProfileClientPage() {
         }).finally(() => {
             setIsLoggingOut(false);
         });
-    }, [router, toast]);
+    }, [router]);
 
     useEffect(() => {
         // If auth is done loading and there's no user, redirect.
@@ -139,66 +139,120 @@ export default function ProfileClientPage() {
     };
 
     const handleDownload = async (solution: SavedSolution) => {
-        const htmlContent = `<!DOCTYPE html>
-<html lang="${solution.language}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solution: ${solution.topic}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVZs3OFDGU4awxMmuAyBCPRbNEOTNaEftGWhUbGasKceMn/bVCTX" crossorigin="anonymous">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
-        onload="renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] }); setTimeout(function(){ window.print(); }, 500);">
-    </script>
-    <style>
-        @media print {
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          @page { margin: 0.5in; }
-        }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.6; background-color: #f9f9f9; color: #111; padding: 1rem; max-width: 800px; margin: auto; }
-        .container { background-color: #fff; border-radius: 8px; padding: 1rem 2rem 2rem 2rem; border: 1px solid #ddd; }
-        img { max-width: 100%; height: auto; display: block; margin: 1.5rem 0; border-radius: 6px; }
-        h1, h2 { color: #000; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
-        h1 { font-size: 1.75rem; }
-        h2 { font-size: 1.5rem; }
-        .content-block { margin-top: 1.5rem; }
-        .text-content { white-space: pre-wrap; word-wrap: break-word; font-size: 1rem; }
-        .katex-display { padding: 1em 0; overflow-x: auto; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Question</h1>
-        <img src="${solution.croppedImage}" alt="Question Image">
-        
-        <h2>Topic: ${solution.topic}</h2>
-        
-        <div class="content-block">
-            <h2>Solution (${solution.language === 'hi' ? 'Hindi' : 'English'})</h2>
-            <div class="text-content">${solution.solution.replace(/\n/g, '<br/>')}</div>
-        </div>
-        
-        ${solution.formulas ? `
-        <div class="content-block">
-            <h2>Key Formulas</h2>
-            <div class="text-content">${solution.formulas.replace(/\n/g, '<br/>')}</div>
-        </div>
-        ` : ''}
-    </div>
-</body>
-</html>`;
+        setDownloadingId(solution.id);
+        toast({ title: 'Preparing Download...', description: 'Please wait a moment.' });
+    
+        const fileName = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    
+        const htmlString = `
+            <!DOCTYPE html>
+            <html lang="${solution.language}">
+            <head>
+                <meta charset="UTF-8">
+                <title>Solution: ${solution.topic}</title>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+                    onload="renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });">
+                </script>
+                <style>
+                    body { font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: auto; color: #333; }
+                    .container { border: 1px solid #ddd; border-radius: 8px; padding: 2rem; background: #fff; }
+                    img { max-width: 100%; height: auto; border-radius: 6px; margin-bottom: 1.5rem; display: block; }
+                    h1, h2 { border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+                    .katex-display { overflow-x: auto; padding: 1em 0; }
+                    .solution-text { white-space: pre-wrap; word-wrap: break-word; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Question</h1>
+                    <img src="${solution.croppedImage}" alt="Question Image">
+                    <h2>Topic: ${solution.topic}</h2>
+                    <div class="solution-text">
+                        <h2>Solution (${solution.language === 'hi' ? 'Hindi' : 'English'})</h2>
+                        ${solution.solution.replace(/\n/g, '<br/>')}
+                    </div>
+                    ${solution.formulas ? `
+                    <div>
+                        <h2>Key Formulas</h2>
+                        <div class="solution-text">${solution.formulas.replace(/\n/g, '<br/>')}</div>
+                    </div>` : ''}
+                </div>
+            </body>
+            </html>`;
+    
+        if (solution.language === 'hi') {
+            try {
+                const blob = new Blob([htmlString], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${fileName || 'solution'}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast({ title: 'Success!', description: 'HTML file downloaded.' });
+            } catch (error) {
+                console.error('HTML download failed', error);
+                toast({ title: 'Error', description: 'Could not download HTML file.', variant: 'destructive' });
+            }
+        } else { // English solution, generate PDF
+            try {
+                const { default: jsPDF } = await import('jspdf');
+                const { default: html2canvas } = await import('html2canvas');
+    
+                const element = document.createElement('div');
+                element.style.position = 'absolute';
+                element.style.left = '-9999px';
+                element.style.width = '800px'; // A reasonable width for rendering
+                element.innerHTML = htmlString;
+                document.body.appendChild(element);
 
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-        } else {
-            toast({
-                title: "Download Failed",
-                description: "Could not open a new window. Please disable your pop-up blocker for this site.",
-                variant: "destructive",
-            });
+                const container = element.querySelector('.container') as HTMLElement;
+                if (!container) throw new Error('Render container not found');
+    
+                // Wait for images and KaTeX to render.
+                await new Promise(resolve => setTimeout(resolve, 1000));
+    
+                const canvas = await html2canvas(container, {
+                    scale: 2,
+                    useCORS: true,
+                });
+    
+                const pdf = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4',
+                });
+    
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+    
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdf.internal.pageSize.getHeight();
+    
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                    heightLeft -= pdf.internal.pageSize.getHeight();
+                }
+    
+                pdf.save(`${fileName || 'solution'}.pdf`);
+                toast({ title: 'Success!', description: 'PDF file downloaded.' });
+                document.body.removeChild(element);
+            } catch (error) {
+                console.error('PDF download failed', error);
+                toast({ title: 'Error', description: 'Could not generate PDF file.', variant: 'destructive' });
+            }
         }
+    
+        setDownloadingId(null);
     };
 
   return (
@@ -281,9 +335,9 @@ export default function ProfileClientPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 self-end sm:self-center">
-                                    <Button size="sm" onClick={() => handleDownload(file)}>
-                                        <Download className="mr-2 h-4 w-4"/>
-                                        Download
+                                    <Button size="sm" onClick={() => handleDownload(file)} disabled={downloadingId === file.id}>
+                                        {downloadingId === file.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                        {downloadingId === file.id ? 'Downloading...' : 'Download'}
                                     </Button>
                                     <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
                                         <Trash2 className="mr-2 h-4 w-4"/>
