@@ -6,7 +6,6 @@ import { Bot, Loader2, Send, Sparkles, Home, XCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { chatWithAssistant } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
@@ -39,10 +38,18 @@ export default function AssistantClientPage() {
     setError(null);
     setResponse(null);
     try {
-      const result = await chatWithAssistant({ prompt: data.prompt });
-      if (result.error) {
-        throw new Error(result.error);
+      const apiResponse = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: data.prompt }),
+      });
+      
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json().catch(() => ({ error: 'An unknown error occurred.' }));
+        throw new Error(errorData.error || `API request failed with status ${apiResponse.status}`);
       }
+
+      const result = await apiResponse.json();
       setResponse(result.response);
     } catch (e) {
       console.error('Assistant Error:', e);

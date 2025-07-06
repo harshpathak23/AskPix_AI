@@ -1,11 +1,11 @@
 /**
  * @fileoverview This file defines the API route for solving questions.
- * This endpoint is specifically for the mobile app to communicate with the
+ * This endpoint is used by the web and mobile apps to communicate with the
  * server-side AI functionality. It receives a POST request, calls the
- * main `solveQuestion` server action, and returns the result as JSON.
+ * Genkit flow directly, and returns the result as JSON.
  */
 import { NextResponse } from 'next/server';
-import { solveQuestion } from '@/app/actions';
+import { solveQuestionFlow } from '@/ai/flows/solve-question-flow';
 import { SolveQuestionInputSchema } from '@/ai/schemas';
 
 export async function POST(request: Request) {
@@ -21,18 +21,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Call the main server action with the validated data.
-    const result = await solveQuestion(validatedInput.data);
-
-    // 3. Check if the action returned an error.
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
-    }
-
-    // 4. Return the successful result.
+    // 2. Call the Genkit flow directly.
+    const result = await solveQuestionFlow(validatedInput.data);
     return NextResponse.json(result);
   } catch (e: any) {
-    console.error('API Route Error:', e);
+    console.error('API Route Error in /api/solve:', e);
+    // If the flow itself throws an error, or if there's another issue, catch it.
     return NextResponse.json(
       { error: e.message || 'An unexpected server error occurred.' },
       { status: 500 }
