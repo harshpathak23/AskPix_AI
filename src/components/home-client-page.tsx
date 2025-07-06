@@ -191,7 +191,7 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
           </Alert>
        )}
       
-      {/* Container for the image and overlaid buttons */}
+      {/* This container will now grow to fill available space and hold the buttons */}
       <div className="w-full flex-1 bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center min-h-0">
         {capturedImage && (
           <ReactCrop
@@ -211,7 +211,7 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
           </ReactCrop>
         )}
         
-        {/* Action buttons overlaid on the image container */}
+        {/* Action buttons are absolutely positioned at the bottom of the container above */}
         <div className="absolute bottom-4 left-4 right-4 z-10 flex gap-4">
             <Button onClick={handleRetake} className="w-full text-lg py-6 bg-black/50 backdrop-blur-sm border border-white/20 hover:bg-black/70">
                 <RefreshCw className="mr-2 h-5 w-5" />
@@ -962,9 +962,10 @@ export default function HomeClientPage() {
       <main className={cn(
         "min-h-screen transition-opacity duration-100",
         showSplash ? "opacity-0" : "opacity-100",
+        "flex flex-col",
         appState === 'welcome' 
-          ? "flex flex-col items-center justify-center p-4" 
-          : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
+          ? "items-center justify-center p-4" 
+          : "container mx-auto max-w-3xl items-center px-0"
       )}>
         {appState === 'welcome' && (
           <WelcomeScreen 
@@ -976,7 +977,7 @@ export default function HomeClientPage() {
         
         {appState !== 'welcome' && (
           <div className={cn(
-            "w-full shadow-sm flex flex-1 flex-col mt-4",
+            "w-full shadow-sm flex flex-1 flex-col mt-4 h-full",
             "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-t-xl"
           )}>
             {appState !== 'scanning' && appState !== 'cropping' && (
@@ -1065,3 +1066,5 @@ export default function HomeClientPage() {
     </>
   );
 }
+
+    
