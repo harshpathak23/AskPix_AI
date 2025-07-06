@@ -644,11 +644,8 @@ export default function HomeClientPage() {
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
 
-      // Unified API call: for mobile, ensure API URL is set. For web, use a relative path.
+      // Unified API call: for mobile, use absolute URL from env var. For web, use relative path.
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true' && !apiBaseUrl) {
-        throw new Error("The application is not configured with a server URL. Please build the mobile app with a NEXT_PUBLIC_API_BASE_URL environment variable pointing to your deployed web app.");
-      }
       
       const response = await fetch(`${apiBaseUrl}/api/solve`, {
         method: 'POST',
@@ -712,11 +709,8 @@ export default function HomeClientPage() {
           subject: subjectForTranslation,
       };
 
-      // Unified API call: for mobile, ensure API URL is set. For web, use a relative path.
+      // Unified API call.
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true' && !apiBaseUrl) {
-          throw new Error("The application is not configured with a server URL. Translation is not possible.");
-      }
 
       const response = await fetch(`${apiBaseUrl}/api/solve`, {
           method: 'POST',
