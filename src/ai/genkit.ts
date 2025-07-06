@@ -14,6 +14,8 @@ export const ai = genkit({
       // An API key is required for the Google AI plugin.
       // It's loaded from the GENAI_API_KEY environment variable.
       apiKey: process.env.GENAI_API_KEY,
+      // Explicitly providing the Project ID ensures Genkit uses the correct project's services.
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     }),
   ],
   // The log and flow state are stored in-memory.
