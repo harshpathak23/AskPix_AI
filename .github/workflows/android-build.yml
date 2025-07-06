@@ -30,18 +30,19 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Configure App and Sync Capacitor
+    # This step now builds the app with the API URL baked in
+    - name: Build and Sync Capacitor App
       env:
-        # Pass the Vercel URL from GitHub secrets to capacitor.config.ts
-        CAPACITOR_SERVER_URL: ${{ secrets.VERCEL_URL }}
+        # This secret must be set in your GitHub repository settings.
+        # It should be the full URL of your deployed Vercel application.
+        NEXT_PUBLIC_API_BASE_URL: ${{ secrets.VERCEL_URL }}
       run: |
-        if [ -z "$CAPACITOR_SERVER_URL" ]; then
+        if [ -z "$NEXT_PUBLIC_API_BASE_URL" ]; then
           echo "Error: VERCEL_URL secret is not set."
           echo "Please add it to your repository secrets in GitHub Settings."
           exit 1
         fi
-        # The `cap:sync` script runs the build and syncs the native project.
-        # With a server URL, the Android app will load the live site.
+        # The cap:sync script runs the static build and syncs the native project.
         npm run cap:sync
 
     - name: Build Android App with stacktrace

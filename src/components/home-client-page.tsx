@@ -365,7 +365,7 @@ interface ResultScreenProps {
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="flex flex-col items-center">
-            <Logo animated className="h-[220px] w-[220px] mb-2" />
+            <Logo animated className="w-[220px] h-[220px] mb-2" />
             <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
         </div>
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
@@ -690,26 +690,42 @@ export default function HomeClientPage() {
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
 
-      // Unified API call: for mobile, use absolute URL from env var. For web, use relative path.
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      
-      const response = await fetch(`${apiBaseUrl}/api/solve`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      let result;
+
+      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
+        // Mobile App: Call the deployed API endpoint
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!apiBaseUrl) {
+          throw new Error("The application is not configured with a server URL. Please build the mobile app with a NEXT_PUBLIC_API_BASE_URL environment variable pointing to your deployed web app.");
+        }
+        
+        const response = await fetch(`${apiBaseUrl}/api/solve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photoDataUri: croppedDataUri,
+            language,
+            subject,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `API request failed with status ${response.status}`);
+        }
+        result = await response.json();
+
+      } else {
+        // Web App: Use the direct server action call
+        const { solveQuestion } = await import('@/app/actions');
+        result = await solveQuestion({
           photoDataUri: croppedDataUri,
           language,
           subject,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: `API request failed with status ${response.status}` }));
-        throw new Error(errorData.error || `API request failed with status ${response.status}`);
+        });
       }
-      const result = await response.json();
 
       if (result.error) {
         throw new Error(result.error);
@@ -749,26 +765,36 @@ export default function HomeClientPage() {
     const subjectForTranslation = identifiedSubject || subject;
 
     try {
+      let result;
       const payload = {
           photoDataUri: croppedImage,
           language: newLang,
           subject: subjectForTranslation,
       };
 
-      // Unified API call.
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
+        // Mobile App: Call the deployed API endpoint
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!apiBaseUrl) {
+            throw new Error("The application is not configured with a server URL. Translation is not possible.");
+        }
 
-      const response = await fetch(`${apiBaseUrl}/api/solve`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-      });
+        const response = await fetch(`${apiBaseUrl}/api/solve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: `API request failed with status ${response.status}` }));
-          throw new Error(errorData.error || `API request failed with status ${response.status}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `API request failed with status ${response.status}`);
+        }
+        result = await response.json();
+      } else {
+        // Web App: Use the direct server action call
+        const { solveQuestion } = await import('@/app/actions');
+        result = await solveQuestion(payload);
       }
-      const result = await response.json();
       
       if (result.error) {
           throw new Error(result.error);
