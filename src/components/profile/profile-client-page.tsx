@@ -148,13 +148,17 @@ export default function ProfileClientPage() {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVZs3OFDGU4awxMmuAyBCPRbNEOTNaEftGWhUbGasKceMn/bVCTX" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
-        onload="renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });">
+        onload="renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] }); setTimeout(function(){ window.print(); }, 500);">
     </script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.6; background-color: #22272e; color: #cdd9e5; padding: 1rem; max-width: 800px; margin: auto; }
-        .container { background-color: #2d333b; border-radius: 8px; padding: 1rem 2rem 2rem 2rem; }
+        @media print {
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @page { margin: 0.5in; }
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.6; background-color: #f9f9f9; color: #111; padding: 1rem; max-width: 800px; margin: auto; }
+        .container { background-color: #fff; border-radius: 8px; padding: 1rem 2rem 2rem 2rem; border: 1px solid #ddd; }
         img { max-width: 100%; height: auto; display: block; margin: 1.5rem 0; border-radius: 6px; }
-        h1, h2 { color: #f0f6fc; border-bottom: 1px solid #484f58; padding-bottom: 0.5rem; }
+        h1, h2 { color: #000; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
         h1 { font-size: 1.75rem; }
         h2 { font-size: 1.5rem; }
         .content-block { margin-top: 1.5rem; }
@@ -170,28 +174,31 @@ export default function ProfileClientPage() {
         <h2>Topic: ${solution.topic}</h2>
         
         <div class="content-block">
-            <h2>Solution</h2>
-            <div class="text-content">${solution.solution}</div>
+            <h2>Solution (${solution.language === 'hi' ? 'Hindi' : 'English'})</h2>
+            <div class="text-content">${solution.solution.replace(/\n/g, '<br/>')}</div>
         </div>
         
         ${solution.formulas ? `
         <div class="content-block">
             <h2>Key Formulas</h2>
-            <div class="text-content">${solution.formulas}</div>
+            <div class="text-content">${solution.formulas.replace(/\n/g, '<br/>')}</div>
         </div>
         ` : ''}
     </div>
 </body>
 </html>`;
 
-        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", `solution-${solution.id}.html`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+        } else {
+            toast({
+                title: "Download Failed",
+                description: "Could not open a new window. Please disable your pop-up blocker for this site.",
+                variant: "destructive",
+            });
+        }
     };
 
   return (
