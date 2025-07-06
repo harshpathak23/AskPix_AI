@@ -17,7 +17,7 @@ const ChatAssistantOutputSchema = z.object({
 
 const chatAssistantPrompt = ai.definePrompt({
   name: 'chatAssistantPrompt',
-  model: 'googleai/gemini-1.0-pro',
+  model: 'googleai/gemini-pro',
   input: { schema: ChatAssistantInputSchema },
   output: { schema: ChatAssistantOutputSchema },
   prompt: `You are a helpful AI assistant. Respond to the following prompt concisely.
