@@ -4,7 +4,9 @@ const path = require('path');
 const isStatic = process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true';
 
 const nextConfig = {
-  // Removed output: 'export' to enable server-side features on Vercel
+  // Conditionally set output to 'export' for static builds (for Capacitor).
+  // This will be undefined for Vercel builds, allowing server-side features.
+  output: isStatic ? 'export' : undefined,
   reactStrictMode: true,
   typescript: {
     ignoreBuildErrors: true,
