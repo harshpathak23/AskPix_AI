@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -69,7 +70,12 @@ export default function LoginClientPage() {
           return;
       }
       
-      router.push('/profile');
+      const pendingSolution = localStorage.getItem('pendingSolution');
+      if (pendingSolution) {
+        router.push('/');
+      } else {
+        router.push('/profile');
+      }
     } catch (e) {
       const authError = e as AuthError;
       let errorMessage = 'An unexpected error occurred. Please try again.';

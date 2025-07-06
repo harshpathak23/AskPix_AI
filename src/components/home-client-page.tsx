@@ -272,7 +272,7 @@ const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage }) => {
                   {activeStep > index ? (
                     <Check className="h-5 w-5 text-green-400" />
                   ) : activeStep === index ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-solid border-primary border-t-transparent"></div>
                   ) : (
                     step.icon
                   )}
@@ -324,7 +324,7 @@ const TranslatingScreen: FC = () => {
                   {activeStep > index ? (
                     <Check className="h-5 w-5 text-green-400" />
                   ) : activeStep === index ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-solid border-primary border-t-transparent"></div>
                   ) : (
                     step.icon
                   )}
@@ -361,6 +361,9 @@ interface ResultScreenProps {
 }
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+        <div className="flex justify-center">
+            <Logo animated className="h-[200px] w-auto aspect-[9/16]" />
+        </div>
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
@@ -432,7 +435,20 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
               {isSaving ? 'Saving...' : solutionSaved ? 'Saved!' : 'Save Solution'}
             </Button>
           ) : (
-            <Button asChild className="w-full text-base py-6 animate-pulse-glow">
+            <Button asChild className="w-full text-base py-6 animate-pulse-glow" onClick={() => {
+                if (croppedImage && solution && topic) {
+                    const pendingSolution = {
+                        croppedImage,
+                        solution,
+                        topic,
+                        formulas,
+                        subject,
+                        identifiedSubject: identifiedSubject || subject,
+                        language,
+                    };
+                    localStorage.setItem('pendingSolution', JSON.stringify(pendingSolution));
+                }
+            }}>
               <Link href="/login">
                 <Download className="mr-2 h-5 w-5" />
                 Login to Save
@@ -480,6 +496,32 @@ export default function HomeClientPage() {
     }, 1000); // Animation is 0.8s, so 1s is a good time to hide it.
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const pendingSolutionJSON = localStorage.getItem('pendingSolution');
+    // Only restore if a user is now logged in
+    if (pendingSolutionJSON && user) {
+        try {
+            const pendingSolution = JSON.parse(pendingSolutionJSON);
+            // Check if we have the required data to prevent setting nulls
+            if (pendingSolution.croppedImage && pendingSolution.solution && pendingSolution.topic) {
+                setCroppedImage(pendingSolution.croppedImage);
+                setSolution(pendingSolution.solution);
+                setTopic(pendingSolution.topic);
+                setFormulas(pendingSolution.formulas || null);
+                setSubject(pendingSolution.subject || 'General');
+                setIdentifiedSubject(pendingSolution.identifiedSubject || null);
+                setLanguage(pendingSolution.language || 'en');
+                setAppState('result');
+            }
+        } catch (e) {
+            console.error("Failed to parse pending solution", e);
+        } finally {
+            // Always clean up to avoid loops or stale data
+            localStorage.removeItem('pendingSolution');
+        }
+    }
+  }, [user]); // Rerun this logic when the user state changes
 
   // This effect now ONLY handles cleaning up the camera stream when leaving the scanning screen.
   useEffect(() => {

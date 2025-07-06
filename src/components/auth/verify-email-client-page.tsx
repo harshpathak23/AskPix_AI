@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -66,7 +67,12 @@ export default function VerifyEmailClientPage() {
     setLoading(true);
     await auth.currentUser.reload();
     if(auth.currentUser.emailVerified) {
-        router.push('/profile');
+        const pendingSolution = localStorage.getItem('pendingSolution');
+        if (pendingSolution) {
+            router.push('/');
+        } else {
+            router.push('/profile');
+        }
     } else {
         setError("Your email is still not verified. Please check your inbox (and spam folder).");
         setLoading(false);
