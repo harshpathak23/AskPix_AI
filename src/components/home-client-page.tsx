@@ -644,42 +644,29 @@ export default function HomeClientPage() {
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
 
-      let result;
-
-      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call the deployed API endpoint
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!apiBaseUrl) {
-          throw new Error("The application is not configured with a server URL. Please build the mobile app with a NEXT_PUBLIC_API_BASE_URL environment variable pointing to your deployed web app.");
-        }
-        
-        const response = await fetch(`${apiBaseUrl}/api/solve`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photoDataUri: croppedDataUri,
-            language,
-            subject,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `API request failed with status ${response.status}`);
-        }
-        result = await response.json();
-
-      } else {
-        // Web App: Use the direct server action call
-        const { solveQuestion } = await import('@/app/actions');
-        result = await solveQuestion({
+      // Unified API call: for mobile, ensure API URL is set. For web, use a relative path.
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true' && !apiBaseUrl) {
+        throw new Error("The application is not configured with a server URL. Please build the mobile app with a NEXT_PUBLIC_API_BASE_URL environment variable pointing to your deployed web app.");
+      }
+      
+      const response = await fetch(`${apiBaseUrl}/api/solve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           photoDataUri: croppedDataUri,
           language,
           subject,
-        });
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `API request failed with status ${response.status}` }));
+        throw new Error(errorData.error || `API request failed with status ${response.status}`);
       }
+      const result = await response.json();
 
       if (result.error) {
         throw new Error(result.error);
@@ -719,36 +706,29 @@ export default function HomeClientPage() {
     const subjectForTranslation = identifiedSubject || subject;
 
     try {
-      let result;
       const payload = {
           photoDataUri: croppedImage,
           language: newLang,
           subject: subjectForTranslation,
       };
 
-      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call the deployed API endpoint
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!apiBaseUrl) {
-            throw new Error("The application is not configured with a server URL. Translation is not possible.");
-        }
-
-        const response = await fetch(`${apiBaseUrl}/api/solve`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `API request failed with status ${response.status}`);
-        }
-        result = await response.json();
-      } else {
-        // Web App: Use the direct server action call
-        const { solveQuestion } = await import('@/app/actions');
-        result = await solveQuestion(payload);
+      // Unified API call: for mobile, ensure API URL is set. For web, use a relative path.
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true' && !apiBaseUrl) {
+          throw new Error("The application is not configured with a server URL. Translation is not possible.");
       }
+
+      const response = await fetch(`${apiBaseUrl}/api/solve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: `API request failed with status ${response.status}` }));
+          throw new Error(errorData.error || `API request failed with status ${response.status}`);
+      }
+      const result = await response.json();
       
       if (result.error) {
           throw new Error(result.error);
