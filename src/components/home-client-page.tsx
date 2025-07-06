@@ -182,24 +182,19 @@ interface CroppingScreenProps {
   handleGetSolution: () => void;
 }
 const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
-    // This is the root container. It fills the height and width of its parent.
-    // p-4 provides some spacing from the screen edges. flex and flex-col stack children vertically.
     <div className="w-full h-full flex flex-col items-center justify-center p-4">
-       {error && (
-          // This alert will only show if there's an error. 
-          // It's outside the main image container so it's always visible at the top.
-          <Alert variant="destructive" className="mb-4 w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white flex-shrink-0">
-            <XCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-       )}
-      
-      {/* This is the main content area that holds the image and the buttons.
-          It fills the remaining vertical space ('flex-1') and available width ('w-full').
-          'relative' is crucial so we can absolutely position the buttons inside it.
-          'overflow-hidden' and 'rounded-lg' give it a nice container look. */}
       <div className="w-full flex-1 bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center min-h-0">
+        
+        {error && (
+            <div className="absolute top-4 left-4 right-4 z-20">
+              <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
+                <XCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
+        )}
+
         {capturedImage && (
           <ReactCrop
             crop={crop}
@@ -210,16 +205,14 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
               ref={imgRef}
               src={capturedImage}
               alt="Captured question to crop"
-              width={1200} // Base width for quality
-              height={675} // Base height for quality
+              width={1200}
+              height={675}
               onLoad={onImageLoad}
-              // This makes the image fit within the container without being distorted.
               className="max-w-full max-h-full object-contain"
             />
           </ReactCrop>
         )}
         
-        {/* Buttons are positioned at the bottom of the relative parent container above. */}
         <div className="absolute bottom-4 left-4 right-4 z-10 flex gap-4">
             <Button onClick={handleRetake} className="w-full text-lg py-6 bg-black/50 backdrop-blur-sm border border-white/20 hover:bg-black/70">
                 <RefreshCw className="mr-2 h-5 w-5" />
