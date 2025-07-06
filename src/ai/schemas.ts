@@ -4,7 +4,6 @@
  * - SolveQuestionInputSchema: The input for the question-solving flow.
  * - SolveQuestionOutputSchema: The output from the question-solving flow.
  */
-'use server';
 
 import { z } from 'zod';
 
