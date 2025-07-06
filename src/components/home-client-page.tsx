@@ -183,20 +183,16 @@ interface CroppingScreenProps {
 }
 const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
     <div className="w-full h-full flex flex-col text-slate-200">
-      {/* Main content area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-       {error && (
-          <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
-            <XCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-       )}
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-100">Crop Your Question</h2>
-          <p className="text-slate-400">Drag to select the area with the question you want to solve.</p>
-        </div>
-        <div className="w-full bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+      {/* Main content area, now without header */}
+      <div className="flex-1 overflow-hidden p-4 flex flex-col space-y-4">
+        {error && (
+            <Alert variant="destructive" className="flex-shrink-0 w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
+              <XCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+        )}
+        <div className="w-full flex-1 bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center min-h-0">
           {capturedImage && (
             <ReactCrop
               crop={crop}
@@ -210,7 +206,7 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
                 width={1200}
                 height={675}
                 onLoad={onImageLoad}
-                className="w-full h-auto object-contain"
+                className="max-w-full max-h-full object-contain"
               />
             </ReactCrop>
           )}
@@ -230,6 +226,7 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
       </div>
     </div>
 );
+
 
 interface SolvingScreenProps {
   croppedImage: string | null;
