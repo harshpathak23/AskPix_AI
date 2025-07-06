@@ -38,8 +38,7 @@ export async function POST(request: Request) {
     const result = await solveQuestionFlow(validatedInput.data);
     return NextResponse.json(result, { headers: corsHeaders });
   } catch (e: any) {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'Project ID not set';
-    console.error(`API Route Error in /api/solve. Configured Project ID: ${projectId}`, e);
+    console.error(`API Route Error in /api/solve`, e);
     
     // Check for a "Model not found" error to provide a more specific message.
     if (e.message && e.message.toLowerCase().includes('not found')) {
