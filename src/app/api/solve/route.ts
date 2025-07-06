@@ -8,8 +8,6 @@ import { NextResponse } from 'next/server';
 import { solveQuestion } from '@/app/actions';
 import { SolveQuestionInputSchema } from '@/ai/schemas';
 
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: Request) {
   try {
     // 1. Parse and validate the incoming request body.
