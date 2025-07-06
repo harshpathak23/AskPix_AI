@@ -39,7 +39,17 @@ export async function POST(request: Request) {
     return NextResponse.json(result, { headers: corsHeaders });
   } catch (e: any) {
     console.error('API Route Error in /api/solve:', e);
-    // If the flow itself throws an error, or if there's another issue, catch it.
+    
+    // Check for a "Model not found" error to provide a more specific message.
+    if (e.message && e.message.toLowerCase().includes('not found')) {
+      return NextResponse.json(
+        {
+          error: `AI Model not found. This usually means the API key is missing, invalid, or does not have access to the required models. Please double-check your 'GENAI_API_KEY' in your Vercel project settings and ensure the Google AI (Generative Language) API is enabled in your Google Cloud project.`,
+        },
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
     return NextResponse.json(
       { error: e.message || 'An unexpected server error occurred.' },
       { status: 500, headers: corsHeaders }
