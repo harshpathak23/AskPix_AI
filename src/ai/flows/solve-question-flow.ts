@@ -10,7 +10,7 @@ import { SolveQuestionInputSchema, SolveQuestionOutputSchema } from '@/ai/schema
 
 const solveQuestionPrompt = ai.definePrompt({
   name: 'solveQuestionPrompt',
-  model: 'googleai/gemini-pro',
+  model: 'googleai/gemini-1.0-pro',
   input: { schema: SolveQuestionInputSchema },
   output: { schema: SolveQuestionOutputSchema },
   prompt: `You are an expert AI tutor specializing in a variety of academic subjects.
