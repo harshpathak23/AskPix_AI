@@ -180,19 +180,9 @@ interface CroppingScreenProps {
   handleGetSolution: () => void;
 }
 const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
-    <div className="w-full h-full flex flex-col items-center p-4 text-slate-200">
-       {error && (
-          <Alert variant="destructive" className="mb-4 w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
-            <XCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-       )}
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold text-slate-100">Crop Your Question</h2>
-        <p className="text-slate-400">Drag to select the area with the question you want to solve.</p>
-      </div>
-      <div className="w-full flex-1 bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+    <div className="w-full h-full relative bg-black">
+      {/* Image container fills the entire space */}
+      <div className="w-full h-full flex items-center justify-center">
         {capturedImage && (
           <ReactCrop
             crop={crop}
@@ -206,23 +196,39 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
               width={1200}
               height={675}
               onLoad={onImageLoad}
-              className="w-full h-auto max-h-[70vh] object-contain"
+              className="max-w-full max-h-full object-contain" // Use max-w/h to respect aspect ratio
             />
           </ReactCrop>
         )}
       </div>
-      <div className="flex w-full gap-4 mt-4">
-        <Button onClick={handleRetake} className="w-full text-lg py-6">
-          <RefreshCw className="mr-2 h-5 w-5" />
-          Retake
-        </Button>
-        <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
-          <Bot className="mr-2 h-5 w-5" />
-          Get Solution
-        </Button>
+
+      {/* Error alert at the top */}
+      {error && (
+        <div className="absolute top-4 left-4 right-4 z-30">
+          <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
+            <XCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Button container overlaid at the bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+        <div className="flex w-full gap-4">
+          <Button onClick={handleRetake} className="w-full text-lg py-6" variant="secondary">
+            <RefreshCw className="mr-2 h-5 w-5" />
+            Retake
+          </Button>
+          <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
+            <Bot className="mr-2 h-5 w-5" />
+            Get Solution
+          </Button>
+        </div>
       </div>
     </div>
 );
+
 
 interface SolvingScreenProps {
   croppedImage: string | null;
@@ -361,6 +367,10 @@ interface ResultScreenProps {
 }
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
+        <div className="flex flex-col items-center">
+            <Logo animated className="w-[220px] h-auto aspect-square" />
+            <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
+        </div>
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
@@ -432,7 +442,20 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
               {isSaving ? 'Saving...' : solutionSaved ? 'Saved!' : 'Save Solution'}
             </Button>
           ) : (
-            <Button asChild className="w-full text-base py-6 animate-pulse-glow">
+            <Button asChild className="w-full text-base py-6 animate-pulse-glow" onClick={() => {
+                if (croppedImage && solution && topic) {
+                    const pendingSolution = {
+                        croppedImage,
+                        solution,
+                        topic,
+                        formulas,
+                        subject,
+                        identifiedSubject: identifiedSubject || subject,
+                        language,
+                    };
+                    localStorage.setItem('pendingSolution', JSON.stringify(pendingSolution));
+                }
+            }}>
               <Link href="/login">
                 <Download className="mr-2 h-5 w-5" />
                 Login to Save
@@ -480,6 +503,32 @@ export default function HomeClientPage() {
     }, 1000); // Animation is 0.8s, so 1s is a good time to hide it.
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const pendingSolutionJSON = localStorage.getItem('pendingSolution');
+    // Only restore if a user is now logged in
+    if (pendingSolutionJSON && user) {
+        try {
+            const pendingSolution = JSON.parse(pendingSolutionJSON);
+            // Check if we have the required data to prevent setting nulls
+            if (pendingSolution.croppedImage && pendingSolution.solution && pendingSolution.topic) {
+                setCroppedImage(pendingSolution.croppedImage);
+                setSolution(pendingSolution.solution);
+                setTopic(pendingSolution.topic);
+                setFormulas(pendingSolution.formulas || null);
+                setSubject(pendingSolution.subject || 'General');
+                setIdentifiedSubject(pendingSolution.identifiedSubject || null);
+                setLanguage(pendingSolution.language || 'en');
+                setAppState('result');
+            }
+        } catch (e) {
+            console.error("Failed to parse pending solution", e);
+        } finally {
+            // Always clean up to avoid loops or stale data
+            localStorage.removeItem('pendingSolution');
+        }
+    }
+  }, [user]); // Rerun this logic when the user state changes
 
   // This effect now ONLY handles cleaning up the camera stream when leaving the scanning screen.
   useEffect(() => {
@@ -858,7 +907,6 @@ export default function HomeClientPage() {
 
     setIsSaving(true);
     try {
-        // NEW: Save to a subcollection under the user's ID
         await addDoc(collection(db, 'users', user.uid, 'solutions'), {
             croppedImage,
             topic,
@@ -916,9 +964,10 @@ export default function HomeClientPage() {
       <main className={cn(
         "min-h-screen transition-opacity duration-100",
         showSplash ? "opacity-0" : "opacity-100",
+        "flex flex-col",
         appState === 'welcome' 
-          ? "flex flex-col items-center justify-center p-4" 
-          : "container mx-auto max-w-3xl flex flex-col items-center px-0 pb-0"
+          ? "items-center justify-center p-4" 
+          : "container mx-auto max-w-3xl items-center px-0 h-screen"
       )}>
         {appState === 'welcome' && (
           <WelcomeScreen 
@@ -930,13 +979,13 @@ export default function HomeClientPage() {
         
         {appState !== 'welcome' && (
           <div className={cn(
-            "w-full shadow-sm flex flex-1 flex-col mt-4",
+            "w-full shadow-sm flex flex-1 flex-col h-full",
             "bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-t-xl"
           )}>
             {appState !== 'scanning' && appState !== 'cropping' && (
               <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
                   <button className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
-                      <Logo className="h-[150px] w-auto aspect-[9/16]" />
+                      <Logo className="h-10 w-auto" />
                       <span className="hidden sm:inline">AskPix AI</span>
                   </button>
                   <div>
