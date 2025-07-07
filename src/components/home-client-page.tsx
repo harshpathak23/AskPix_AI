@@ -180,29 +180,29 @@ interface CroppingScreenProps {
   handleGetSolution: () => void;
 }
 const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
-    <div className="w-full h-full relative p-4">
-      <div className="w-full h-full bg-black rounded-lg overflow-hidden flex items-center justify-center">
-          {capturedImage && (
-            <ReactCrop
-              crop={crop}
-              onChange={(c) => setCrop(c)}
-              aspect={undefined}
-            >
-              <Image
-                ref={imgRef}
-                src={capturedImage}
-                alt="Captured question to crop"
-                width={1200}
-                height={675}
-                onLoad={onImageLoad}
-                className="max-w-full max-h-full object-contain"
-              />
-            </ReactCrop>
-          )}
+    <div className="w-full h-full relative bg-black">
+      <div className="w-full h-full flex items-center justify-center">
+        {capturedImage && (
+          <ReactCrop
+            crop={crop}
+            onChange={(c, percentCrop) => setCrop(c)}
+            aspect={undefined}
+          >
+            <Image
+              ref={imgRef}
+              src={capturedImage}
+              alt="Captured question to crop"
+              width={1200}
+              height={675}
+              onLoad={onImageLoad}
+              className="max-w-full max-h-full object-contain"
+            />
+          </ReactCrop>
+        )}
       </div>
 
       {error && (
-        <div className="absolute top-6 left-4 right-4 z-20">
+        <div className="absolute top-4 left-4 right-4 z-30">
           <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
             <XCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
@@ -211,15 +211,17 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
         </div>
       )}
 
-      <div className="absolute bottom-6 left-4 right-4 z-10 flex gap-4">
-          <Button onClick={handleRetake} className="w-full text-lg py-6 bg-black/50 backdrop-blur-sm border border-white/20 hover:bg-black/70">
-              <RefreshCw className="mr-2 h-5 w-5" />
-              Retake
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+        <div className="flex w-full gap-4">
+          <Button onClick={handleRetake} className="w-full text-lg py-6" variant="secondary">
+            <RefreshCw className="mr-2 h-5 w-5" />
+            Retake
           </Button>
           <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
-              <Bot className="mr-2 h-5 w-5" />
-              Get Solution
+            <Bot className="mr-2 h-5 w-5" />
+            Get Solution
           </Button>
+        </div>
       </div>
     </div>
 );
