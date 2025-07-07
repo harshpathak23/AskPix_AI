@@ -29,6 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 
 interface SavedSolution {
     id: string;
@@ -63,6 +65,15 @@ export default function ProfileClientPage() {
         }).finally(() => {
             setIsLoggingOut(false);
         });
+    }, [router]);
+
+    useEffect(() => {
+        if (Capacitor.isNativePlatform()) {
+          const listener = App.addListener('backButton', () => {
+            router.push('/');
+          });
+          return () => { listener.remove() };
+        }
     }, [router]);
 
     useEffect(() => {
@@ -146,7 +157,6 @@ export default function ProfileClientPage() {
     
         const fileName = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     
-        // The HTML content is the same for both PDF and HTML downloads
         const htmlString = `
             <!DOCTYPE html>
             <html lang="${solution.language}">
@@ -188,14 +198,12 @@ export default function ProfileClientPage() {
         try {
             if (solution.language === 'hi') {
                 const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `${fileName || 'solution'}.html`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-                toast({ title: 'Success!', description: 'HTML file download initiated.' });
+                const url = URL.createObjectURL(blob);
+                const newWindow = window.open(url);
+                if (!newWindow) {
+                    throw new Error("Could not open file. Please check your pop-up blocker settings.");
+                }
+                toast({ title: 'Success!', description: 'HTML file opened in a new tab.' });
             } else { // English solution, generate and download PDF
                 const element = document.createElement('div');
                 element.style.position = 'absolute';
@@ -238,13 +246,19 @@ export default function ProfileClientPage() {
                     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
                     heightLeft -= pdfHeight;
                 }
-    
-                pdf.save(`${fileName || 'solution'}.pdf`);
-                toast({ title: 'Success!', description: 'PDF download initiated.' });
+                
+                // This opens the PDF in a new tab, which is more reliable on mobile.
+                const pdfDataUri = pdf.output('datauristring');
+                const newWindow = window.open(pdfDataUri);
+                 if (!newWindow) {
+                    throw new Error("Could not open file. Please check your pop-up blocker settings.");
+                }
+                
+                toast({ title: 'Success!', description: 'PDF opened in a new tab.' });
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Download failed', error);
-            toast({ title: 'Error', description: 'Could not prepare the file for download.', variant: 'destructive' });
+            toast({ title: 'Error', description: error.message || 'Could not prepare the file for download.', variant: 'destructive' });
         } finally {
             setDownloadingId(null);
         }
@@ -254,9 +268,7 @@ export default function ProfileClientPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
-            <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
-                <Logo className="h-12 w-auto aspect-[16/9]" />
-            </Link>
+            <h1 className="font-bold text-xl text-slate-100">AskPix AI</h1>
             <div className="flex items-center gap-2 sm:gap-4">
                 <Button asChild size="icon">
                     <Link href="/">
@@ -332,7 +344,7 @@ export default function ProfileClientPage() {
                                 <div className="flex items-center gap-2 self-end sm:self-center">
                                     <Button size="sm" onClick={() => handleDownload(file)} disabled={downloadingId === file.id}>
                                         {downloadingId === file.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                        {downloadingId === file.id ? 'Downloading...' : 'Download'}
+                                        {downloadingId === file.id ? 'Preparing...' : 'Download'}
                                     </Button>
                                     <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
                                         <Trash2 className="mr-2 h-4 w-4"/>

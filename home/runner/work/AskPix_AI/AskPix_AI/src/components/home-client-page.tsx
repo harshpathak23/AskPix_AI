@@ -3,12 +3,13 @@
 
 import { useState, useRef, useEffect, FC } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
-
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
@@ -47,8 +48,7 @@ interface WelcomeScreenProps {
 const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning, user, isLoggingOut, handleLogout }) => {
   return (
     <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col animate-in fade-in-10 min-h-[90vh] sm:min-h-[700px] border border-purple-900/50">
-      <header className="flex justify-between items-center w-full mb-4 h-10">
-        <Logo className="h-12 w-auto" />
+      <header className="flex justify-end items-center w-full mb-4 h-10">
         <div className="flex items-center gap-2">
           {user ? (
             <>
@@ -197,7 +197,6 @@ const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef
 );
 
 interface CroppingScreenProps {
-  error: string | null;
   capturedImage: string | null;
   crop: Crop | undefined;
   setCrop: (crop: Crop) => void;
@@ -206,50 +205,39 @@ interface CroppingScreenProps {
   handleRetake: () => void;
   handleGetSolution: () => void;
 }
-const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
+const CroppingScreen: FC<CroppingScreenProps> = ({ capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
     <div className="w-full h-full relative bg-black">
-      <div className="w-full h-full flex items-center justify-center">
-        {capturedImage && (
-          <ReactCrop
-            crop={crop}
-            onChange={(c, percentCrop) => setCrop(c)}
-            aspect={undefined}
-          >
-            <Image
-              ref={imgRef}
-              src={capturedImage}
-              alt="Captured question to crop"
-              width={1200}
-              height={675}
-              onLoad={onImageLoad}
-              className="max-w-full max-h-[100dvh] object-contain"
-            />
-          </ReactCrop>
-        )}
-      </div>
-
-      {error && (
-        <div className="absolute top-4 left-4 right-4 z-30">
-          <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
-            <XCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+        <div className="w-full h-full flex items-center justify-center">
+            {capturedImage && (
+                <ReactCrop
+                    crop={crop}
+                    onChange={(c, percentCrop) => setCrop(c)}
+                    aspect={undefined}
+                >
+                    <Image
+                        ref={imgRef}
+                        src={capturedImage}
+                        alt="Captured question to crop"
+                        width={1200}
+                        height={675}
+                        onLoad={onImageLoad}
+                        className="max-w-full max-h-[100dvh] object-contain"
+                    />
+                </ReactCrop>
+            )}
         </div>
-      )}
-
-      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
-        <div className="flex w-full gap-4">
-          <Button onClick={handleRetake} className="w-full text-lg py-6" variant="secondary">
-            <RefreshCw className="mr-2 h-5 w-5" />
-            Retake
-          </Button>
-          <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
-            <Bot className="mr-2 h-5 w-5" />
-            Get Solution
-          </Button>
+        <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+            <div className="flex w-full gap-4">
+                <Button onClick={handleRetake} className="w-full text-lg py-6" variant="secondary">
+                    <RefreshCw className="mr-2 h-5 w-5" />
+                    Retake
+                </Button>
+                <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
+                    <Bot className="mr-2 h-5 w-5" />
+                    Get Solution
+                </Button>
+            </div>
         </div>
-      </div>
     </div>
 );
 
@@ -390,7 +378,7 @@ interface ResultScreenProps {
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="flex flex-col items-center">
-            <Logo animated className="w-[220px] h-auto aspect-[16/9]" />
+            <Logo animated className="w-[220px] h-[220px] aspect-square" />
             <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
         </div>
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
@@ -518,6 +506,26 @@ export default function HomeClientPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      const listener = App.addListener('backButton', () => {
+        if (appState === 'scanning') {
+          setAppState('welcome');
+        } else if (appState === 'cropping') {
+          setAppState('scanning');
+        } else if (appState === 'solving' || appState === 'result') {
+          setAppState('welcome');
+        } else {
+          // Allow the default behavior (exit app) on the welcome screen
+        }
+      });
+
+      return () => {
+        listener.remove();
+      };
+    }
+  }, [appState]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1009,10 +1017,7 @@ export default function HomeClientPage() {
           )}>
             {appState !== 'scanning' && appState !== 'cropping' && (
               <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
-                  <button className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
-                      <Logo className="h-10 w-auto" />
-                      <span className="hidden sm:inline">AskPix AI</span>
-                  </button>
+                  <h1 className="font-bold text-xl text-slate-100 flex items-center gap-2">AskPix AI</h1>
                   <div>
                       {user ? (
                           <div className="flex items-center gap-2 sm:gap-4">
@@ -1028,9 +1033,16 @@ export default function HomeClientPage() {
                               </Button>
                           </div>
                       ) : (
-                          <Button asChild>
-                              <Link href="/login">Login / Sign Up</Link>
-                          </Button>
+                          <div className="flex items-center gap-2 sm:gap-4">
+                            <Button asChild>
+                                <Link href="/login">Login / Sign Up</Link>
+                            </Button>
+                            <Button asChild variant="ghost">
+                                <Link href="/">
+                                    <Home className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                          </div>
                       )}
                   </div>
               </header>
@@ -1052,7 +1064,6 @@ export default function HomeClientPage() {
             )}
             {appState === 'cropping' && (
               <CroppingScreen
-                error={error}
                 capturedImage={capturedImage}
                 crop={crop}
                 setCrop={setCrop}
@@ -1093,5 +1104,3 @@ export default function HomeClientPage() {
     </>
   );
 }
-
-    
