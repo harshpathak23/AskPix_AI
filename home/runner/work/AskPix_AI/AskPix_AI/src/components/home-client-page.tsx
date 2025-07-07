@@ -375,10 +375,6 @@ interface ResultScreenProps {
 }
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="flex flex-col items-center">
-            <Logo animated className="w-[220px] h-[220px] aspect-square" />
-            <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
-        </div>
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
@@ -996,31 +992,25 @@ export default function HomeClientPage() {
             {appState !== 'scanning' && appState !== 'cropping' && (
               <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
                   <h1 className="font-bold text-xl text-slate-100 flex items-center gap-2">AskPix AI</h1>
-                  <div>
+                  <div className="flex items-center gap-2 sm:gap-4">
+                      <Button onClick={() => setAppState('welcome')} size="icon">
+                        <Home />
+                      </Button>
                       {user ? (
-                          <div className="flex items-center gap-2 sm:gap-4">
-                              <Button asChild size="sm">
+                          <>
+                              <Button asChild size="icon">
                                   <Link href="/profile">
-                                      <User className="h-4 w-4 sm:mr-2" />
-                                      <span className="hidden sm:inline">View Profile</span>
+                                      <User />
                                   </Link>
                               </Button>
-                              <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
-                                  {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
-                                  <span className="hidden sm:inline">Logout</span>
+                              <Button size="icon" onClick={handleLogout} disabled={isLoggingOut}>
+                                  {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut />}
                               </Button>
-                          </div>
+                          </>
                       ) : (
-                          <div className="flex items-center gap-2 sm:gap-4">
-                            <Button asChild>
-                                <Link href="/login">Login / Sign Up</Link>
-                            </Button>
-                            <Button asChild variant="ghost">
-                                <Link href="/">
-                                    <Home className="h-4 w-4" />
-                                </Link>
-                            </Button>
-                          </div>
+                          <Button asChild>
+                              <Link href="/login">Login / Sign Up</Link>
+                          </Button>
                       )}
                   </div>
               </header>

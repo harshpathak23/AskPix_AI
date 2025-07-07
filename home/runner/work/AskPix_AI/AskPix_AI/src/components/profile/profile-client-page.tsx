@@ -146,6 +146,7 @@ export default function ProfileClientPage() {
     
         const fileName = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     
+        // This is a common structure for the downloadable content.
         const htmlString = `
             <!DOCTYPE html>
             <html lang="${solution.language}">
@@ -188,11 +189,14 @@ export default function ProfileClientPage() {
             if (solution.language === 'hi') {
                 const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
-                const newWindow = window.open(url);
-                if (!newWindow) {
-                    throw new Error("Could not open file. Please check your pop-up blocker settings.");
-                }
-                toast({ title: 'Success!', description: 'HTML file opened in a new tab.' });
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${fileName || 'solution'}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast({ title: 'Success!', description: 'HTML download initiated.' });
             } else { // English solution, generate and download PDF
                 const element = document.createElement('div');
                 element.style.position = 'absolute';
@@ -221,29 +225,23 @@ export default function ProfileClientPage() {
     
                 const imgData = canvas.toDataURL('image/png');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
                 const imgHeight = (canvas.height * pdfWidth) / canvas.width;
                 let heightLeft = imgHeight;
                 let position = 0;
     
                 pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pdfHeight;
+                heightLeft -= pdf.internal.pageSize.getHeight();
     
                 while (heightLeft > 0) {
                     position = heightLeft - imgHeight;
                     pdf.addPage();
                     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                    heightLeft -= pdfHeight;
+                    heightLeft -= pdf.internal.pageSize.getHeight();
                 }
                 
-                // This opens the PDF in a new tab, which is more reliable on mobile.
-                const pdfDataUri = pdf.output('datauristring');
-                const newWindow = window.open(pdfDataUri);
-                 if (!newWindow) {
-                    throw new Error("Could not open file. Please check your pop-up blocker settings.");
-                }
+                pdf.save(`${fileName || 'solution'}.pdf`);
                 
-                toast({ title: 'Success!', description: 'PDF opened in a new tab.' });
+                toast({ title: 'Success!', description: 'PDF download initiated.' });
             }
         } catch (error: any) {
             console.error('Download failed', error);
