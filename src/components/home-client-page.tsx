@@ -8,8 +8,6 @@ import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -242,14 +240,12 @@ const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    // This timer simulates the AI "thinking" through steps.
     const timers = solvingSteps.map((_, index) =>
       setTimeout(() => {
         setActiveStep(index + 1);
-      }, (index + 1) * 1200) // Stagger the "completion" of each step
+      }, (index + 1) * 1200)
     );
 
-    // Cleanup timers if the component unmounts
     return () => {
       timers.forEach(clearTimeout);
     };
@@ -904,7 +900,6 @@ export default function HomeClientPage() {
 
     setIsSaving(true);
     try {
-        // NEW: Save to a subcollection under the user's ID
         await addDoc(collection(db, 'users', user.uid, 'solutions'), {
             croppedImage,
             topic,
@@ -965,7 +960,7 @@ export default function HomeClientPage() {
         "flex flex-col",
         appState === 'welcome' 
           ? "items-center justify-center p-4" 
-          : "container mx-auto max-w-3xl items-center px-0"
+          : "container mx-auto max-w-3xl items-center px-0 h-screen"
       )}>
         {appState === 'welcome' && (
           <WelcomeScreen 
@@ -983,7 +978,7 @@ export default function HomeClientPage() {
             {appState !== 'scanning' && appState !== 'cropping' && (
               <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
                   <button className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
-                      <Logo className="h-[150px] w-auto aspect-[9/16]" />
+                      <Logo className="h-10 w-auto" />
                       <span className="hidden sm:inline">AskPix AI</span>
                   </button>
                   <div>
@@ -1066,5 +1061,3 @@ export default function HomeClientPage() {
     </>
   );
 }
-
-    
