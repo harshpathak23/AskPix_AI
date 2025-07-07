@@ -185,45 +185,36 @@ export default function ProfileClientPage() {
             </body>
             </html>`;
     
-        if (solution.language === 'hi') {
-            try {
+        try {
+            if (solution.language === 'hi') {
                 const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${fileName || 'solution'}.html`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                toast({ title: 'Success!', description: 'HTML file downloaded.' });
-            } catch (error) {
-                console.error('HTML download failed', error);
-                toast({ title: 'Error', description: 'Could not download HTML file.', variant: 'destructive' });
-            }
-        } else { // English solution, generate and download PDF
-            try {
-                // Create a hidden element to render the HTML for PDF conversion
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${fileName || 'solution'}.html`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+                toast({ title: 'Success!', description: 'HTML file download initiated.' });
+            } else { // English solution, generate and download PDF
                 const element = document.createElement('div');
                 element.style.position = 'absolute';
                 element.style.left = '-9999px';
-                element.style.width = '800px'; 
+                element.style.width = '800px';
                 element.innerHTML = htmlString;
                 document.body.appendChild(element);
     
-                // Find the specific container to render
                 const container = element.querySelector('.container') as HTMLElement;
                 if (!container) throw new Error('Render container not found');
     
-                // Wait for images and KaTeX to render properly.
                 await new Promise(resolve => setTimeout(resolve, 1500));
     
                 const canvas = await html2canvas(container, {
-                    scale: 2, // Higher scale for better quality
+                    scale: 2,
                     useCORS: true,
                 });
     
-                document.body.removeChild(element); // Clean up the temporary element
+                document.body.removeChild(element);
     
                 const pdf = new jsPDF({
                     orientation: 'p',
@@ -249,14 +240,14 @@ export default function ProfileClientPage() {
                 }
     
                 pdf.save(`${fileName || 'solution'}.pdf`);
-                toast({ title: 'Success!', description: 'PDF file downloaded.' });
-            } catch (error) {
-                console.error('PDF download failed', error);
-                toast({ title: 'Error', description: 'Could not generate PDF file.', variant: 'destructive' });
+                toast({ title: 'Success!', description: 'PDF download initiated.' });
             }
+        } catch (error) {
+            console.error('Download failed', error);
+            toast({ title: 'Error', description: 'Could not prepare the file for download.', variant: 'destructive' });
+        } finally {
+            setDownloadingId(null);
         }
-    
-        setDownloadingId(null);
     };
 
   return (
@@ -264,8 +255,7 @@ export default function ProfileClientPage() {
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
             <Link href="/" className="font-bold text-xl text-slate-100 flex items-center gap-2">
-                <Logo className="h-10 w-auto" />
-                <span className="hidden sm:inline">AskPix AI</span>
+                <Logo className="h-12 w-auto aspect-[16/9]" />
             </Link>
             <div className="flex items-center gap-2 sm:gap-4">
                 <Button asChild size="icon">
