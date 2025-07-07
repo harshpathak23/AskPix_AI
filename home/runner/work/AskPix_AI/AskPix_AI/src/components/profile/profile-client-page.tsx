@@ -140,6 +140,15 @@ export default function ProfileClientPage() {
         }
     };
 
+    const triggerDownload = (href: string, fileName: string) => {
+        const a = document.createElement('a');
+        a.href = href;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
     const handleDownload = async (solution: SavedSolution) => {
         setDownloadingId(solution.id);
         toast({ title: 'Preparing Download...', description: 'Please wait a moment.' });
@@ -189,12 +198,7 @@ export default function ProfileClientPage() {
             if (solution.language === 'hi') {
                 const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${fileName || 'solution'}.html`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                triggerDownload(url, `${fileName || 'solution'}.html`);
                 URL.revokeObjectURL(url);
                 toast({ title: 'Success!', description: 'HTML download initiated.' });
             } else { // English solution, generate and download PDF
@@ -208,6 +212,7 @@ export default function ProfileClientPage() {
                 const container = element.querySelector('.container') as HTMLElement;
                 if (!container) throw new Error('Render container not found');
     
+                // Wait for images and KaTeX to render.
                 await new Promise(resolve => setTimeout(resolve, 1500));
     
                 const canvas = await html2canvas(container, {
@@ -225,21 +230,23 @@ export default function ProfileClientPage() {
     
                 const imgData = canvas.toDataURL('image/png');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
                 const imgHeight = (canvas.height * pdfWidth) / canvas.width;
                 let heightLeft = imgHeight;
                 let position = 0;
     
                 pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pdf.internal.pageSize.getHeight();
+                heightLeft -= pdfHeight;
     
                 while (heightLeft > 0) {
-                    position = heightLeft - imgHeight;
+                    position -= pdfHeight;
                     pdf.addPage();
                     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                    heightLeft -= pdf.internal.pageSize.getHeight();
+                    heightLeft -= pdfHeight;
                 }
                 
-                pdf.save(`${fileName || 'solution'}.pdf`);
+                const pdfDataUri = pdf.output('dataurlstring');
+                triggerDownload(pdfDataUri, `${fileName || 'solution'}.pdf`);
                 
                 toast({ title: 'Success!', description: 'PDF download initiated.' });
             }
@@ -381,3 +388,5 @@ export default function ProfileClientPage() {
     </div>
     );
 }
+
+    
