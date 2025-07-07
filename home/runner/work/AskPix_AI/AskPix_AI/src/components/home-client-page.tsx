@@ -40,44 +40,71 @@ interface WelcomeScreenProps {
   subject: Subject;
   setSubject: (subject: Subject) => void;
   handleStartScanning: () => void;
+  user: FirebaseUser | null;
+  isLoggingOut: boolean;
+  handleLogout: () => void;
 }
-const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning }) => {
+const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning, user, isLoggingOut, handleLogout }) => {
   return (
-    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-10 h-[95vh] min-h-[700px] border border-purple-900/50">
-      <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
-        <Logo animated className="h-[320px] w-[320px] mb-2" />
-        <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
-      </div>
-
-      <div className="flex-1 flex flex-col justify-center space-y-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">Choose a subject</h1>
+    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col animate-in fade-in-10 min-h-[90vh] sm:min-h-[700px] border border-purple-900/50">
+      <header className="flex justify-between items-center w-full mb-4">
+        <Logo className="h-10 w-auto" />
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <Button asChild size="sm">
+                <Link href="/profile">
+                  <User className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button size="sm" variant="ghost" onClick={handleLogout} disabled={isLoggingOut}>
+                {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4" />}
+              </Button>
+            </>
+          ) : (
+            <Button asChild size="sm">
+              <Link href="/login">Login / Sign Up</Link>
+            </Button>
+          )}
         </div>
-        
-        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 gap-3 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <FunctionSquare className="h-4 w-4" />
-                  <span className="font-medium text-xs">Math</span>
-              </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <Atom className="h-4 w-4" />
-                  <span className="font-medium text-xs">Physics</span>
-              </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <TestTube className="h-4 w-4" />
-                  <span className="font-medium text-xs">Chemistry</span>
-              </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <Dna className="h-4 w-4" />
-                  <span className="font-medium text-xs">Biology</span>
-              </TabsTrigger>
-              <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <BrainCircuit className="h-4 w-4" />
-                  <span className="font-medium text-xs">General Question</span>
-              </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      </header>
+
+      <div className="flex-1 flex flex-col">
+        <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
+          <Logo animated className="h-[320px] w-[320px] mb-2" />
+          <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center space-y-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-100">Choose a subject</h1>
+          </div>
+          
+          <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 gap-3 h-auto p-0 bg-transparent">
+                <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <FunctionSquare className="h-4 w-4" />
+                    <span className="font-medium text-xs">Math</span>
+                </TabsTrigger>
+                <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <Atom className="h-4 w-4" />
+                    <span className="font-medium text-xs">Physics</span>
+                </TabsTrigger>
+                <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <TestTube className="h-4 w-4" />
+                    <span className="font-medium text-xs">Chemistry</span>
+                </TabsTrigger>
+                <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <Dna className="h-4 w-4" />
+                    <span className="font-medium text-xs">Biology</span>
+                </TabsTrigger>
+                <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <BrainCircuit className="h-4 w-4" />
+                    <span className="font-medium text-xs">General Question</span>
+                </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       <div className="flex-shrink-0 pt-4 pb-2">
@@ -181,7 +208,6 @@ interface CroppingScreenProps {
 }
 const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
     <div className="w-full h-full relative bg-black">
-      {/* Image container fills the entire space */}
       <div className="w-full h-full flex items-center justify-center">
         {capturedImage && (
           <ReactCrop
@@ -196,13 +222,12 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
               width={1200}
               height={675}
               onLoad={onImageLoad}
-              className="max-w-full max-h-full object-contain" // Use max-w/h to respect aspect ratio
+              className="max-w-full max-h-[100dvh] object-contain"
             />
           </ReactCrop>
         )}
       </div>
 
-      {/* Error alert at the top */}
       {error && (
         <div className="absolute top-4 left-4 right-4 z-30">
           <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
@@ -213,7 +238,6 @@ const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, s
         </div>
       )}
 
-      {/* Button container overlaid at the bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
         <div className="flex w-full gap-4">
           <Button onClick={handleRetake} className="w-full text-lg py-6" variant="secondary">
@@ -245,14 +269,12 @@ const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    // This timer simulates the AI "thinking" through steps.
     const timers = solvingSteps.map((_, index) =>
       setTimeout(() => {
         setActiveStep(index + 1);
-      }, (index + 1) * 1200) // Stagger the "completion" of each step
+      }, (index + 1) * 1200)
     );
 
-    // Cleanup timers if the component unmounts
     return () => {
       timers.forEach(clearTimeout);
     };
@@ -278,7 +300,7 @@ const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage }) => {
                   {activeStep > index ? (
                     <Check className="h-5 w-5 text-green-400" />
                   ) : activeStep === index ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-solid border-primary border-t-transparent"></div>
                   ) : (
                     step.icon
                   )}
@@ -330,7 +352,7 @@ const TranslatingScreen: FC = () => {
                   {activeStep > index ? (
                     <Check className="h-5 w-5 text-green-400" />
                   ) : activeStep === index ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-solid border-primary border-t-transparent"></div>
                   ) : (
                     step.icon
                   )}
@@ -368,7 +390,7 @@ interface ResultScreenProps {
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         <div className="flex flex-col items-center">
-            <Logo animated className="w-[220px] h-auto aspect-square" />
+            <Logo animated className="w-[220px] h-auto aspect-[16/9]" />
             <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
         </div>
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
@@ -543,13 +565,13 @@ export default function HomeClientPage() {
   const handleLogout = () => {
     setIsLoggingOut(true);
     // Don't wait for signOut to complete. Navigate immediately for a faster user experience.
-    setAppState('welcome');
     signOut(auth).catch(error => {
         // Log error but don't block user. The onAuthStateChanged listener is the source of truth.
         console.error("Error signing out: ", error);
         toast({ title: "Logout Failed", description: "There was an error signing out.", variant: "destructive" });
     }).finally(() => {
         setIsLoggingOut(false);
+        setAppState('welcome');
     });
   };
 
@@ -974,6 +996,9 @@ export default function HomeClientPage() {
             subject={subject} 
             setSubject={setSubject} 
             handleStartScanning={handleStartScanning} 
+            user={user}
+            isLoggingOut={isLoggingOut}
+            handleLogout={handleLogout}
           />
         )}
         

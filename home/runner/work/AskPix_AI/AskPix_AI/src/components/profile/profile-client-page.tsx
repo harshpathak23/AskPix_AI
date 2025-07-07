@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface SavedSolution {
     id: string;
@@ -144,7 +146,7 @@ export default function ProfileClientPage() {
     
         const fileName = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     
-        // Create an HTML string with embedded styles and scripts for rendering
+        // The HTML content is the same for both PDF and HTML downloads
         const htmlString = `
             <!DOCTYPE html>
             <html lang="${solution.language}">
@@ -152,10 +154,10 @@ export default function ProfileClientPage() {
                 <meta charset="UTF-8">
                 <title>Solution: ${solution.topic}</title>
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
                 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
                     onload="renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });">
-                </script>
+                <\/script>
                 <style>
                     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: auto; color: #333; }
                     .container { border: 1px solid #ddd; border-radius: 8px; padding: 2rem; background: #fff; }
@@ -183,18 +185,75 @@ export default function ProfileClientPage() {
             </body>
             </html>`;
     
-        // Open the HTML content in a new tab
-        const newWindow = window.open();
-        if (newWindow) {
-            newWindow.document.write(htmlString);
-            newWindow.document.close();
-            // Give the browser a moment to render content, especially KaTeX
-            setTimeout(() => {
-                newWindow.print();
-            }, 1000); 
-            toast({ title: 'Ready to Print/Save!', description: 'Please use your browser\'s dialog to save as PDF or print.' });
-        } else {
-            toast({ title: 'Error', description: 'Could not open a new tab. Please disable your pop-up blocker.', variant: 'destructive' });
+        if (solution.language === 'hi') {
+            try {
+                const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${fileName || 'solution'}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast({ title: 'Success!', description: 'HTML file downloaded.' });
+            } catch (error) {
+                console.error('HTML download failed', error);
+                toast({ title: 'Error', description: 'Could not download HTML file.', variant: 'destructive' });
+            }
+        } else { // English solution, generate and download PDF
+            try {
+                // Create a hidden element to render the HTML for PDF conversion
+                const element = document.createElement('div');
+                element.style.position = 'absolute';
+                element.style.left = '-9999px';
+                element.style.width = '800px'; 
+                element.innerHTML = htmlString;
+                document.body.appendChild(element);
+    
+                // Find the specific container to render
+                const container = element.querySelector('.container') as HTMLElement;
+                if (!container) throw new Error('Render container not found');
+    
+                // Wait for images and KaTeX to render properly.
+                await new Promise(resolve => setTimeout(resolve, 1500));
+    
+                const canvas = await html2canvas(container, {
+                    scale: 2, // Higher scale for better quality
+                    useCORS: true,
+                });
+    
+                document.body.removeChild(element); // Clean up the temporary element
+    
+                const pdf = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4',
+                });
+    
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+    
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdfHeight;
+    
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                    heightLeft -= pdfHeight;
+                }
+    
+                pdf.save(`${fileName || 'solution'}.pdf`);
+                toast({ title: 'Success!', description: 'PDF file downloaded.' });
+            } catch (error) {
+                console.error('PDF download failed', error);
+                toast({ title: 'Error', description: 'Could not generate PDF file.', variant: 'destructive' });
+            }
         }
     
         setDownloadingId(null);
@@ -283,7 +342,7 @@ export default function ProfileClientPage() {
                                 <div className="flex items-center gap-2 self-end sm:self-center">
                                     <Button size="sm" onClick={() => handleDownload(file)} disabled={downloadingId === file.id}>
                                         {downloadingId === file.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                        {downloadingId === file.id ? 'Preparing...' : 'Print / Save'}
+                                        {downloadingId === file.id ? 'Downloading...' : 'Download'}
                                     </Button>
                                     <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
                                         <Trash2 className="mr-2 h-4 w-4"/>
