@@ -8,8 +8,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
-import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
 
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
@@ -38,18 +36,6 @@ export default function AssistantClientPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<AssistantFormValues>({
     resolver: zodResolver(AssistantFormSchema),
   });
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      const listener = App.addListener('backButton', () => {
-        router.push('/');
-      });
-
-      return () => {
-        listener.remove();
-      };
-    }
-  }, [router]);
 
   const onSubmit = async (data: AssistantFormValues) => {
     setError(null);

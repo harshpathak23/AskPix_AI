@@ -16,8 +16,6 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { signInWithEmailAndPassword, AuthError, sendPasswordResetEmail, sendEmailVerification } from 'firebase/auth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
 
 const LoginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -58,15 +56,6 @@ export default function LoginClientPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting }, getValues } = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
   });
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      const listener = App.addListener('backButton', () => {
-        router.push('/');
-      });
-      return () => { listener.remove() };
-    }
-  }, [router]);
 
   const onSubmit = async (data: LoginFormValues) => {
     setError(null);

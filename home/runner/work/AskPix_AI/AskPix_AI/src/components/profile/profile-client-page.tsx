@@ -29,8 +29,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
 
 interface SavedSolution {
     id: string;
@@ -65,15 +63,6 @@ export default function ProfileClientPage() {
         }).finally(() => {
             setIsLoggingOut(false);
         });
-    }, [router]);
-
-    useEffect(() => {
-        if (Capacitor.isNativePlatform()) {
-          const listener = App.addListener('backButton', () => {
-            router.push('/');
-          });
-          return () => { listener.remove() };
-        }
     }, [router]);
 
     useEffect(() => {

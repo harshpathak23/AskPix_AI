@@ -16,8 +16,6 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { createUserWithEmailAndPassword, updateProfile, AuthError, sendEmailVerification } from 'firebase/auth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
 
 const SignupSchema = z.object({
   name: z.string().min(1, { message: 'Name is required.' }),
@@ -57,15 +55,6 @@ export default function SignupClientPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormValues>({
     resolver: zodResolver(SignupSchema),
   });
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      const listener = App.addListener('backButton', () => {
-        router.push('/');
-      });
-      return () => { listener.remove() };
-    }
-  }, [router]);
 
   const onSubmit = async (data: SignupFormValues) => {
     setError(null);

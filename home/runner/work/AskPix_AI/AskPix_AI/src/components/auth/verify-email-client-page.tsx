@@ -11,8 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Logo } from '@/components/icons/logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MailCheck, Send, Loader2, LogOut, XCircle } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
 
 export default function VerifyEmailClientPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -38,15 +36,6 @@ export default function VerifyEmailClientPage() {
     });
 
     return () => unsubscribe();
-  }, [router]);
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      const listener = App.addListener('backButton', () => {
-        router.push('/login');
-      });
-      return () => { listener.remove() };
-    }
   }, [router]);
 
   const handleResendVerification = async () => {

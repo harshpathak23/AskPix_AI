@@ -8,8 +8,6 @@ import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
-import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
@@ -506,26 +504,6 @@ export default function HomeClientPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      const listener = App.addListener('backButton', () => {
-        if (appState === 'scanning') {
-          setAppState('welcome');
-        } else if (appState === 'cropping') {
-          setAppState('scanning');
-        } else if (appState === 'solving' || appState === 'result') {
-          setAppState('welcome');
-        } else {
-          // Allow the default behavior (exit app) on the welcome screen
-        }
-      });
-
-      return () => {
-        listener.remove();
-      };
-    }
-  }, [appState]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
