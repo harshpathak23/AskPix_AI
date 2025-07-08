@@ -11,7 +11,6 @@ import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { useEffect, useState, useCallback } from "react";
 import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError, doc, deleteDoc } from "firebase/firestore";
-import { Logo } from "@/components/icons/logo";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ProfileIcon } from "@/components/icons/profile-icon";
@@ -53,7 +52,6 @@ export default function ProfileClientPage() {
 
     const handleLogout = useCallback(() => {
         setIsLoggingOut(true);
-        // Navigate immediately for a faster experience. The auth listener will handle the state.
         router.push('/login');
         signOut(auth).catch(error => {
             console.error("Error signing out: ", error);
@@ -64,13 +62,11 @@ export default function ProfileClientPage() {
     }, [router]);
 
     useEffect(() => {
-        // If auth is done loading and there's no user, redirect.
         if (!loading && !user) {
             router.push('/login');
             return;
         }
 
-        // If we have a user, fetch their solutions.
         if (user) {
             if (!db) {
                 setError("Firebase is not configured correctly. Saved solutions cannot be loaded.");
@@ -100,24 +96,14 @@ export default function ProfileClientPage() {
                  setSolutionsLoading(false);
             });
             
-            // Cleanup function for the snapshot listener
             return () => unsubscribeSnapshot();
         }
     }, [user, loading, router]);
 
 
     const handleDeleteSolution = async () => {
-        if (!solutionToDelete || !user) return;
+        if (!solutionToDelete || !user || !db) return;
         
-        if (!db) {
-            toast({
-                title: "Deletion Failed",
-                description: "Could not connect to the database.",
-                variant: "destructive",
-            });
-            return;
-        }
-
         setIsDeleting(true);
         try {
             await deleteDoc(doc(db, "users", user.uid, "solutions", solutionToDelete.id));
@@ -125,7 +111,7 @@ export default function ProfileClientPage() {
                 title: "Solution Deleted",
                 description: `"${solutionToDelete.topic}" has been removed.`,
             });
-            setSolutionToDelete(null); // Close the dialog on success
+            setSolutionToDelete(null);
         } catch (e) {
             console.error("Error deleting solution: ", e);
             toast({
@@ -140,128 +126,82 @@ export default function ProfileClientPage() {
 
     const handleDownload = async (solution: SavedSolution) => {
         setDownloadingId(solution.id);
-        toast({ title: 'Preparing Download...', description: 'Please wait a moment.' });
-    
-        const fileName = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        
-        const triggerDownload = (blob: Blob, name: string) => {
-            try {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = name;
-                document.body.appendChild(a);
-                a.click();
-                
-                // Clean up the created URL and link element.
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                }, 100);
+        toast({ title: 'Preparing File...', description: 'Please wait a moment.' });
 
-                toast({ title: 'Success!', description: `${name} download initiated.` });
-            } catch (err) {
-                 console.error('Download trigger failed', err);
-                 toast({ title: 'Error', description: 'Could not trigger the file download.', variant: 'destructive' });
-            }
-        };
-    
-        const htmlString = `
-            <!DOCTYPE html>
-            <html lang="${solution.language}">
-            <head>
-                <meta charset="UTF-8">
-                <title>Solution: ${solution.topic}</title>
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
-                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
-                    onload="renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });">
-                <\/script>
-                <style>
-                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: auto; color: #333; }
-                    .container { border: 1px solid #ddd; border-radius: 8px; padding: 2rem; background: #fff; }
-                    img { max-width: 100%; height: auto; border-radius: 6px; margin-bottom: 1.5rem; display: block; border: 1px solid #eee; }
-                    h1, h2 { border-bottom: 1px solid #eee; padding-bottom: 0.5rem; margin-top: 1.5rem; }
-                    .katex-display { overflow-x: auto; padding: 1em 0; }
-                    .solution-text { white-space: pre-wrap; word-wrap: break-word; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Question</h1>
-                    <img src="${solution.croppedImage}" alt="Question Image">
-                    <h2>Topic: ${solution.topic}</h2>
-                    <div class="solution-text">
-                        <h2>Solution (${solution.language === 'hi' ? 'Hindi' : 'English'})</h2>
-                        ${solution.solution.replace(/\n/g, '<br/>')}
-                    </div>
-                    ${solution.formulas ? `
-                    <div>
-                        <h2>Key Formulas</h2>
-                        <div class="solution-text">${solution.formulas.replace(/\n/g, '<br/>')}</div>
-                    </div>` : ''}
-                </div>
-            </body>
-            </html>`;
-    
+        // Check if the Web Share API is supported, which is the best method for mobile.
+        if (!navigator.share) {
+            toast({ title: 'Error', description: 'File sharing is not supported on your device.', variant: 'destructive' });
+            setDownloadingId(null);
+            return;
+        }
+
+        const fileNameBase = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        
         try {
+            let blob: Blob;
+            let fileName: string;
+            
             if (solution.language === 'hi') {
-                const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
-                triggerDownload(blob, `${fileName || 'solution'}.html`);
+                const htmlString = `
+                    <!DOCTYPE html>
+                    <html lang="hi"><head><meta charset="UTF-8"><title>Solution: ${solution.topic}</title></head>
+                    <body><h1>Question</h1><img src="${solution.croppedImage}" alt="Question Image" style="max-width:100%;"><h2>Topic: ${solution.topic}</h2><div><h2>Solution (Hindi)</h2>${solution.solution.replace(/\n/g, '<br/>')}</div></body></html>`;
+                blob = new Blob([htmlString], { type: 'text/html' });
+                fileName = `${fileNameBase || 'solution'}.html`;
             } else {
-                // Dynamically import libraries ONLY when needed
+                 // Dynamically import libraries ONLY when needed
                 const { default: jsPDF } = await import('jspdf');
                 const { default: html2canvas } = await import('html2canvas');
-
+                const htmlString = `
+                    <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Solution: ${solution.topic}</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"><\/script><style>body{font-family:sans-serif;line-height:1.6;padding:20px;max-width:800px;margin:auto;color:#333;}.container{border:1px solid #ddd;padding:2rem;background:#fff;}img{max-width:100%;}h1,h2{border-bottom:1px solid #eee;}.solution-text{white-space:pre-wrap;}</style></head>
+                    <body><div class="container"><h1>Question</h1><img src="${solution.croppedImage}" alt="Question Image"><h2>Topic: ${solution.topic}</h2><div class="solution-text"><h2>Solution</h2>${solution.solution.replace(/\n/g, '<br/>')}</div>${solution.formulas ? `<div><h2>Formulas</h2><div class="solution-text">${solution.formulas.replace(/\n/g, '<br/>')}</div></div>` : ''}</div></body></html>`;
+                
                 const element = document.createElement('div');
                 element.style.position = 'absolute';
                 element.style.left = '-9999px';
                 element.style.width = '800px';
                 element.innerHTML = htmlString;
                 document.body.appendChild(element);
-    
-                const container = element.querySelector('.container') as HTMLElement;
-                if (!container) throw new Error('Render container not found');
-    
-                // Wait for images and KaTeX to render.
+
                 await new Promise(resolve => setTimeout(resolve, 1500));
-    
-                const canvas = await html2canvas(container, {
-                    scale: 2,
-                    useCORS: true,
-                });
-    
+                
+                const canvas = await html2canvas(element.querySelector('.container') as HTMLElement, { scale: 2, useCORS: true });
                 document.body.removeChild(element);
-    
-                const pdf = new jsPDF({
-                    orientation: 'p',
-                    unit: 'mm',
-                    format: 'a4',
-                });
-    
+
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
                 const imgData = canvas.toDataURL('image/png');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
                 const imgHeight = (canvas.height * pdfWidth) / canvas.width;
                 let heightLeft = imgHeight;
                 let position = 0;
-    
+
                 pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pdfHeight;
-    
+                heightLeft -= pdf.internal.pageSize.getHeight();
                 while (heightLeft > 0) {
-                    position = position - pdfHeight;
+                    position = position - pdf.internal.pageSize.getHeight();
                     pdf.addPage();
                     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                    heightLeft -= pdfHeight;
+                    heightLeft -= pdf.internal.pageSize.getHeight();
                 }
-                
-                const pdfBlob = pdf.output('blob');
-                triggerDownload(pdfBlob, `${fileName || 'solution'}.pdf`);
+                blob = pdf.output('blob');
+                fileName = `${fileNameBase || 'solution'}.pdf`;
             }
+
+            // Use the Web Share API
+            const file = new File([blob], fileName, { type: blob.type });
+            await navigator.share({
+                title: solution.topic,
+                text: `Solution for ${solution.topic}`,
+                files: [file],
+            });
+            toast({ title: 'Success!', description: 'Share dialog opened.' });
+
         } catch (error: any) {
-            console.error('Download failed', error);
-            toast({ title: 'Error', description: error.message || 'Could not prepare the file for download.', variant: 'destructive' });
+            console.error('Download/Share failed', error);
+            // Don't show an error if the user just closed the share sheet
+            if (error.name !== 'AbortError') {
+                 toast({ title: 'Error', description: error.message || 'Could not share the file.', variant: 'destructive' });
+            }
         } finally {
             setDownloadingId(null);
         }
@@ -271,17 +211,17 @@ export default function ProfileClientPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
+            <h1 className="font-bold text-xl text-slate-100">AskPix AI</h1>
             <div className="flex items-center gap-2 sm:gap-4">
                 <Button asChild size="icon">
                     <Link href="/">
                         <Home />
                     </Link>
                 </Button>
+                <Button onClick={handleLogout} size="icon" disabled={isLoggingOut}>
+                    {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
+                </Button>
             </div>
-             <h1 className="font-bold text-xl text-slate-100">AskPix AI</h1>
-            <Button onClick={handleLogout} size="icon" disabled={isLoggingOut}>
-                {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
-            </Button>
         </header>
         
         <div className="flex items-center gap-6 mb-8">
@@ -347,7 +287,7 @@ export default function ProfileClientPage() {
                                 <div className="flex items-center gap-2 self-end sm:self-center">
                                     <Button size="sm" onClick={() => handleDownload(file)} disabled={downloadingId === file.id}>
                                         {downloadingId === file.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                        {downloadingId === file.id ? 'Preparing...' : 'Download'}
+                                        {downloadingId === file.id ? 'Preparing...' : 'Share'}
                                     </Button>
                                     <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
                                         <Trash2 className="mr-2 h-4 w-4"/>
@@ -397,3 +337,5 @@ export default function ProfileClientPage() {
     </div>
     );
 }
+
+    

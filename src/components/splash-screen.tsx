@@ -1,3 +1,4 @@
+
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -22,7 +23,7 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
       >
         <Image
           src="/icon.png"
-          alt="ScanSolve App Icon"
+          alt="AskPix App Icon"
           className="object-contain"
           fill
           unoptimized
@@ -40,3 +41,5 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
     </div>
   );
 };
+
+    
