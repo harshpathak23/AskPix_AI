@@ -22,7 +22,7 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
         )}
       >
         <Image
-          src="/icon.png"
+          src="/images/icon.png"
           alt="AskPix App Icon"
           className="object-contain"
           fill
