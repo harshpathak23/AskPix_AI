@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -65,7 +66,14 @@ export default function SignupClientPage() {
             displayName: data.name
         });
         
-        await sendEmailVerification(userCredential.user);
+        try {
+          await sendEmailVerification(userCredential.user);
+        } catch (emailError) {
+          console.error("Failed to send verification email during signup:", emailError);
+          // Let the user know the email failed, so they can use the "Resend" button on the next screen.
+          // This is stored in localStorage so the verify-email page can display it.
+          localStorage.setItem('verificationError', 'Account created, but we failed to send the initial verification email. Please use the "Resend Link" button.');
+        }
       }
       
       router.push('/verify-email');
@@ -74,7 +82,7 @@ export default function SignupClientPage() {
       let errorMessage = 'An unexpected error occurred. Please try again.';
       switch (authError.code) {
         case 'auth/email-already-in-use':
-          errorMessage = 'This email address is already in use.';
+          errorMessage = 'This email address is already in use by another account.';
           break;
         case 'auth/invalid-email':
           errorMessage = 'Please enter a valid email address.';
@@ -83,7 +91,7 @@ export default function SignupClientPage() {
           errorMessage = 'The password is too weak. Please choose a stronger password.';
           break;
         default:
-          console.error(authError);
+          console.error('Signup Error:', authError);
           break;
       }
       setError(errorMessage);

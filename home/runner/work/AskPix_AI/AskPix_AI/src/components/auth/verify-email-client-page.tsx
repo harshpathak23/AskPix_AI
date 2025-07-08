@@ -21,6 +21,13 @@ export default function VerifyEmailClientPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Check for a specific error passed from the signup page.
+    const verificationError = localStorage.getItem('verificationError');
+    if (verificationError) {
+      setError(verificationError);
+      localStorage.removeItem('verificationError'); // Clear after displaying
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
