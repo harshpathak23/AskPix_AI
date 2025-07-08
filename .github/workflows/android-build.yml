@@ -30,12 +30,23 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Create debug keystore
+      run: |
+        keytool -genkey -v \
+          -keystore android/app/debug.keystore \
+          -alias androiddebugkey \
+          -storepass android \
+          -keypass android \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -dname "CN=Android Debug,O=Android,C=US"
+
     - name: Get Signing Report
       run: |
         cd android
         ./gradlew signingReport
 
-    # This step now builds the app with the API URL baked in
     - name: Build and Sync Capacitor App
       env:
         # This secret must be set in your GitHub repository settings.

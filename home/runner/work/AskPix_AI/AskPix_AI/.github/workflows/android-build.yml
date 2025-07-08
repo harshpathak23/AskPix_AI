@@ -30,18 +30,36 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build Next.js project
+    - name: Create debug keystore
       run: |
-        NEXT_PUBLIC_FIREBASE_API_KEY=dummy_key_for_build \
-        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=dummy.firebaseapp.com \
-        NEXT_PUBLIC_FIREBASE_PROJECT_ID=dummy-project \
-        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=dummy.appspot.com \
-        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1234567890 \
-        NEXT_PUBLIC_FIREBASE_APP_ID=1:1234567890:web:dummyappid \
-        npm run build:mobile
+        keytool -genkey -v \
+          -keystore android/app/debug.keystore \
+          -alias androiddebugkey \
+          -storepass android \
+          -keypass android \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -dname "CN=Android Debug,O=Android,C=US"
 
-    - name: Sync Capacitor project
-      run: npx cap sync android
+    - name: Get Signing Report
+      run: |
+        cd android
+        ./gradlew signingReport
+
+    - name: Build and Sync Capacitor App
+      env:
+        # This secret must be set in your GitHub repository settings.
+        # It should be the full URL of your deployed Vercel application.
+        NEXT_PUBLIC_API_BASE_URL: ${{ secrets.VERCEL_URL }}
+      run: |
+        if [ -z "$NEXT_PUBLIC_API_BASE_URL" ]; then
+          echo "Error: VERCEL_URL secret is not set."
+          echo "Please add it to your repository secrets in GitHub Settings."
+          exit 1
+        fi
+        # The cap:sync script runs the static build and syncs the native project.
+        npm run cap:sync
 
     - name: Build Android App with stacktrace
       run: |
