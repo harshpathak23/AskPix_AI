@@ -1,8 +1,7 @@
-
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Logo } from './icons/logo';
+import Image from 'next/image';
 
 export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
   return (
@@ -21,7 +20,13 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
           isVisible && 'animate-pop-in'
         )}
       >
-        <Logo animated={false} />
+        <Image
+          src="/icon.png"
+          alt="ScanSolve App Icon"
+          className="object-contain"
+          fill
+          unoptimized
+        />
       </div>
       <p
         className={cn(
