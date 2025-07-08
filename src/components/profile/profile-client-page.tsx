@@ -11,6 +11,7 @@ import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { useEffect, useState, useCallback } from "react";
 import { collection, query, onSnapshot, Timestamp, orderBy, FirestoreError, doc, deleteDoc } from "firebase/firestore";
+import { Logo } from "@/components/icons/logo";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ProfileIcon } from "@/components/icons/profile-icon";
@@ -33,8 +34,8 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
-import { MathRenderer } from "../math-renderer";
-import { ScrollArea } from "../ui/scroll-area";
+import { MathRenderer } from "@/components/math-renderer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SavedSolution {
     id: string;
@@ -61,6 +62,7 @@ export default function ProfileClientPage() {
 
     const handleLogout = useCallback(() => {
         setIsLoggingOut(true);
+        // Navigate immediately for a faster experience. The auth listener will handle the state.
         router.push('/login');
         signOut(auth).catch(error => {
             console.error("Error signing out: ", error);
@@ -71,11 +73,13 @@ export default function ProfileClientPage() {
     }, [router]);
 
     useEffect(() => {
+        // If auth is done loading and there's no user, redirect.
         if (!loading && !user) {
             router.push('/login');
             return;
         }
 
+        // If we have a user, fetch their solutions.
         if (user) {
             if (!db) {
                 setError("Firebase is not configured correctly. Saved solutions cannot be loaded.");
@@ -105,14 +109,24 @@ export default function ProfileClientPage() {
                  setSolutionsLoading(false);
             });
             
+            // Cleanup function for the snapshot listener
             return () => unsubscribeSnapshot();
         }
     }, [user, loading, router]);
 
 
     const handleDeleteSolution = async () => {
-        if (!solutionToDelete || !user || !db) return;
+        if (!solutionToDelete || !user) return;
         
+        if (!db) {
+            toast({
+                title: "Deletion Failed",
+                description: "Could not connect to the database.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         setIsDeleting(true);
         try {
             await deleteDoc(doc(db, "users", user.uid, "solutions", solutionToDelete.id));
@@ -120,7 +134,7 @@ export default function ProfileClientPage() {
                 title: "Solution Deleted",
                 description: `"${solutionToDelete.topic}" has been removed.`,
             });
-            setSolutionToDelete(null);
+            setSolutionToDelete(null); // Close the dialog on success
         } catch (e) {
             console.error("Error deleting solution: ", e);
             toast({
