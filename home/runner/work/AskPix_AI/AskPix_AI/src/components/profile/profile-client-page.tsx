@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, LogOut, Loader2, Home, FileWarning, Trash2 } from "lucide-react";
+import { Eye, LogOut, Loader2, Home, FileWarning, Trash2 } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
@@ -25,10 +25,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { MathRenderer } from "../math-renderer";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface SavedSolution {
     id: string;
@@ -49,9 +56,9 @@ export default function ProfileClientPage() {
     const [solutionsLoading, setSolutionsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [solutionToDelete, setSolutionToDelete] = useState<SavedSolution | null>(null);
+    const [solutionToView, setSolutionToView] = useState<SavedSolution | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const handleLogout = useCallback(() => {
         setIsLoggingOut(true);
@@ -140,124 +147,6 @@ export default function ProfileClientPage() {
         }
     };
 
-    const triggerDownload = (href: string, fileName: string) => {
-        const a = document.createElement('a');
-        a.href = href;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    };
-
-    const handleDownload = async (solution: SavedSolution) => {
-        setDownloadingId(solution.id);
-        toast({ title: 'Preparing Download...', description: 'Please wait a moment.' });
-    
-        const fileName = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    
-        // This is a common structure for the downloadable content.
-        const htmlString = `
-            <!DOCTYPE html>
-            <html lang="${solution.language}">
-            <head>
-                <meta charset="UTF-8">
-                <title>Solution: ${solution.topic}</title>
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
-                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
-                    onload="renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });">
-                <\/script>
-                <style>
-                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: auto; color: #333; }
-                    .container { border: 1px solid #ddd; border-radius: 8px; padding: 2rem; background: #fff; }
-                    img { max-width: 100%; height: auto; border-radius: 6px; margin-bottom: 1.5rem; display: block; border: 1px solid #eee; }
-                    h1, h2 { border-bottom: 1px solid #eee; padding-bottom: 0.5rem; margin-top: 1.5rem; }
-                    .katex-display { overflow-x: auto; padding: 1em 0; }
-                    .solution-text { white-space: pre-wrap; word-wrap: break-word; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Question</h1>
-                    <img src="${solution.croppedImage}" alt="Question Image">
-                    <h2>Topic: ${solution.topic}</h2>
-                    <div class="solution-text">
-                        <h2>Solution (${solution.language === 'hi' ? 'Hindi' : 'English'})</h2>
-                        ${solution.solution.replace(/\n/g, '<br/>')}
-                    </div>
-                    ${solution.formulas ? `
-                    <div>
-                        <h2>Key Formulas</h2>
-                        <div class="solution-text">${solution.formulas.replace(/\n/g, '<br/>')}</div>
-                    </div>` : ''}
-                </div>
-            </body>
-            </html>`;
-    
-        try {
-            if (solution.language === 'hi') {
-                const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                triggerDownload(url, `${fileName || 'solution'}.html`);
-                URL.revokeObjectURL(url);
-                toast({ title: 'Success!', description: 'HTML download initiated.' });
-            } else { // English solution, generate and download PDF
-                const element = document.createElement('div');
-                element.style.position = 'absolute';
-                element.style.left = '-9999px';
-                element.style.width = '800px';
-                element.innerHTML = htmlString;
-                document.body.appendChild(element);
-    
-                const container = element.querySelector('.container') as HTMLElement;
-                if (!container) throw new Error('Render container not found');
-    
-                // Wait for images and KaTeX to render.
-                await new Promise(resolve => setTimeout(resolve, 1500));
-    
-                const canvas = await html2canvas(container, {
-                    scale: 2,
-                    useCORS: true,
-                });
-    
-                document.body.removeChild(element);
-    
-                const pdf = new jsPDF({
-                    orientation: 'p',
-                    unit: 'mm',
-                    format: 'a4',
-                });
-    
-                const imgData = canvas.toDataURL('image/png');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 0;
-    
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pdfHeight;
-    
-                while (heightLeft > 0) {
-                    position -= pdfHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                    heightLeft -= pdfHeight;
-                }
-                
-                const pdfDataUri = pdf.output('dataurlstring');
-                triggerDownload(pdfDataUri, `${fileName || 'solution'}.pdf`);
-                
-                toast({ title: 'Success!', description: 'PDF download initiated.' });
-            }
-        } catch (error: any) {
-            console.error('Download failed', error);
-            toast({ title: 'Error', description: error.message || 'Could not prepare the file for download.', variant: 'destructive' });
-        } finally {
-            setDownloadingId(null);
-        }
-    };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
@@ -302,7 +191,7 @@ export default function ProfileClientPage() {
             <CardHeader>
                 <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
                 <CardDescription className="text-slate-400">
-                    Download or delete your previously solved questions.
+                    View or delete your previously solved questions.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -336,9 +225,9 @@ export default function ProfileClientPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 self-end sm:self-center">
-                                    <Button size="sm" onClick={() => handleDownload(file)} disabled={downloadingId === file.id}>
-                                        {downloadingId === file.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                        {downloadingId === file.id ? 'Preparing...' : 'Download'}
+                                    <Button size="sm" onClick={() => setSolutionToView(file)}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View Solution
                                     </Button>
                                     <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
                                         <Trash2 className="mr-2 h-4 w-4"/>
@@ -385,8 +274,41 @@ export default function ProfileClientPage() {
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+
+        <Dialog open={!!solutionToView} onOpenChange={(open) => !open && setSolutionToView(null)}>
+            <DialogContent className="max-w-3xl h-[90vh] flex flex-col bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border-purple-900/50 text-slate-200">
+                <DialogHeader>
+                    <DialogTitle>{solutionToView?.topic}</DialogTitle>
+                    <DialogDescription>
+                        Saved on {solutionToView?.createdAt.toDate().toLocaleDateString()}
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="flex-grow">
+                    <div className="pr-4 space-y-4">
+                        <div className="relative w-full aspect-video rounded-md overflow-hidden bg-slate-800">
+                            {solutionToView?.croppedImage && (
+                                <Image
+                                    src={solutionToView.croppedImage}
+                                    alt="Saved question"
+                                    layout="fill"
+                                    className="object-contain"
+                                />
+                            )}
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg mb-2 text-slate-100">Solution</h3>
+                            <MathRenderer text={solutionToView?.solution ?? ''} />
+                        </div>
+                        {solutionToView?.formulas && (
+                             <div>
+                                <h3 className="font-bold text-lg mb-2 text-slate-100">Key Formulas</h3>
+                                <MathRenderer text={solutionToView.formulas} />
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
     </div>
     );
 }
-
-    
