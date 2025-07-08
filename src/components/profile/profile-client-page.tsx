@@ -153,6 +153,7 @@ export default function ProfileClientPage() {
     
         const fileName = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     
+        // This is a common structure for the downloadable content.
         const htmlString = `
             <!DOCTYPE html>
             <html lang="${solution.language}">
@@ -260,135 +261,136 @@ export default function ProfileClientPage() {
         }
     };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex justify-between items-center mb-8">
-            <h1 className="font-bold text-xl text-slate-100">AskPix AI</h1>
-            <div className="flex items-center gap-2 sm:gap-4">
-                <Button asChild size="icon">
-                    <Link href="/">
-                        <Home />
-                    </Link>
-                </Button>
-                <Button onClick={handleLogout} size="icon" disabled={isLoggingOut}>
-                    {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
-                </Button>
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
+            <div className="max-w-4xl mx-auto">
+                <header className="flex justify-between items-center mb-8">
+                    <h1 className="font-bold text-xl text-slate-100 flex items-center gap-2">
+                        <Logo className="h-10 w-auto" />
+                        AskPix AI
+                    </h1>
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <Button asChild size="icon">
+                            <Link href="/">
+                                <Home />
+                            </Link>
+                        </Button>
+                        <Button onClick={handleLogout} size="icon" disabled={isLoggingOut}>
+                            {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
+                        </Button>
+                    </div>
+                </header>
+                
+                <div className="flex items-center gap-6 mb-8">
+                    {loading ? (
+                        <>
+                            <Skeleton className="w-20 h-20 rounded-full" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-8 w-48" />
+                                <Skeleton className="h-5 w-64" />
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/50">
+                                <ProfileIcon />
+                            </div>
+
+                            <div>
+                                <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
+                                <p className="text-slate-400 mt-1">{user?.email}</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                <Card className="bg-slate-800/30 border-purple-900/50 text-slate-200 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
+                        <CardDescription className="text-slate-400">
+                            Download or delete your previously solved questions.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {solutionsLoading ? (
+                            <div className="space-y-4">
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-20 w-full" />
+                            </div>
+                        ) : error ? (
+                             <Alert variant="destructive" className="bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
+                                <FileWarning className="h-4 w-4" />
+                                <AlertTitle>Could not load solutions</AlertTitle>
+                                <AlertDescription>{error}</AlertDescription>
+                            </Alert>
+                        ) : (
+                            <ul className="space-y-4">
+                                {solutions.map((file) => (
+                                    <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border border-purple-900/50 hover:brightness-110 transition-all gap-4">
+                                        <div className="flex items-center gap-4 flex-grow">
+                                            <Image
+                                                src={file.croppedImage}
+                                                alt="Question thumbnail"
+                                                width={80}
+                                                height={45}
+                                                className="rounded-md object-cover aspect-video bg-slate-700"
+                                            />
+                                            <div className="flex-grow">
+                                                <p className="font-semibold text-slate-100">{file.topic}</p>
+                                                <p className="text-sm text-slate-400">{file.identifiedSubject} &middot; Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 self-end sm:self-center">
+                                            <Button size="sm" onClick={() => handleDownload(file)} disabled={downloadingId === file.id}>
+                                                {downloadingId === file.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                                {downloadingId === file.id ? 'Preparing...' : 'Download'}
+                                            </Button>
+                                            <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
+                                                <Trash2 className="mr-2 h-4 w-4"/>
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        {(!solutionsLoading && !error && solutions.length === 0) && (
+                            <div className="text-center py-12 text-slate-400 flex flex-col items-center gap-4">
+                                <p>You have no saved solutions yet.</p>
+                                <Button asChild><Link href="/"><Home className="mr-2 h-4 w-4" /> Solve a question to get started!</Link></Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
-        </header>
-        
-        <div className="flex items-center gap-6 mb-8">
-            {loading ? (
-                <>
-                    <Skeleton className="w-20 h-20 rounded-full" />
-                    <div className="space-y-2">
-                        <Skeleton className="h-8 w-48" />
-                        <Skeleton className="h-5 w-64" />
-                    </div>
-                </>
-            ) : (
-                <>
-                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/50">
-                        <ProfileIcon />
-                    </div>
 
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
-                        <p className="text-slate-400 mt-1">{user?.email}</p>
-                    </div>
-                </>
-            )}
+             <AlertDialog open={!!solutionToDelete} onOpenChange={(open) => !open && setSolutionToDelete(null)}>
+                <AlertDialogContent className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border-purple-900/50 text-slate-200">
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-slate-400">
+                        This action cannot be undone. This will permanently delete the solution for "{solutionToDelete?.topic}" from your account.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel
+                        onClick={() => setSolutionToDelete(null)}
+                        className="bg-gradient-to-r from-purple-600 to-cyan-400 text-primary-foreground hover:opacity-90 border-transparent"
+                    >
+                        Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={handleDeleteSolution}
+                        disabled={isDeleting}
+                        className="bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white"
+                    >
+                        {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Delete Solution
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
-
-        <Card className="bg-slate-800/30 border-purple-900/50 text-slate-200 backdrop-blur-sm">
-            <CardHeader>
-                <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
-                <CardDescription className="text-slate-400">
-                    Download or delete your previously solved questions.
-                </Description>
-            </CardHeader>
-            <CardContent>
-                {solutionsLoading ? (
-                    <div className="space-y-4">
-                        <Skeleton className="h-20 w-full" />
-                        <Skeleton className="h-20 w-full" />
-                        <Skeleton className="h-20 w-full" />
-                    </div>
-                ) : error ? (
-                     <Alert variant="destructive" className="bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
-                        <FileWarning className="h-4 w-4" />
-                        <AlertTitle>Could not load solutions</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                ) : (
-                    <ul className="space-y-4">
-                        {solutions.map((file) => (
-                            <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border border-purple-900/50 hover:brightness-110 transition-all gap-4">
-                                <div className="flex items-center gap-4 flex-grow">
-                                    <Image
-                                        src={file.croppedImage}
-                                        alt="Question thumbnail"
-                                        width={80}
-                                        height={45}
-                                        className="rounded-md object-cover aspect-video bg-slate-700"
-                                    />
-                                    <div className="flex-grow">
-                                        <p className="font-semibold text-slate-100">{file.topic}</p>
-                                        <p className="text-sm text-slate-400">{file.identifiedSubject} &middot; Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 self-end sm:self-center">
-                                    <Button size="sm" onClick={() => handleDownload(file)} disabled={downloadingId === file.id}>
-                                        {downloadingId === file.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                        {downloadingId === file.id ? 'Preparing...' : 'Download'}
-                                    </Button>
-                                    <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
-                                        <Trash2 className="mr-2 h-4 w-4"/>
-                                        Delete
-                                    </Button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-                {(!solutionsLoading && !error && solutions.length === 0) && (
-                    <div className="text-center py-12 text-slate-400 flex flex-col items-center gap-4">
-                        <p>You have no saved solutions yet.</p>
-                        <Button asChild><Link href="/"><Home className="mr-2 h-4 w-4" /> Solve a question to get started!</Link></Button>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-      </div>
-
-       <AlertDialog open={!!solutionToDelete} onOpenChange={(open) => !open && setSolutionToDelete(null)}>
-            <AlertDialogContent className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border-purple-900/50 text-slate-200">
-                <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription className="text-slate-400">
-                    This action cannot be undone. This will permanently delete the solution for "{solutionToDelete?.topic}" from your account.
-                </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                <AlertDialogCancel
-                    onClick={() => setSolutionToDelete(null)}
-                    className="bg-gradient-to-r from-purple-600 to-cyan-400 text-primary-foreground hover:opacity-90 border-transparent"
-                >
-                    Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                    onClick={handleDeleteSolution}
-                    disabled={isDeleting}
-                    className="bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white"
-                >
-                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Delete Solution
-                </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    </div>
     );
 }
-
-    
