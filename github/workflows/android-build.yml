@@ -34,9 +34,9 @@ jobs:
       run: |
         # Gradle looks for the debug keystore in a default location.
         # We need to create the directory and the keystore file there explicitly.
-        mkdir -p $HOME/.android
+        mkdir -p $HOME/.config/.android
         keytool -genkey -v \
-          -keystore $HOME/.android/debug.keystore \
+          -keystore $HOME/.config/.android/debug.keystore \
           -alias androiddebugkey \
           -storepass android \
           -keypass android \
