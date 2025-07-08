@@ -30,6 +30,11 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Get Signing Report
+      run: |
+        cd android
+        ./gradlew signingReport
+
     # This step now builds the app with the API URL baked in
     - name: Build and Sync Capacitor App
       env:
