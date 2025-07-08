@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, LogOut, Loader2, Home, FileWarning, Trash2 } from "lucide-react";
+import { Eye, LogOut, Loader2, Home, FileWarning, Trash2 } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
@@ -24,8 +24,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
+import { MathRenderer } from "../math-renderer";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface SavedSolution {
     id: string;
@@ -46,9 +55,9 @@ export default function ProfileClientPage() {
     const [solutionsLoading, setSolutionsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [solutionToDelete, setSolutionToDelete] = useState<SavedSolution | null>(null);
+    const [solutionToView, setSolutionToView] = useState<SavedSolution | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const handleLogout = useCallback(() => {
         setIsLoggingOut(true);
@@ -124,89 +133,6 @@ export default function ProfileClientPage() {
         }
     };
 
-    const handleDownload = async (solution: SavedSolution) => {
-        setDownloadingId(solution.id);
-        toast({ title: 'Preparing File...', description: 'Please wait a moment.' });
-
-        // Check if the Web Share API is supported, which is the best method for mobile.
-        if (!navigator.share) {
-            toast({ title: 'Error', description: 'File sharing is not supported on your device.', variant: 'destructive' });
-            setDownloadingId(null);
-            return;
-        }
-
-        const fileNameBase = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        
-        try {
-            let blob: Blob;
-            let fileName: string;
-            
-            if (solution.language === 'hi') {
-                const htmlString = `
-                    <!DOCTYPE html>
-                    <html lang="hi"><head><meta charset="UTF-8"><title>Solution: ${solution.topic}</title></head>
-                    <body><h1>Question</h1><img src="${solution.croppedImage}" alt="Question Image" style="max-width:100%;"><h2>Topic: ${solution.topic}</h2><div><h2>Solution (Hindi)</h2>${solution.solution.replace(/\n/g, '<br/>')}</div></body></html>`;
-                blob = new Blob([htmlString], { type: 'text/html' });
-                fileName = `${fileNameBase || 'solution'}.html`;
-            } else {
-                 // Dynamically import libraries ONLY when needed
-                const { default: jsPDF } = await import('jspdf');
-                const { default: html2canvas } = await import('html2canvas');
-                const htmlString = `
-                    <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Solution: ${solution.topic}</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"><\/script><style>body{font-family:sans-serif;line-height:1.6;padding:20px;max-width:800px;margin:auto;color:#333;}.container{border:1px solid #ddd;padding:2rem;background:#fff;}img{max-width:100%;}h1,h2{border-bottom:1px solid #eee;}.solution-text{white-space:pre-wrap;}</style></head>
-                    <body><div class="container"><h1>Question</h1><img src="${solution.croppedImage}" alt="Question Image"><h2>Topic: ${solution.topic}</h2><div class="solution-text"><h2>Solution</h2>${solution.solution.replace(/\n/g, '<br/>')}</div>${solution.formulas ? `<div><h2>Formulas</h2><div class="solution-text">${solution.formulas.replace(/\n/g, '<br/>')}</div></div>` : ''}</div></body></html>`;
-                
-                const element = document.createElement('div');
-                element.style.position = 'absolute';
-                element.style.left = '-9999px';
-                element.style.width = '800px';
-                element.innerHTML = htmlString;
-                document.body.appendChild(element);
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                const canvas = await html2canvas(element.querySelector('.container') as HTMLElement, { scale: 2, useCORS: true });
-                document.body.removeChild(element);
-
-                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-                const imgData = canvas.toDataURL('image/png');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 0;
-
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pdf.internal.pageSize.getHeight();
-                while (heightLeft > 0) {
-                    position = position - pdf.internal.pageSize.getHeight();
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                    heightLeft -= pdf.internal.pageSize.getHeight();
-                }
-                blob = pdf.output('blob');
-                fileName = `${fileNameBase || 'solution'}.pdf`;
-            }
-
-            // Use the Web Share API
-            const file = new File([blob], fileName, { type: blob.type });
-            await navigator.share({
-                title: solution.topic,
-                text: `Solution for ${solution.topic}`,
-                files: [file],
-            });
-            toast({ title: 'Success!', description: 'Share dialog opened.' });
-
-        } catch (error: any) {
-            console.error('Download/Share failed', error);
-            // Don't show an error if the user just closed the share sheet
-            if (error.name !== 'AbortError') {
-                 toast({ title: 'Error', description: error.message || 'Could not share the file.', variant: 'destructive' });
-            }
-        } finally {
-            setDownloadingId(null);
-        }
-    };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
@@ -251,7 +177,7 @@ export default function ProfileClientPage() {
             <CardHeader>
                 <CardTitle className="text-slate-100">Saved Solutions</CardTitle>
                 <CardDescription className="text-slate-400">
-                    Download or delete your previously solved questions.
+                    View or delete your previously solved questions.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -285,9 +211,9 @@ export default function ProfileClientPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 self-end sm:self-center">
-                                    <Button size="sm" onClick={() => handleDownload(file)} disabled={downloadingId === file.id}>
-                                        {downloadingId === file.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                        {downloadingId === file.id ? 'Preparing...' : 'Share'}
+                                    <Button size="sm" onClick={() => setSolutionToView(file)}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View Solution
                                     </Button>
                                     <Button size="sm" variant="destructive" onClick={() => setSolutionToDelete(file)} disabled={isDeleting}>
                                         <Trash2 className="mr-2 h-4 w-4"/>
@@ -334,8 +260,41 @@ export default function ProfileClientPage() {
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+
+        <Dialog open={!!solutionToView} onOpenChange={(open) => !open && setSolutionToView(null)}>
+            <DialogContent className="max-w-3xl h-[90vh] flex flex-col bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border-purple-900/50 text-slate-200">
+                <DialogHeader>
+                    <DialogTitle>{solutionToView?.topic}</DialogTitle>
+                    <DialogDescription>
+                        Saved on {solutionToView?.createdAt.toDate().toLocaleDateString()}
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="flex-grow">
+                    <div className="pr-4 space-y-4">
+                        <div className="relative w-full aspect-video rounded-md overflow-hidden bg-slate-800">
+                            {solutionToView?.croppedImage && (
+                                <Image
+                                    src={solutionToView.croppedImage}
+                                    alt="Saved question"
+                                    layout="fill"
+                                    className="object-contain"
+                                />
+                            )}
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg mb-2 text-slate-100">Solution</h3>
+                            <MathRenderer text={solutionToView?.solution ?? ''} />
+                        </div>
+                        {solutionToView?.formulas && (
+                             <div>
+                                <h3 className="font-bold text-lg mb-2 text-slate-100">Key Formulas</h3>
+                                <MathRenderer text={solutionToView.formulas} />
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
     </div>
     );
 }
-
-    

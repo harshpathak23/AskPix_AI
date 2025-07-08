@@ -27,6 +27,7 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
           className="object-contain"
           fill
           unoptimized
+          data-ai-hint="logo"
         />
       </div>
       <p
@@ -41,5 +42,3 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
     </div>
   );
 };
-
-    
