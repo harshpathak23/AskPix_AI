@@ -3,12 +3,11 @@
 
 import { useState, useRef, useEffect, FC } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
-
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
@@ -40,44 +39,70 @@ interface WelcomeScreenProps {
   subject: Subject;
   setSubject: (subject: Subject) => void;
   handleStartScanning: () => void;
+  user: FirebaseUser | null;
+  isLoggingOut: boolean;
+  handleLogout: () => void;
 }
-const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning }) => {
+const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStartScanning, user, isLoggingOut, handleLogout }) => {
   return (
-    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-6 flex flex-col animate-in fade-in-10 h-[95vh] min-h-[700px] border border-purple-900/50">
-      <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
-        <Logo animated className="h-[320px] w-[320px] mb-2" />
-        <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
-      </div>
-
-      <div className="flex-1 flex flex-col justify-center space-y-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">Choose a subject</h1>
+    <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col animate-in fade-in-10 min-h-[90vh] sm:min-h-[700px] border border-purple-900/50">
+      <header className="flex justify-end items-center w-full mb-4 h-10">
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <Button asChild size="sm">
+                <Link href="/profile">
+                  <User className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
+                {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4" />}
+              </Button>
+            </>
+          ) : (
+            <Button asChild size="sm">
+              <Link href="/login">Login / Sign Up</Link>
+            </Button>
+          )}
         </div>
-        
-        <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 gap-3 h-auto p-0 bg-transparent">
-              <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <FunctionSquare className="h-4 w-4" />
-                  <span className="font-medium text-xs">Math</span>
-              </TabsTrigger>
-              <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <Atom className="h-4 w-4" />
-                  <span className="font-medium text-xs">Physics</span>
-              </TabsTrigger>
-              <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <TestTube className="h-4 w-4" />
-                  <span className="font-medium text-xs">Chemistry</span>
-              </TabsTrigger>
-              <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <Dna className="h-4 w-4" />
-                  <span className="font-medium text-xs">Biology</span>
-              </TabsTrigger>
-              <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
-                  <BrainCircuit className="h-4 w-4" />
-                  <span className="font-medium text-xs">General Question</span>
-              </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      </header>
+
+      <div className="flex-1 flex flex-col">
+        <div className="flex-shrink-0 pt-8 pb-4 flex flex-col items-center">
+          <Logo animated className="h-[320px] w-[320px] mb-2" />
+          <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center space-y-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-100">Choose a subject</h1>
+          </div>
+          
+          <Tabs defaultValue={subject} onValueChange={(value) => setSubject(value as Subject)} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 gap-3 h-auto p-0 bg-transparent">
+                <TabsTrigger value="Mathematics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <FunctionSquare className="h-4 w-4" />
+                    <span className="font-medium text-xs">Math</span>
+                </TabsTrigger>
+                <TabsTrigger value="Physics" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <Atom className="h-4 w-4" />
+                    <span className="font-medium text-xs">Physics</span>
+                </TabsTrigger>
+                <TabsTrigger value="Chemistry" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <TestTube className="h-4 w-4" />
+                    <span className="font-medium text-xs">Chemistry</span>
+                </TabsTrigger>
+                <TabsTrigger value="Biology" className="flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <Dna className="h-4 w-4" />
+                    <span className="font-medium text-xs">Biology</span>
+                </TabsTrigger>
+                <TabsTrigger value="General" className="col-span-2 flex-col h-16 gap-1 bg-white/5 border-white/10 hover:bg-white/10 shadow-sm rounded-xl transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:border-transparent">
+                    <BrainCircuit className="h-4 w-4" />
+                    <span className="font-medium text-xs">General Question</span>
+                </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       <div className="flex-shrink-0 pt-4 pb-2">
@@ -101,8 +126,10 @@ interface ScanningScreenProps {
   zoomSupported: boolean;
   handleZoomChange: (value: number[]) => void;
   handleScan: () => void;
+  user: FirebaseUser | null;
+  setAppState: (state: AppState) => void;
 }
-const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, canvasRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, handleScan }) => (
+const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, canvasRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, handleScan, user, setAppState }) => (
     <div className="w-full h-full flex flex-col items-center justify-center p-4">
       <div className="w-full h-full overflow-hidden relative flex items-center justify-center bg-black rounded-lg">
         {hasCameraPermission === null && (
@@ -119,13 +146,25 @@ const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef
           <>
             <div className="absolute top-0 left-0 w-full h-1 bg-primary/70 shadow-[0_0_20px_5px_hsl(var(--primary))] animate-scan-line pointer-events-none" />
 
-            <div className="absolute top-4 right-4 z-10 space-y-3">
+            <div className="absolute top-4 left-4 z-10">
               {flashSupported && (
                 <Button onClick={toggleFlash} size="icon" variant={isFlashOn ? 'secondary' : 'ghost'} className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/20 hover:bg-black/40 text-white">
                   <Zap className={cn(isFlashOn && "fill-yellow-300 text-yellow-300")} />
                 </Button>
               )}
             </div>
+
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+                <Button onClick={() => setAppState('welcome')} size="icon" variant="ghost" className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/20 hover:bg-black/40 text-white">
+                    <Home />
+                </Button>
+                {!user && (
+                    <Button asChild className={cn(buttonVariants({ size: 'sm' }), "h-12 rounded-full")}>
+                        <Link href="/login">Login / Sign Up</Link>
+                    </Button>
+                )}
+            </div>
+
              {zoomSupported && (
               <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-1/2 max-h-64 flex flex-col items-center space-y-2">
                 <ZoomIn className="text-white/80"/>
@@ -170,7 +209,6 @@ const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef
 );
 
 interface CroppingScreenProps {
-  error: string | null;
   capturedImage: string | null;
   crop: Crop | undefined;
   setCrop: (crop: Crop) => void;
@@ -179,50 +217,39 @@ interface CroppingScreenProps {
   handleRetake: () => void;
   handleGetSolution: () => void;
 }
-const CroppingScreen: FC<CroppingScreenProps> = ({ error, capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
+const CroppingScreen: FC<CroppingScreenProps> = ({ capturedImage, crop, setCrop, imgRef, onImageLoad, handleRetake, handleGetSolution }) => (
     <div className="w-full h-full relative bg-black">
-      <div className="w-full h-full flex items-center justify-center">
-        {capturedImage && (
-          <ReactCrop
-            crop={crop}
-            onChange={(c, percentCrop) => setCrop(c)}
-            aspect={undefined}
-          >
-            <Image
-              ref={imgRef}
-              src={capturedImage}
-              alt="Captured question to crop"
-              width={1200}
-              height={675}
-              onLoad={onImageLoad}
-              className="max-w-full max-h-full object-contain"
-            />
-          </ReactCrop>
-        )}
-      </div>
-
-      {error && (
-        <div className="absolute top-4 left-4 right-4 z-30">
-          <Alert variant="destructive" className="w-full bg-gradient-to-br from-rose-500 to-red-900 border-rose-400 text-white">
-            <XCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+        <div className="w-full h-full flex items-center justify-center">
+            {capturedImage && (
+                <ReactCrop
+                    crop={crop}
+                    onChange={(c, percentCrop) => setCrop(c)}
+                    aspect={undefined}
+                >
+                    <Image
+                        ref={imgRef}
+                        src={capturedImage}
+                        alt="Captured question to crop"
+                        width={1200}
+                        height={675}
+                        onLoad={onImageLoad}
+                        className="max-w-full max-h-[100dvh] object-contain"
+                    />
+                </ReactCrop>
+            )}
         </div>
-      )}
-
-      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
-        <div className="flex w-full gap-4">
-          <Button onClick={handleRetake} className="w-full text-lg py-6" variant="secondary">
-            <RefreshCw className="mr-2 h-5 w-5" />
-            Retake
-          </Button>
-          <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
-            <Bot className="mr-2 h-5 w-5" />
-            Get Solution
-          </Button>
+        <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+            <div className="flex w-full gap-4">
+                <Button onClick={handleRetake} className="w-full text-lg py-6" variant="secondary">
+                    <RefreshCw className="mr-2 h-5 w-5" />
+                    Retake
+                </Button>
+                <Button onClick={handleGetSolution} className="w-full text-lg py-6" disabled={!crop?.width || !crop?.height}>
+                    <Bot className="mr-2 h-5 w-5" />
+                    Get Solution
+                </Button>
+            </div>
         </div>
-      </div>
     </div>
 );
 
@@ -362,10 +389,6 @@ interface ResultScreenProps {
 }
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="flex flex-col items-center">
-            <Logo animated className="w-[220px] h-[220px] aspect-square" />
-            <p className="text-xs text-slate-400 tracking-wider">Build By Harsh Pathak</p>
-        </div>
         <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
             {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
         </div>
@@ -538,13 +561,13 @@ export default function HomeClientPage() {
   const handleLogout = () => {
     setIsLoggingOut(true);
     // Don't wait for signOut to complete. Navigate immediately for a faster user experience.
-    setAppState('welcome');
     signOut(auth).catch(error => {
         // Log error but don't block user. The onAuthStateChanged listener is the source of truth.
         console.error("Error signing out: ", error);
         toast({ title: "Logout Failed", description: "There was an error signing out.", variant: "destructive" });
     }).finally(() => {
         setIsLoggingOut(false);
+        setAppState('welcome');
     });
   };
 
@@ -969,6 +992,9 @@ export default function HomeClientPage() {
             subject={subject} 
             setSubject={setSubject} 
             handleStartScanning={handleStartScanning} 
+            user={user}
+            isLoggingOut={isLoggingOut}
+            handleLogout={handleLogout}
           />
         )}
         
@@ -979,24 +1005,22 @@ export default function HomeClientPage() {
           )}>
             {appState !== 'scanning' && appState !== 'cropping' && (
               <header className="w-full max-w-3xl mx-auto py-4 px-4 flex justify-between items-center text-slate-200">
-                  <button className="font-bold text-xl text-slate-100 flex items-center gap-2" onClick={() => setAppState('welcome')}>
-                      <Logo className="h-10 w-auto" />
-                      <span className="hidden sm:inline">AskPix AI</span>
-                  </button>
-                  <div>
+                  <h1 className="font-bold text-xl text-slate-100 flex items-center gap-2">AskPix AI</h1>
+                  <div className="flex items-center gap-2 sm:gap-4">
+                      <Button onClick={() => setAppState('welcome')} size="icon">
+                        <Home />
+                      </Button>
                       {user ? (
-                          <div className="flex items-center gap-2 sm:gap-4">
-                              <Button asChild size="sm">
+                          <>
+                              <Button asChild size="icon">
                                   <Link href="/profile">
-                                      <User className="h-4 w-4 sm:mr-2" />
-                                      <span className="hidden sm:inline">View Profile</span>
+                                      <User />
                                   </Link>
                               </Button>
-                              <Button size="sm" onClick={handleLogout} disabled={isLoggingOut}>
-                                  {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut className="h-4 w-4 sm:mr-2" />}
-                                  <span className="hidden sm:inline">Logout</span>
+                              <Button size="icon" onClick={handleLogout} disabled={isLoggingOut}>
+                                  {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin"/> : <LogOut />}
                               </Button>
-                          </div>
+                          </>
                       ) : (
                           <Button asChild>
                               <Link href="/login">Login / Sign Up</Link>
@@ -1018,11 +1042,12 @@ export default function HomeClientPage() {
                 zoomSupported={zoomSupported}
                 handleZoomChange={handleZoomChange}
                 handleScan={handleScan}
+                user={user}
+                setAppState={setAppState}
               />
             )}
             {appState === 'cropping' && (
               <CroppingScreen
-                error={error}
                 capturedImage={capturedImage}
                 crop={crop}
                 setCrop={setCrop}
