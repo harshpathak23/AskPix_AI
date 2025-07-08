@@ -1,3 +1,4 @@
+
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
@@ -11,13 +12,13 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 3000,
       launchAutoHide: true,
-      backgroundColor: "#EEEEF2",
+      backgroundColor: "#0D2A4B",
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",
       showSpinner: true,
       androidSpinnerStyle: "large",
       iosSpinnerStyle: "small",
-      spinnerColor: "#4F3A93",
+      spinnerColor: "#FFFFFF",
       splashFullScreen: true,
       splashImmersive: true,
     },
@@ -25,3 +26,5 @@ const config: CapacitorConfig = {
 };
 
 export default config;
+
+    
