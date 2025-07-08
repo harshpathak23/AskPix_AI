@@ -34,8 +34,8 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
-import { MathRenderer } from "../math-renderer";
-import { ScrollArea } from "../ui/scroll-area";
+import { MathRenderer } from "@/components/math-renderer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SavedSolution {
     id: string;
