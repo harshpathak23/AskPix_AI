@@ -53,7 +53,6 @@ export default function ProfileClientPage() {
 
     const handleLogout = useCallback(() => {
         setIsLoggingOut(true);
-        // Navigate immediately for a faster experience. The auth listener will handle the state.
         router.push('/login');
         signOut(auth).catch(error => {
             console.error("Error signing out: ", error);
@@ -64,13 +63,11 @@ export default function ProfileClientPage() {
     }, [router]);
 
     useEffect(() => {
-        // If auth is done loading and there's no user, redirect.
         if (!loading && !user) {
             router.push('/login');
             return;
         }
 
-        // If we have a user, fetch their solutions.
         if (user) {
             if (!db) {
                 setError("Firebase is not configured correctly. Saved solutions cannot be loaded.");
@@ -100,24 +97,14 @@ export default function ProfileClientPage() {
                  setSolutionsLoading(false);
             });
             
-            // Cleanup function for the snapshot listener
             return () => unsubscribeSnapshot();
         }
     }, [user, loading, router]);
 
 
     const handleDeleteSolution = async () => {
-        if (!solutionToDelete || !user) return;
+        if (!solutionToDelete || !user || !db) return;
         
-        if (!db) {
-            toast({
-                title: "Deletion Failed",
-                description: "Could not connect to the database.",
-                variant: "destructive",
-            });
-            return;
-        }
-
         setIsDeleting(true);
         try {
             await deleteDoc(doc(db, "users", user.uid, "solutions", solutionToDelete.id));
@@ -125,7 +112,7 @@ export default function ProfileClientPage() {
                 title: "Solution Deleted",
                 description: `"${solutionToDelete.topic}" has been removed.`,
             });
-            setSolutionToDelete(null); // Close the dialog on success
+            setSolutionToDelete(null);
         } catch (e) {
             console.error("Error deleting solution: ", e);
             toast({
@@ -138,22 +125,33 @@ export default function ProfileClientPage() {
         }
     };
 
-    const triggerDownload = (href: string, fileName: string) => {
-        const a = document.createElement('a');
-        a.href = href;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    };
-
     const handleDownload = async (solution: SavedSolution) => {
         setDownloadingId(solution.id);
         toast({ title: 'Preparing Download...', description: 'Please wait a moment.' });
     
         const fileName = solution.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        
+        const triggerDownload = (blob: Blob, name: string) => {
+            try {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+
+                toast({ title: 'Success!', description: `${name} download initiated.` });
+            } catch (err) {
+                 console.error('Download trigger failed', err);
+                 toast({ title: 'Error', description: 'Could not trigger the file download.', variant: 'destructive' });
+            }
+        };
     
-        // This is a common structure for the downloadable content.
         const htmlString = `
             <!DOCTYPE html>
             <html lang="${solution.language}">
@@ -195,11 +193,8 @@ export default function ProfileClientPage() {
         try {
             if (solution.language === 'hi') {
                 const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                triggerDownload(url, `${fileName || 'solution'}.html`);
-                URL.revokeObjectURL(url);
-                toast({ title: 'Success!', description: 'HTML download initiated.' });
-            } else { // English solution, generate and download PDF
+                triggerDownload(blob, `${fileName || 'solution'}.html`);
+            } else {
                 const { default: jsPDF } = await import('jspdf');
                 const { default: html2canvas } = await import('html2canvas');
 
@@ -213,22 +208,13 @@ export default function ProfileClientPage() {
                 const container = element.querySelector('.container') as HTMLElement;
                 if (!container) throw new Error('Render container not found');
     
-                // Wait for images and KaTeX to render.
                 await new Promise(resolve => setTimeout(resolve, 1500));
     
-                const canvas = await html2canvas(container, {
-                    scale: 2,
-                    useCORS: true,
-                });
+                const canvas = await html2canvas(container, { scale: 2, useCORS: true });
     
                 document.body.removeChild(element);
     
-                const pdf = new jsPDF({
-                    orientation: 'p',
-                    unit: 'mm',
-                    format: 'a4',
-                });
-    
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
                 const imgData = canvas.toDataURL('image/png');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -247,11 +233,7 @@ export default function ProfileClientPage() {
                 }
                 
                 const pdfBlob = pdf.output('blob');
-                const blobUrl = URL.createObjectURL(pdfBlob);
-                triggerDownload(blobUrl, `${fileName || 'solution'}.pdf`);
-                URL.revokeObjectURL(blobUrl);
-                
-                toast({ title: 'Success!', description: 'PDF download initiated.' });
+                triggerDownload(pdfBlob, `${fileName || 'solution'}.pdf`);
             }
         } catch (error: any) {
             console.error('Download failed', error);
@@ -265,10 +247,7 @@ export default function ProfileClientPage() {
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 p-4 sm:p-6 md:p-8">
             <div className="max-w-4xl mx-auto">
                 <header className="flex justify-between items-center mb-8">
-                    <h1 className="font-bold text-xl text-slate-100 flex items-center gap-2">
-                        <Logo className="h-10 w-auto" />
-                        AskPix AI
-                    </h1>
+                     <h1 className="font-bold text-xl text-slate-100">AskPix AI</h1>
                     <div className="flex items-center gap-2 sm:gap-4">
                         <Button asChild size="icon">
                             <Link href="/">
@@ -295,7 +274,6 @@ export default function ProfileClientPage() {
                             <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/50">
                                 <ProfileIcon />
                             </div>
-
                             <div>
                                 <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
                                 <p className="text-slate-400 mt-1">{user?.email}</p>
