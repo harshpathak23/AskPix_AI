@@ -128,8 +128,10 @@ interface ScanningScreenProps {
   handleScan: () => void;
   user: FirebaseUser | null;
   setAppState: (state: AppState) => void;
+  handleLogout: () => void;
+  isLoggingOut: boolean;
 }
-const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, canvasRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, handleScan, user, setAppState }) => (
+const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, canvasRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, handleScan, user, setAppState, handleLogout, isLoggingOut }) => (
     <div className="w-full h-full flex flex-col items-center justify-center p-4">
       <div className="w-full h-full overflow-hidden relative flex items-center justify-center bg-black rounded-lg">
         {hasCameraPermission === null && (
@@ -155,11 +157,15 @@ const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef
             </div>
 
             <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-                <Button onClick={() => setAppState('welcome')} size="icon" variant="ghost" className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/20 hover:bg-black/40 text-white">
+                <Button onClick={() => setAppState('welcome')} size="icon">
                     <Home />
                 </Button>
-                {!user && (
-                    <Button asChild className={cn(buttonVariants({ size: 'sm' }), "h-12 rounded-full")}>
+                {user ? (
+                    <Button onClick={handleLogout} size="icon" disabled={isLoggingOut}>
+                        {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
+                    </Button>
+                ) : (
+                    <Button asChild>
                         <Link href="/login">Login / Sign Up</Link>
                     </Button>
                 )}
@@ -1044,6 +1050,8 @@ export default function HomeClientPage() {
                 handleScan={handleScan}
                 user={user}
                 setAppState={setAppState}
+                handleLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
               />
             )}
             {appState === 'cropping' && (
