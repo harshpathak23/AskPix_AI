@@ -20,6 +20,13 @@ export const SolveQuestionInputSchema = z.object({
 });
 export type SolveQuestionInput = z.infer<typeof SolveQuestionInputSchema>;
 
+export const SolveTextQuestionInputSchema = z.object({
+  questionText: z.string().describe('The text of the question to solve.'),
+  language: z.enum(['en', 'hi']).describe('The desired language for the solution.'),
+  subject: SubjectsEnum.describe('The user-selected subject for the question.'),
+});
+export type SolveTextQuestionInput = z.infer<typeof SolveTextQuestionInputSchema>;
+
 export const SolveQuestionOutputSchema = z.object({
   identifiedSubject: SubjectsEnum.describe("The subject of the question as identified by the AI."),
   topic: z.string().describe("The specific topic of the question (e.g., 'Quadratic Equations', 'Newton's Laws')."),

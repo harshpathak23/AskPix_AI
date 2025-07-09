@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect, FC, useCallback } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -28,6 +28,8 @@ import { useRouter, type AppRouterInstance } from 'next/navigation';
 import { ToastAction } from '@/components/ui/toast';
 import { useAuth } from '@/context/auth-context';
 import { SplashScreen } from '@/components/splash-screen';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 
 // Define the states for our app's screen flow
@@ -120,22 +122,24 @@ const WelcomeScreen: FC<WelcomeScreenProps> = ({ subject, setSubject, handleStar
 interface ScanningScreenProps {
   hasCameraPermission: boolean | null;
   videoRef: React.RefObject<HTMLVideoElement>;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
   error: string | null;
   flashSupported: boolean;
   isFlashOn: boolean;
   toggleFlash: () => void;
   zoomSupported: boolean;
   handleZoomChange: (value: number[]) => void;
-  handleScan: () => void;
   user: FirebaseUser | null;
   setAppState: (state: AppState) => void;
   handleLogout: () => void;
   isLoggingOut: boolean;
+  textQuestion: string;
+  setTextQuestion: (text: string) => void;
+  handleSolveQuestion: () => void;
 }
-const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, canvasRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, handleScan, user, setAppState, handleLogout, isLoggingOut }) => (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-      <div className="w-full h-full overflow-hidden relative flex items-center justify-center bg-black rounded-lg">
+const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, user, setAppState, handleLogout, isLoggingOut, textQuestion, setTextQuestion, handleSolveQuestion }) => (
+    <div className="w-full h-full flex flex-col items-center justify-center p-0">
+      {/* Top Half: Camera */}
+      <div className="w-full h-1/2 overflow-hidden relative flex items-center justify-center bg-black">
         {hasCameraPermission === null && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-white bg-black/50">
             <Camera className="h-16 w-16 mb-4 animate-pulse" />
@@ -157,22 +161,6 @@ const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef
                 </Button>
               )}
             </div>
-
-            <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-                <Button onClick={() => setAppState('welcome')} size="icon">
-                    <Home />
-                </Button>
-                {user ? (
-                    <Button onClick={handleLogout} size="icon" disabled={isLoggingOut}>
-                        {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
-                    </Button>
-                ) : (
-                    <Button asChild>
-                        <Link href="/login">Login / Sign Up</Link>
-                    </Button>
-                )}
-            </div>
-
              {zoomSupported && (
               <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-1/2 max-h-64 flex flex-col items-center space-y-2">
                 <ZoomIn className="text-white/80"/>
@@ -201,17 +189,45 @@ const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef
                 </Alert>
             </div>
         )}
-        <canvas ref={canvasRef} className="hidden" />
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-            <Button
-              onClick={handleScan}
-              size="icon"
-              className="h-16 w-16 rounded-full animate-pulse-glow border-4 border-white/50"
-              disabled={hasCameraPermission !== true}
-            >
-              <ScanLine className="h-8 w-8" />
-            </Button>
+      </div>
+      
+      {/* Top right navigation */}
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          <Button onClick={() => setAppState('welcome')} size="icon" className="h-12 w-12 rounded-full">
+              <Home />
+          </Button>
+          {user ? (
+              <Button onClick={handleLogout} size="icon" disabled={isLoggingOut} className="h-12 w-12 rounded-full">
+                  {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
+              </Button>
+          ) : (
+              <Button asChild size="sm" className="h-12 rounded-full px-4">
+                  <Link href="/login">Login / Sign Up</Link>
+              </Button>
+          )}
+      </div>
+
+      {/* Bottom Half: Text Input */}
+      <div className="w-full h-1/2 bg-slate-800 p-4 flex flex-col justify-between border-t-2 border-primary">
+        <div className="flex-grow flex flex-col">
+          <Label htmlFor="text-question" className="text-slate-400 mb-2 block">Or type your question here:</Label>
+          <Textarea
+            id="text-question"
+            value={textQuestion}
+            onChange={(e) => setTextQuestion(e.target.value)}
+            placeholder="e.g., What is the integral of 2x dx?"
+            className="flex-grow bg-slate-900/70 border-slate-700 text-slate-200 placeholder:text-slate-500 focus:border-primary focus:ring-primary text-base resize-none"
+          />
         </div>
+        <Button
+          onClick={handleSolveQuestion}
+          size="lg"
+          className="w-full text-lg py-6 mt-4 flex-shrink-0"
+          disabled={hasCameraPermission !== true && !textQuestion.trim()}
+        >
+          <Sparkles className="mr-3 h-6 w-6" />
+          Solve Question
+        </Button>
       </div>
     </div>
 );
@@ -267,7 +283,7 @@ interface SolvingScreenProps {
 }
 
 const solvingSteps = [
-  { text: 'Analyzing image content...', icon: <ScanLine className="h-5 w-5 text-slate-400" /> },
+  { text: 'Analyzing content...', icon: <ScanLine className="h-5 w-5 text-slate-400" /> },
   { text: 'Identifying academic subject...', icon: <BrainCircuit className="h-5 w-5 text-slate-400" /> },
   { text: 'Formulating step-by-step solution...', icon: <Bot className="h-5 w-5 text-slate-400" /> },
   { text: 'Formatting final answer...', icon: <NotebookText className="h-5 w-5 text-slate-400" /> },
@@ -290,9 +306,11 @@ const SolvingScreen: FC<SolvingScreenProps> = ({ croppedImage }) => {
 
   return (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-      <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-        {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
-      </div>
+      {croppedImage && (
+        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+          <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />
+        </div>
+      )}
 
       <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
         <CardHeader>
@@ -397,9 +415,11 @@ interface ResultScreenProps {
 }
 const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
-        <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
-            {croppedImage && <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />}
-        </div>
+        {croppedImage && (
+            <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
+                <Image src={croppedImage} alt="Cropped question" fill className="object-contain" />
+            </div>
+        )}
         
         {identifiedSubject && identifiedSubject !== subject && (
             <Alert className="bg-slate-800/50 border-slate-700 text-slate-200">
@@ -469,9 +489,9 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
             </Button>
           ) : (
             <Button asChild className="w-full text-base py-6 animate-pulse-glow" onClick={() => {
-                if (croppedImage && solution && topic) {
+                if (solution && topic) {
                     const pendingSolution = {
-                        croppedImage,
+                        croppedImage: croppedImage, // Can be null for text questions
                         solution,
                         topic,
                         formulas,
@@ -504,13 +524,13 @@ export default function HomeClientPage() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [textQuestion, setTextQuestion] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [crop, setCrop] = useState<Crop>();
   const [flashSupported, setFlashSupported] = useState(false);
   const [zoomSupported, setZoomSupported] = useState(false);
   const [isFlashOn, setIsFlashOn] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [solutionSaved, setSolutionSaved] = useState(false);
@@ -520,25 +540,22 @@ export default function HomeClientPage() {
 
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
         setShowSplash(false);
-    }, 1000); // Animation is 0.8s, so 1s is a good time to hide it.
+    }, 1000); 
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     const pendingSolutionJSON = localStorage.getItem('pendingSolution');
-    // Only restore if a user is now logged in
     if (pendingSolutionJSON && user) {
         try {
             const pendingSolution = JSON.parse(pendingSolutionJSON);
-            // Check if we have the required data to prevent setting nulls
-            if (pendingSolution.croppedImage && pendingSolution.solution && pendingSolution.topic) {
-                setCroppedImage(pendingSolution.croppedImage);
+            if (pendingSolution.solution && pendingSolution.topic) {
+                setCroppedImage(pendingSolution.croppedImage || null);
                 setSolution(pendingSolution.solution);
                 setTopic(pendingSolution.topic);
                 setFormulas(pendingSolution.formulas || null);
@@ -550,13 +567,11 @@ export default function HomeClientPage() {
         } catch (e) {
             console.error("Failed to parse pending solution", e);
         } finally {
-            // Always clean up to avoid loops or stale data
             localStorage.removeItem('pendingSolution');
         }
     }
-  }, [user]); // Rerun this logic when the user state changes
+  }, [user]); 
 
-  // This effect now ONLY handles cleaning up the camera stream when leaving the scanning screen.
   useEffect(() => {
     const videoElement = videoRef.current;
     if (appState !== 'scanning' && videoElement?.srcObject) {
@@ -568,9 +583,7 @@ export default function HomeClientPage() {
 
   const handleLogout = useCallback(() => {
     setIsLoggingOut(true);
-    // Don't wait for signOut to complete. Navigate immediately for a faster user experience.
     signOut(auth).catch(error => {
-        // Log error but don't block user. The onAuthStateChanged listener is the source of truth.
         console.error("Error signing out: ", error);
         toast({ title: "Logout Failed", description: "There was an error signing out.", variant: "destructive" });
     }).finally(() => {
@@ -580,17 +593,12 @@ export default function HomeClientPage() {
   }, [toast]);
 
   const startCamera = useCallback(async () => {
-    // Immediately switch to scanning view to show loading state
     setAppState('scanning');
-    
-    // Reset states for a new camera session
     setHasCameraPermission(null);
     setError(null);
     setFlashSupported(false);
     setZoomSupported(false);
     setIsFlashOn(false);
-    setZoomLevel(1);
-
 
     if (!navigator.mediaDevices?.getUserMedia) {
         setError("Camera access is not supported by your browser.");
@@ -598,56 +606,30 @@ export default function HomeClientPage() {
         return;
     }
 
-    const constraintsToTry: MediaStreamConstraints[] = [
-      { video: { facingMode: 'environment', width: { ideal: 3840 }, height: { ideal: 2160 } } }, // 4K
-    ];
-
-    let stream: MediaStream | null = null;
-    let lastError: any = null;
-
-    for (const constraints of constraintsToTry) {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log("Successfully got camera stream with constraints:", constraints);
-        break; // Success!
-      } catch (err) {
-        lastError = err;
-        console.warn("Failed to get stream with constraints:", constraints, "Error:", err);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } });
+      const video = videoRef.current;
+      if (video) {
+          video.srcObject = stream;
+          video.onloadedmetadata = () => {
+              setHasCameraPermission(true);
+              const [track] = stream!.getVideoTracks();
+              const capabilities = track.getCapabilities();
+              if (capabilities.torch) setFlashSupported(true);
+              if (capabilities.zoom) setZoomSupported(true);
+          };
       }
-    }
-
-    if (!stream) {
-      console.error("All camera requests failed:", lastError);
+    } catch (err) {
       setHasCameraPermission(false);
-      if (lastError instanceof Error && (lastError.name === 'NotAllowedError' || lastError.name === 'PermissionDeniedError')) {
+      if (err instanceof Error && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
           setError('Camera access was denied. Please enable camera permissions in your browser settings.');
       } else {
           setError('Could not access the camera. It may be in use, not available, or not supported.');
       }
-      return;
-    }
-    
-    const video = videoRef.current;
-    if (video) {
-        video.srcObject = stream;
-        // This is the robust way to wait for the camera to be ready.
-        video.onloadedmetadata = () => {
-            setHasCameraPermission(true);
-            const [track] = stream!.getVideoTracks();
-            const capabilities = track.getCapabilities();
-
-            if (capabilities.torch) {
-              setFlashSupported(true);
-            }
-            if (capabilities.zoom) {
-              setZoomSupported(true);
-            }
-        };
     }
   }, []);
 
-  const handleStartScanning = useCallback(async () => {
-    // Reset all previous results and states
+  const resetStateForNewScan = () => {
     setCapturedImage(null);
     setCroppedImage(null);
     setSolution(null);
@@ -658,6 +640,11 @@ export default function HomeClientPage() {
     setCrop(undefined);
     setIdentifiedSubject(null);
     setSolutionSaved(false);
+    setTextQuestion('');
+  };
+
+  const handleStartScanning = useCallback(async () => {
+    resetStateForNewScan();
     await startCamera();
   }, [startCamera]);
 
@@ -665,139 +652,64 @@ export default function HomeClientPage() {
     await handleStartScanning();
   }, [handleStartScanning]);
 
-  // This effect handles the Android hardware back button.
   useEffect(() => {
-    if (!Capacitor.isNativePlatform()) {
-        return;
-    }
-
+    if (!Capacitor.isNativePlatform()) return;
     const listener = App.addListener('backButton', () => {
         switch (appState) {
-            case 'result':
-                setAppState('welcome');
-                break;
-            case 'solving':
-                // Go back to cropping to allow a re-try.
-                setAppState('cropping');
-                break;
-            case 'cropping':
-                handleRetake();
-                break;
-            case 'scanning':
-                setAppState('welcome');
-                break;
-            case 'welcome':
-                // If on the main screen, exit the app.
-                App.exitApp();
-                break;
-            default:
-                App.exitApp();
+            case 'result': setAppState('welcome'); break;
+            case 'solving': setAppState('cropping'); break;
+            case 'cropping': handleRetake(); break;
+            case 'scanning': setAppState('welcome'); break;
+            case 'welcome': App.exitApp(); break;
+            default: App.exitApp();
         }
     });
-
-    return () => {
-        listener.remove();
-    };
-}, [appState, handleRetake, setAppState]);
-
+    return () => { listener.remove(); };
+  }, [appState, handleRetake, setAppState]);
 
   function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<string> {
     const canvas = document.createElement('canvas');
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
-    
-    const cropX = crop.x * scaleX;
-    const cropY = crop.y * scaleY;
-    const cropWidth = crop.width * scaleX;
-    const cropHeight = crop.height * scaleY;
-
-    canvas.width = Math.floor(cropWidth);
-    canvas.height = Math.floor(cropHeight);
-
+    canvas.width = Math.floor(crop.width * scaleX);
+    canvas.height = Math.floor(crop.height * scaleY);
     const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return Promise.reject(new Error('Failed to get canvas context'));
-    }
-  
+    if (!ctx) return Promise.reject(new Error('Failed to get canvas context'));
     ctx.imageSmoothingQuality = 'high';
-    // Fill with white background for JPEG compression of transparent areas
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-    ctx.drawImage(
-      image,
-      cropX,
-      cropY,
-      cropWidth,
-      cropHeight,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-  
-    return new Promise((resolve) => {
-      // Use JPEG for lossy, smaller image files. 0.9 provides a good balance of quality and size.
-      resolve(canvas.toDataURL('image/jpeg', 0.9));
-    });
+    ctx.drawImage(image, crop.x * scaleX, crop.y * scaleY, crop.width * scaleX, crop.height * scaleY, 0, 0, canvas.width, canvas.height);
+    return Promise.resolve(canvas.toDataURL('image/jpeg', 0.9));
   }
 
-  const handleGetSolution = async () => {
+  const handleGetSolutionFromImage = async () => {
     if (!crop || !imgRef.current || !crop.width || !crop.height) {
       setError("Please select an area to crop before getting a solution.");
       return;
     }
-
     setAppState('solving');
     setError(null);
-
     try {
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
 
       let result;
+      const payload = { photoDataUri: croppedDataUri, language, subject };
 
       if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call the deployed API endpoint
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!apiBaseUrl) {
-          throw new Error("The application is not configured with a server URL. Please build the mobile app with a NEXT_PUBLIC_API_BASE_URL environment variable pointing to your deployed web app.");
-        }
-        
-        const response = await fetch(`${apiBaseUrl}/api/solve`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photoDataUri: croppedDataUri,
-            language,
-            subject,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `API request failed with status ${response.status}`);
-        }
+        if (!apiBaseUrl) throw new Error("App not configured with a server URL.");
+        const response = await fetch(`${apiBaseUrl}/api/solve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error || `API Error`); }
         result = await response.json();
-
       } else {
-        // Web App: Use the direct server action call
         const { solveQuestion } = await import('@/app/actions');
-        result = await solveQuestion({
-          photoDataUri: croppedDataUri,
-          language,
-          subject,
-        });
+        result = await solveQuestion(payload);
       }
 
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
+      if (result.error) throw new Error(result.error);
       if (!result?.solution || !result?.topic || !result.identifiedSubject) {
-        setError('Could not generate a solution. Please try a different question or crop a different area.');
+        setError('Could not generate a solution. Please try again.');
         setAppState('cropping');
       } else {
         setTopic(result.topic || null);
@@ -808,17 +720,50 @@ export default function HomeClientPage() {
       }
     } catch (e) {
       console.error("Solution retrieval failed", e);
-      let errorMessage = 'An unexpected error occurred. Please try again.';
-      if (e instanceof Error) {
-        errorMessage = e.message;
+      setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
+      setAppState('result');
+    }
+  };
+
+  const handleGetSolutionFromText = async () => {
+    setAppState('solving');
+    setError(null);
+    setCroppedImage(null); // Ensure no image is shown for text questions
+    try {
+      let result;
+      const payload = { questionText: textQuestion, language, subject };
+
+      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!apiBaseUrl) throw new Error("App not configured with a server URL.");
+        const response = await fetch(`${apiBaseUrl}/api/solve-text`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error || `API Error`); }
+        result = await response.json();
+      } else {
+        const { solveTextQuestion } = await import('@/app/actions');
+        result = await solveTextQuestion(payload);
       }
-      setError(errorMessage);
-      setAppState('result'); // Go to result screen to show the error
+
+      if (result.error) throw new Error(result.error);
+      if (!result?.solution || !result?.topic || !result.identifiedSubject) {
+        setError('Could not generate a solution. Please try again.');
+        setAppState('scanning');
+      } else {
+        setTopic(result.topic || null);
+        setSolution(result.solution);
+        setFormulas(result.formulas || null);
+        setIdentifiedSubject(result.identifiedSubject || subject);
+        setAppState('result');
+      }
+    } catch (e) {
+      console.error("Solution retrieval failed", e);
+      setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
+      setAppState('result');
     }
   };
 
   const handleLanguageChange = async (newLang: Language) => {
-    if (!croppedImage) {
+    if (!solution) {
       setError("Cannot change language without a solved question.");
       return;
     }
@@ -830,77 +775,52 @@ export default function HomeClientPage() {
     const subjectForTranslation = identifiedSubject || subject;
 
     try {
-      let result;
-      const payload = {
-          photoDataUri: croppedImage,
-          language: newLang,
-          subject: subjectForTranslation,
-      };
-
-      if (process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true') {
-        // Mobile App: Call the deployed API endpoint
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!apiBaseUrl) {
-            throw new Error("The application is not configured with a server URL. Translation is not possible.");
+        if (croppedImage) {
+            // It was an image question, re-solve with new language
+            const { solveQuestion } = await import('@/app/actions');
+            const result = await solveQuestion({ photoDataUri: croppedImage, language: newLang, subject: subjectForTranslation });
+            if (result.error) throw new Error(result.error);
+            if (!result?.solution) throw new Error('Failed to translate the solution.');
+            setSolution(result.solution);
+            setFormulas(result.formulas || null);
+        } else {
+            // It was a text question, re-solve with new language
+            const { solveTextQuestion } = await import('@/app/actions');
+            const result = await solveTextQuestion({ questionText: textQuestion, language: newLang, subject: subjectForTranslation });
+            if (result.error) throw new Error(result.error);
+            if (!result?.solution) throw new Error('Failed to translate the solution.');
+            setSolution(result.solution);
+            setFormulas(result.formulas || null);
         }
-
-        const response = await fetch(`${apiBaseUrl}/api/solve`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `API request failed with status ${response.status}`);
-        }
-        result = await response.json();
-      } else {
-        // Web App: Use the direct server action call
-        const { solveQuestion } = await import('@/app/actions');
-        result = await solveQuestion(payload);
-      }
-      
-      if (result.error) {
-          throw new Error(result.error);
-      }
-
-      if (!result?.solution) {
-        setError('Failed to translate the solution.');
-      } else {
-        setSolution(result.solution);
-        setFormulas(result.formulas || null);
-      }
     } catch (e) {
       console.error("Translation failed", e);
-      let errorMessage = 'An unexpected error occurred during translation.';
-      if (e instanceof Error) {
-          errorMessage = e.message;
-      }
-      setError(errorMessage);
+      setError(e instanceof Error ? e.message : 'An unexpected error occurred during translation.');
     } finally {
       setIsTranslating(false);
     }
   };
 
-  const handleScan = () => {
-    if (videoRef.current && canvasRef.current) {
+  const handleCameraCapture = () => {
+    if (videoRef.current) {
       const video = videoRef.current;
-      const canvas = canvasRef.current;
+      const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        // Use PNG for lossless image quality
         const dataUri = canvas.toDataURL('image/png');
         setCapturedImage(dataUri);
-        setCroppedImage(null);
-        setSolution(null);
-        setError(null);
-        setLanguage('en');
         setAppState('cropping');
       }
+    }
+  };
+
+  const handleSolveQuestion = () => {
+    if (textQuestion.trim()) {
+      handleGetSolutionFromText();
+    } else {
+      handleCameraCapture();
     }
   };
 
@@ -908,17 +828,11 @@ export default function HomeClientPage() {
     if (videoRef.current?.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       const [track] = stream.getVideoTracks();
-      if (track) {
-        await track.applyConstraints({
-          advanced: [{ torch: !isFlashOn }],
-        });
-        setIsFlashOn(!isFlashOn);
-      }
+      if (track) { await track.applyConstraints({ advanced: [{ torch: !isFlashOn }] }); setIsFlashOn(!isFlashOn); }
     }
   };
 
   const handleZoomChange = async (value: number[]) => {
-    const newZoom = value[0];
     if (videoRef.current?.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       const [track] = stream.getVideoTracks();
@@ -926,51 +840,26 @@ export default function HomeClientPage() {
       if (capabilities.zoom) {
         const minZoom = capabilities.zoom.min!;
         const maxZoom = capabilities.zoom.max!;
-        const scaledZoom = minZoom + (maxZoom - minZoom) * ((newZoom - 1) / 9);
-        await track.applyConstraints({
-          advanced: [{ zoom: scaledZoom }],
-        });
-        setZoomLevel(newZoom);
+        const newZoom = minZoom + (maxZoom - minZoom) * ((value[0] - 1) / 9);
+        await track.applyConstraints({ advanced: [{ zoom: newZoom }] });
       }
     }
   };
   
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
-    const crop = centerCrop(
-      makeAspectCrop(
-        {
-          unit: 'px', // Use pixels for more reliable cropping
-          width: width * 0.9,
-        },
-        16 / 9,
-        width,
-        height
-      ),
-      width,
-      height
-    );
-    setCrop(crop);
+    setCrop(centerCrop(makeAspectCrop({ unit: 'px', width: width * 0.9 }, 16 / 9, width, height), width, height));
   }
 
   const handleSaveSolution = async () => {
-    if (!user) {
-        toast({ title: "Login Required", description: "Please log in to save your solutions.", variant: "destructive" });
-        return;
-    }
-    if (!croppedImage || !solution || !topic) {
-        toast({ title: "Error", description: "No solution to save.", variant: "destructive" });
-        return;
-    }
-    if (!db) {
-        toast({ title: "Save Failed", description: "Could not connect to the database. Please check your configuration.", variant: "destructive" });
-        return;
-    }
+    if (!user) { toast({ title: "Login Required", description: "Please log in to save your solutions.", variant: "destructive" }); return; }
+    if (!solution || !topic) { toast({ title: "Error", description: "No solution to save.", variant: "destructive" }); return; }
+    if (!db) { toast({ title: "Save Failed", description: "Could not connect to the database.", variant: "destructive" }); return; }
 
     setIsSaving(true);
     try {
         await addDoc(collection(db, 'users', user.uid, 'solutions'), {
-            croppedImage,
+            croppedImage, // This will be null for text questions, which is fine
             topic,
             solution,
             formulas,
@@ -983,37 +872,16 @@ export default function HomeClientPage() {
         toast({
             title: "Success!", 
             description: "Solution saved to your profile.",
-            action: (
-              <ToastAction
-                altText="View Profile"
-                onClick={() => router.push('/profile')}
-                className="bg-gradient-to-r from-purple-500 to-cyan-400 text-primary-foreground border-transparent hover:opacity-90"
-              >
-                View Profile
-              </ToastAction>
-            ),
+            action: <ToastAction altText="View Profile" onClick={() => router.push('/profile')}>View Profile</ToastAction>,
         });
     } catch (e) {
-        console.error("Error saving solution to Firestore: ", e);
-        let title = "Save Failed";
-        let description = "An unexpected error occurred while saving.";
-
+        console.error("Error saving solution: ", e);
+        let description = "An unexpected error occurred.";
         if (e instanceof FirestoreError) {
-            switch(e.code) {
-                case 'permission-denied':
-                    description = "Permission denied. Please check your Firestore security rules.";
-                    break;
-                case 'resource-exhausted':
-                case 'invalid-argument': // Firestore uses invalid-argument for too large documents
-                    description = 'Image file is too large to save. Please try cropping a smaller area.';
-                    break;
-                case 'unauthenticated':
-                    description = 'You must be logged in to save solutions.';
-                    break;
-            }
+            if (e.code === 'permission-denied') description = "Permission denied.";
+            else if (e.code === 'resource-exhausted' || e.code === 'invalid-argument') description = 'Image file is too large to save.';
         }
-        
-        toast({ title, description, variant: "destructive" });
+        toast({ title: "Save Failed", description, variant: "destructive" });
     } finally {
         setIsSaving(false);
     }
@@ -1078,18 +946,19 @@ export default function HomeClientPage() {
               <ScanningScreen
                 hasCameraPermission={hasCameraPermission}
                 videoRef={videoRef}
-                canvasRef={canvasRef}
                 error={error}
                 flashSupported={flashSupported}
                 isFlashOn={isFlashOn}
                 toggleFlash={toggleFlash}
                 zoomSupported={zoomSupported}
                 handleZoomChange={handleZoomChange}
-                handleScan={handleScan}
                 user={user}
                 setAppState={setAppState}
                 handleLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
+                textQuestion={textQuestion}
+                setTextQuestion={setTextQuestion}
+                handleSolveQuestion={handleSolveQuestion}
               />
             )}
             {appState === 'cropping' && (
@@ -1100,7 +969,7 @@ export default function HomeClientPage() {
                 imgRef={imgRef}
                 onImageLoad={onImageLoad}
                 handleRetake={handleRetake}
-                handleGetSolution={handleGetSolution}
+                handleGetSolution={handleGetSolutionFromImage}
               />
             )}
             {appState === 'solving' && (
