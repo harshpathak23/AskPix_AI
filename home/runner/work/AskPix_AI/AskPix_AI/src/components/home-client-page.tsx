@@ -1,13 +1,15 @@
 
 'use client';
 
-import { useState, useRef, useEffect, FC } from 'react';
+import { useState, useRef, useEffect, FC, useCallback } from 'react';
 import Link from 'next/link';
 import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
@@ -126,8 +128,12 @@ interface ScanningScreenProps {
   zoomSupported: boolean;
   handleZoomChange: (value: number[]) => void;
   handleScan: () => void;
+  user: FirebaseUser | null;
+  setAppState: (state: AppState) => void;
+  handleLogout: () => void;
+  isLoggingOut: boolean;
 }
-const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, canvasRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, handleScan }) => (
+const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef, canvasRef, error, flashSupported, isFlashOn, toggleFlash, zoomSupported, handleZoomChange, handleScan, user, setAppState, handleLogout, isLoggingOut }) => (
     <div className="w-full h-full flex flex-col items-center justify-center p-4">
       <div className="w-full h-full overflow-hidden relative flex items-center justify-center bg-black rounded-lg">
         {hasCameraPermission === null && (
@@ -144,13 +150,29 @@ const ScanningScreen: FC<ScanningScreenProps> = ({ hasCameraPermission, videoRef
           <>
             <div className="absolute top-0 left-0 w-full h-1 bg-primary/70 shadow-[0_0_20px_5px_hsl(var(--primary))] animate-scan-line pointer-events-none" />
 
-            <div className="absolute top-4 right-4 z-10 space-y-3">
+            <div className="absolute top-4 left-4 z-10">
               {flashSupported && (
                 <Button onClick={toggleFlash} size="icon" variant={isFlashOn ? 'secondary' : 'ghost'} className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/20 hover:bg-black/40 text-white">
                   <Zap className={cn(isFlashOn && "fill-yellow-300 text-yellow-300")} />
                 </Button>
               )}
             </div>
+
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+                <Button onClick={() => setAppState('welcome')} size="icon">
+                    <Home />
+                </Button>
+                {user ? (
+                    <Button onClick={handleLogout} size="icon" disabled={isLoggingOut}>
+                        {isLoggingOut ? <Loader2 className="animate-spin" /> : <LogOut />}
+                    </Button>
+                ) : (
+                    <Button asChild>
+                        <Link href="/login">Login / Sign Up</Link>
+                    </Button>
+                )}
+            </div>
+
              {zoomSupported && (
               <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-1/2 max-h-64 flex flex-col items-center space-y-2">
                 <ZoomIn className="text-white/80"/>
@@ -544,7 +566,7 @@ export default function HomeClientPage() {
     }
   }, [appState]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     setIsLoggingOut(true);
     // Don't wait for signOut to complete. Navigate immediately for a faster user experience.
     signOut(auth).catch(error => {
@@ -555,9 +577,9 @@ export default function HomeClientPage() {
         setIsLoggingOut(false);
         setAppState('welcome');
     });
-  };
+  }, [toast]);
 
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     // Immediately switch to scanning view to show loading state
     setAppState('scanning');
     
@@ -622,9 +644,9 @@ export default function HomeClientPage() {
             }
         };
     }
-  };
+  }, []);
 
-  const handleStartScanning = async () => {
+  const handleStartScanning = useCallback(async () => {
     // Reset all previous results and states
     setCapturedImage(null);
     setCroppedImage(null);
@@ -637,11 +659,47 @@ export default function HomeClientPage() {
     setIdentifiedSubject(null);
     setSolutionSaved(false);
     await startCamera();
-  };
+  }, [startCamera]);
 
-  const handleRetake = async () => {
+  const handleRetake = useCallback(async () => {
     await handleStartScanning();
-  };
+  }, [handleStartScanning]);
+
+  // This effect handles the Android hardware back button.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) {
+        return;
+    }
+
+    const listener = App.addListener('backButton', () => {
+        switch (appState) {
+            case 'result':
+                setAppState('welcome');
+                break;
+            case 'solving':
+                // Go back to cropping to allow a re-try.
+                setAppState('cropping');
+                break;
+            case 'cropping':
+                handleRetake();
+                break;
+            case 'scanning':
+                setAppState('welcome');
+                break;
+            case 'welcome':
+                // If on the main screen, exit the app.
+                App.exitApp();
+                break;
+            default:
+                App.exitApp();
+        }
+    });
+
+    return () => {
+        listener.remove();
+    };
+}, [appState, handleRetake, setAppState]);
+
 
   function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<string> {
     const canvas = document.createElement('canvas');
@@ -1028,6 +1086,10 @@ export default function HomeClientPage() {
                 zoomSupported={zoomSupported}
                 handleZoomChange={handleZoomChange}
                 handleScan={handleScan}
+                user={user}
+                setAppState={setAppState}
+                handleLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
               />
             )}
             {appState === 'cropping' && (

@@ -1,13 +1,15 @@
 
 'use client';
 
-import { useState, useRef, useEffect, FC } from 'react';
+import { useState, useRef, useEffect, FC, useCallback } from 'react';
 import Link from 'next/link';
 import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
@@ -564,7 +566,7 @@ export default function HomeClientPage() {
     }
   }, [appState]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     setIsLoggingOut(true);
     // Don't wait for signOut to complete. Navigate immediately for a faster user experience.
     signOut(auth).catch(error => {
@@ -575,9 +577,9 @@ export default function HomeClientPage() {
         setIsLoggingOut(false);
         setAppState('welcome');
     });
-  };
+  }, [toast]);
 
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     // Immediately switch to scanning view to show loading state
     setAppState('scanning');
     
@@ -642,9 +644,9 @@ export default function HomeClientPage() {
             }
         };
     }
-  };
+  }, []);
 
-  const handleStartScanning = async () => {
+  const handleStartScanning = useCallback(async () => {
     // Reset all previous results and states
     setCapturedImage(null);
     setCroppedImage(null);
@@ -657,11 +659,47 @@ export default function HomeClientPage() {
     setIdentifiedSubject(null);
     setSolutionSaved(false);
     await startCamera();
-  };
+  }, [startCamera]);
 
-  const handleRetake = async () => {
+  const handleRetake = useCallback(async () => {
     await handleStartScanning();
-  };
+  }, [handleStartScanning]);
+
+  // This effect handles the Android hardware back button.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) {
+        return;
+    }
+
+    const listener = App.addListener('backButton', () => {
+        switch (appState) {
+            case 'result':
+                setAppState('welcome');
+                break;
+            case 'solving':
+                // Go back to cropping to allow a re-try.
+                setAppState('cropping');
+                break;
+            case 'cropping':
+                handleRetake();
+                break;
+            case 'scanning':
+                setAppState('welcome');
+                break;
+            case 'welcome':
+                // If on the main screen, exit the app.
+                App.exitApp();
+                break;
+            default:
+                App.exitApp();
+        }
+    });
+
+    return () => {
+        listener.remove();
+    };
+}, [appState, handleRetake, setAppState]);
+
 
   function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<string> {
     const canvas = document.createElement('canvas');
