@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit",
     "ionic:build": "npm run build:mobile",
     "ionic:serve": "npm run dev",
-    "cap:sync": "npm run build:mobile && npx cap sync android",
+    "cap:sync": "rm -rf .next out && npm run build:mobile && npx cap sync android",
     "android:add": "npx cap add android",
     "postinstall": "patch-package",
     "icon:generate": "npx @capacitor/assets generate"
