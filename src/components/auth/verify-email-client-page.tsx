@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo } from '@/components/icons/logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { MailCheck, Send, Loader2, LogOut, XCircle } from 'lucide-react';
+import { MailCheck, Send, Loader2, LogOut, XCircle, MailWarning } from 'lucide-react';
 
 export default function VerifyEmailClientPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -109,6 +109,13 @@ export default function VerifyEmailClientPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <Alert className="bg-yellow-900/50 border-yellow-500/50 text-white">
+            <MailWarning className="h-4 w-4" />
+            <AlertTitle>Check your Spam Folder!</AlertTitle>
+            <AlertDescription>
+              If you don't see the verification email in your inbox, please check your spam or junk folder.
+            </AlertDescription>
+          </Alert>
           {message && (
             <Alert className="bg-green-900/50 border-green-500/50 text-white">
               <Send className="h-4 w-4" />
@@ -124,7 +131,7 @@ export default function VerifyEmailClientPage() {
             </Alert>
           )}
           <p className="text-center text-slate-300">
-            Please click the link in the email to activate your account. If you don&apos;t see it, be sure to check your spam folder.
+            Please click the link in the email to activate your account.
           </p>
           <Button onClick={checkVerificationStatus} className="w-full text-base py-6" disabled={loading}>
             {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <MailCheck className="mr-2 h-5 w-5" />}

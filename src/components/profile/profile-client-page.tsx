@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, LogOut, Loader2, Home, FileWarning, Trash2 } from "lucide-react";
+import { Eye, LogOut, Loader2, Home, FileWarning, Trash2, NotebookText } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
@@ -39,7 +39,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SavedSolution {
     id: string;
-    croppedImage: string;
+    croppedImage: string | null;
     topic: string;
     solution: string;
     formulas?: string | null;
@@ -62,7 +62,6 @@ export default function ProfileClientPage() {
 
     const handleLogout = useCallback(() => {
         setIsLoggingOut(true);
-        // Navigate immediately for a faster experience. The auth listener will handle the state.
         router.push('/login');
         signOut(auth).catch(error => {
             console.error("Error signing out: ", error);
@@ -73,13 +72,11 @@ export default function ProfileClientPage() {
     }, [router]);
 
     useEffect(() => {
-        // If auth is done loading and there's no user, redirect.
         if (!loading && !user) {
             router.push('/login');
             return;
         }
 
-        // If we have a user, fetch their solutions.
         if (user) {
             if (!db) {
                 setError("Firebase is not configured correctly. Saved solutions cannot be loaded.");
@@ -109,7 +106,6 @@ export default function ProfileClientPage() {
                  setSolutionsLoading(false);
             });
             
-            // Cleanup function for the snapshot listener
             return () => unsubscribeSnapshot();
         }
     }, [user, loading, router]);
@@ -134,7 +130,7 @@ export default function ProfileClientPage() {
                 title: "Solution Deleted",
                 description: `"${solutionToDelete.topic}" has been removed.`,
             });
-            setSolutionToDelete(null); // Close the dialog on success
+            setSolutionToDelete(null);
         } catch (e) {
             console.error("Error deleting solution: ", e);
             toast({
@@ -181,7 +177,7 @@ export default function ProfileClientPage() {
 
                     <div>
                         <h1 className="text-3xl font-bold text-slate-100">{user?.displayName || "My Profile"}</h1>
-                        <p className="text-slate-400 mt-1">{user?.email}</p>
+                        <p className="text-slate-400 mt-1">{user?.email || user?.phoneNumber}</p>
                     </div>
                 </>
             )}
@@ -212,13 +208,19 @@ export default function ProfileClientPage() {
                         {solutions.map((file) => (
                             <li key={file.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 rounded-lg bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border border-purple-900/50 hover:brightness-110 transition-all gap-4">
                                 <div className="flex items-center gap-4 flex-grow">
-                                    <Image
-                                        src={file.croppedImage}
-                                        alt="Question thumbnail"
-                                        width={80}
-                                        height={45}
-                                        className="rounded-md object-cover aspect-video bg-slate-700"
-                                    />
+                                    <div className="w-[80px] h-[45px] rounded-md bg-slate-700 flex items-center justify-center shrink-0">
+                                        {file.croppedImage ? (
+                                            <Image
+                                                src={file.croppedImage}
+                                                alt="Question thumbnail"
+                                                width={80}
+                                                height={45}
+                                                className="rounded-md object-cover aspect-video"
+                                            />
+                                        ) : (
+                                            <NotebookText className="w-6 h-6 text-slate-400" />
+                                        )}
+                                    </div>
                                     <div className="flex-grow">
                                         <p className="font-semibold text-slate-100">{file.topic}</p>
                                         <p className="text-sm text-slate-400">{file.identifiedSubject} &middot; Saved on {file.createdAt.toDate().toLocaleDateString()}</p>
@@ -285,16 +287,16 @@ export default function ProfileClientPage() {
                 </DialogHeader>
                 <ScrollArea className="flex-grow">
                     <div className="pr-4 space-y-4">
-                        <div className="relative w-full aspect-video rounded-md overflow-hidden bg-slate-800">
-                            {solutionToView?.croppedImage && (
+                        {solutionToView?.croppedImage && (
+                            <div className="relative w-full aspect-video rounded-md overflow-hidden bg-slate-800">
                                 <Image
                                     src={solutionToView.croppedImage}
                                     alt="Saved question"
                                     layout="fill"
                                     className="object-contain"
                                 />
-                            )}
-                        </div>
+                            </div>
+                        )}
                         <div>
                             <h3 className="font-bold text-lg mb-2 text-slate-100">Solution</h3>
                             <MathRenderer text={solutionToView?.solution ?? ''} />
