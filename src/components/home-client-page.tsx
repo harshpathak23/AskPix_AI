@@ -665,7 +665,7 @@ export default function HomeClientPage() {
         }
     });
     return () => { listener.remove(); };
-  }, [appState, handleRetake, setAppState]);
+  }, [appState, handleRetake]);
 
   function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<string> {
     const canvas = document.createElement('canvas');
