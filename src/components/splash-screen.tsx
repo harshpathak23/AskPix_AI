@@ -1,4 +1,3 @@
-
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -22,12 +21,11 @@ export const SplashScreen = ({ isVisible }: { isVisible: boolean }) => {
         )}
       >
         <Image
-          src="/logo.png"
-          alt="AskPix AI Logo"
+          src="/images/icon.png"
+          alt="AskPix AI App Icon"
           className="object-contain"
           fill
           unoptimized
-          data-ai-hint="logo"
         />
       </div>
       <p
