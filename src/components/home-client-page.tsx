@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect, FC, useCallback } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home, Sparkles } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home, Sparkles, Youtube } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -285,6 +285,7 @@ interface SolvingScreenProps {
 const solvingSteps = [
   { text: 'Analyzing content...', icon: <ScanLine className="h-5 w-5 text-slate-400" /> },
   { text: 'Identifying academic subject...', icon: <BrainCircuit className="h-5 w-5 text-slate-400" /> },
+  { text: 'Finding relevant videos...', icon: <Youtube className="h-5 w-5 text-slate-400" /> },
   { text: 'Formulating step-by-step solution...', icon: <Bot className="h-5 w-5 text-slate-400" /> },
   { text: 'Formatting final answer...', icon: <NotebookText className="h-5 w-5 text-slate-400" /> },
 ];
@@ -407,13 +408,14 @@ interface ResultScreenProps {
   solution: string | null;
   topic: string | null;
   formulas: string | null;
+  youtubeVideoId: string | null;
   handleStartScanning: () => void;
   handleSaveSolution: () => void;
   isSaving: boolean;
   solutionSaved: boolean;
   router: AppRouterInstance;
 }
-const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
+const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, youtubeVideoId, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         {croppedImage && (
             <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
@@ -467,6 +469,27 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                             </CardContent>
                         </Card>
                     )}
+                    {youtubeVideoId && (
+                      <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
+                          <CardHeader>
+                              <CardTitle className="flex items-center gap-2 text-slate-100">
+                                  <Youtube />
+                                  Related Video Lesson
+                              </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                              <div className="aspect-video w-full">
+                                  <iframe
+                                      className="w-full h-full rounded-md"
+                                      src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+                                      title="YouTube video player"
+                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                      allowFullScreen
+                                  ></iframe>
+                              </div>
+                          </CardContent>
+                      </Card>
+                    )}
                 </div>
             ) : !error ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8 rounded-xl bg-slate-800 border border-slate-700 shadow-sm min-h-[200px]">
@@ -495,6 +518,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                         solution,
                         topic,
                         formulas,
+                        youtubeVideoId,
                         subject,
                         identifiedSubject: identifiedSubject || subject,
                         language,
@@ -518,6 +542,7 @@ export default function HomeClientPage() {
   const [solution, setSolution] = useState<string | null>(null);
   const [topic, setTopic] = useState<string | null>(null);
   const [formulas, setFormulas] = useState<string | null>(null);
+  const [youtubeVideoId, setYoutubeVideoId] = useState<string | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [identifiedSubject, setIdentifiedSubject] = useState<Subject | null>(null);
   const [language, setLanguage] = useState<Language>('en');
@@ -559,6 +584,7 @@ export default function HomeClientPage() {
                 setSolution(pendingSolution.solution);
                 setTopic(pendingSolution.topic);
                 setFormulas(pendingSolution.formulas || null);
+                setYoutubeVideoId(pendingSolution.youtubeVideoId || null);
                 setSubject(pendingSolution.subject || 'General');
                 setIdentifiedSubject(pendingSolution.identifiedSubject || null);
                 setLanguage(pendingSolution.language || 'en');
@@ -635,6 +661,7 @@ export default function HomeClientPage() {
     setSolution(null);
     setTopic(null);
     setFormulas(null);
+    setYoutubeVideoId(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -682,6 +709,27 @@ export default function HomeClientPage() {
     return Promise.resolve(canvas.toDataURL('image/jpeg', 0.9));
   }
 
+  const handleApiResponse = (result: any) => {
+    if (result.error) throw new Error(result.error);
+    if (!result?.solution || !result?.topic || !result.identifiedSubject) {
+      setError('Could not generate a solution. Please try again.');
+      setAppState('cropping');
+    } else {
+      setTopic(result.topic || null);
+      setSolution(result.solution);
+      setFormulas(result.formulas || null);
+      setYoutubeVideoId(result.youtubeVideoId || null);
+      setIdentifiedSubject(result.identifiedSubject || subject);
+      setAppState('result');
+    }
+  };
+
+  const handleApiError = (e: any) => {
+    console.error("Solution retrieval failed", e);
+    setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
+    setAppState('result');
+  };
+
   const handleGetSolutionFromImage = async () => {
     if (!crop || !imgRef.current || !crop.width || !crop.height) {
       setError("Please select an area to crop before getting a solution.");
@@ -711,22 +759,9 @@ export default function HomeClientPage() {
           throw new Error(errorData.error || `API Error`); 
       }
       const result = await response.json();
-
-      if (result.error) throw new Error(result.error);
-      if (!result?.solution || !result?.topic || !result.identifiedSubject) {
-        setError('Could not generate a solution. Please try again.');
-        setAppState('cropping');
-      } else {
-        setTopic(result.topic || null);
-        setSolution(result.solution);
-        setFormulas(result.formulas || null);
-        setIdentifiedSubject(result.identifiedSubject || subject);
-        setAppState('result');
-      }
+      handleApiResponse(result);
     } catch (e) {
-      console.error("Solution retrieval failed", e);
-      setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
-      setAppState('result');
+      handleApiError(e);
     }
   };
 
@@ -753,22 +788,9 @@ export default function HomeClientPage() {
           throw new Error(errorData.error || `API Error`); 
       }
       const result = await response.json();
-
-      if (result.error) throw new Error(result.error);
-      if (!result?.solution || !result?.topic || !result.identifiedSubject) {
-        setError('Could not generate a solution. Please try again.');
-        setAppState('scanning');
-      } else {
-        setTopic(result.topic || null);
-        setSolution(result.solution);
-        setFormulas(result.formulas || null);
-        setIdentifiedSubject(result.identifiedSubject || subject);
-        setAppState('result');
-      }
+      handleApiResponse(result);
     } catch (e) {
-      console.error("Solution retrieval failed", e);
-      setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
-      setAppState('result');
+      handleApiError(e);
     }
   };
 
@@ -813,6 +835,7 @@ export default function HomeClientPage() {
 
       setSolution(result.solution);
       setFormulas(result.formulas || null);
+      setYoutubeVideoId(result.youtubeVideoId || null);
 
     } catch (e) {
       console.error("Translation failed", e);
@@ -886,6 +909,7 @@ export default function HomeClientPage() {
             topic,
             solution,
             formulas,
+            youtubeVideoId,
             subject,
             identifiedSubject: identifiedSubject || subject,
             language,
@@ -1013,6 +1037,7 @@ export default function HomeClientPage() {
                 solution={solution}
                 topic={topic}
                 formulas={formulas}
+                youtubeVideoId={youtubeVideoId}
                 handleStartScanning={handleStartScanning}
                 handleSaveSolution={handleSaveSolution}
                 isSaving={isSaving}

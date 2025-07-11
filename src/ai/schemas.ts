@@ -39,5 +39,9 @@ export const SolveQuestionOutputSchema = z.object({
     .string()
     .optional()
     .describe('Any relevant formulas used in the solution, formatted with KaTeX.'),
+  youtubeVideoId: z
+    .string()
+    .optional()
+    .describe("The video ID of a relevant YouTube tutorial for the identified topic."),
 });
 export type SolveQuestionOutput = z.infer<typeof SolveQuestionOutputSchema>;
