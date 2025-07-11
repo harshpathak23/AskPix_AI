@@ -34,9 +34,9 @@ jobs:
       run: |
         # Gradle looks for the debug keystore in a default location.
         # We need to create the directory and the keystore file there explicitly.
-        mkdir -p $HOME/.config/.android
+        mkdir -p $HOME/.android
         keytool -genkey -v \
-          -keystore $HOME/.config/.android/debug.keystore \
+          -keystore $HOME/.android/debug.keystore \
           -alias androiddebugkey \
           -storepass android \
           -keypass android \
@@ -55,6 +55,7 @@ jobs:
         # This secret must be set in your GitHub repository settings.
         # It should be the full URL of your deployed Vercel application.
         NEXT_PUBLIC_API_BASE_URL: ${{ secrets.VERCEL_URL }}
+        YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       run: |
         if [ -z "$NEXT_PUBLIC_API_BASE_URL" ]; then
           echo "Error: VERCEL_URL secret is not set."
