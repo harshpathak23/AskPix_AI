@@ -155,6 +155,11 @@ export default function LoginClientPage() {
                   </FormItem>
                 )}
               />
+               <div className="text-right">
+                <Link href="/forgot-password" className="text-sm text-primary underline-offset-4 hover:underline">
+                  Forgot Password?
+                </Link>
+              </div>
               <Button type="submit" className="w-full" disabled={isSigningIn}>
                 {isSigningIn && <Loader2 className="animate-spin" />}
                 Sign In
@@ -171,7 +176,7 @@ export default function LoginClientPage() {
             </div>
           </div>
           
-          <Button onClick={handleGoogleSignIn} className="w-full" variant="secondary" disabled={isGoogleSigningIn}>
+          <Button onClick={handleGoogleSignIn} className="w-full" disabled={isGoogleSigningIn}>
             {isGoogleSigningIn ? <Loader2 className="animate-spin" /> : <GoogleIcon />}
             Sign In with Google
           </Button>
