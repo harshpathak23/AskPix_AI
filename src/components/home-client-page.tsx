@@ -711,15 +711,17 @@ export default function HomeClientPage() {
 
   const handleApiResponse = (result: any) => {
     if (result.error) throw new Error(result.error);
+    
+    setTopic(result.topic || null);
+    setSolution(result.solution || null);
+    setFormulas(result.formulas || null);
+    setYoutubeVideoId(result.youtubeVideoId || null);
+    setIdentifiedSubject(result.identifiedSubject || subject);
+    
     if (!result?.solution || !result?.topic || !result.identifiedSubject) {
       setError('Could not generate a solution. Please try again.');
-      setAppState('cropping');
+      setAppState('result');
     } else {
-      setTopic(result.topic || null);
-      setSolution(result.solution);
-      setFormulas(result.formulas || null);
-      setYoutubeVideoId(result.youtubeVideoId || null);
-      setIdentifiedSubject(result.identifiedSubject || subject);
       setAppState('result');
     }
   };
