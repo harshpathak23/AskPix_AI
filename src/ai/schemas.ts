@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview This file defines the Zod schemas for the AI flows.
  * Schemas provide type safety and validation for the inputs and outputs of AI functions.
@@ -43,5 +44,9 @@ export const SolveQuestionOutputSchema = z.object({
     .string()
     .optional()
     .describe("The video ID of a relevant YouTube tutorial for the identified topic."),
+  youtubeVideoThumbnail: z
+    .string()
+    .optional()
+    .describe("The URL of the YouTube video's thumbnail image."),
 });
 export type SolveQuestionOutput = z.infer<typeof SolveQuestionOutputSchema>;

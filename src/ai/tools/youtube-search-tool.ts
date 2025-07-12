@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Defines a Genkit tool for searching YouTube for educational videos.
  */
@@ -23,6 +24,7 @@ export const searchYouTube = ai.defineTool(
     }),
     outputSchema: z.object({
       videoId: z.string().optional().describe('The ID of the most relevant video found.'),
+      videoThumbnail: z.string().optional().describe('The URL of the video thumbnail.'),
     }),
   },
   async ({ query, language, regionCode }) => {
@@ -36,7 +38,7 @@ export const searchYouTube = ai.defineTool(
       const refinedQuery = `${query} tutorial explanation class`;
 
       const searchResponse = await youtube.search.list({
-        part: ['id'],
+        part: ['id', 'snippet'],
         q: refinedQuery,
         type: ['video'],
         maxResults: 5, // Get a few results to check for embeddable ones
@@ -46,24 +48,32 @@ export const searchYouTube = ai.defineTool(
         videoEmbeddable: 'true',
       });
 
-      const videoIds = searchResponse.data.items?.map(item => item.id?.videoId).filter((id): id is string => !!id);
+      const videos = searchResponse.data.items?.map(item => ({
+        id: item.id?.videoId,
+        thumbnail: item.snippet?.thumbnails?.high?.url,
+      })).filter((video): video is { id: string, thumbnail: string } => !!video.id && !!video.thumbnail);
 
-      if (!videoIds || videoIds.length === 0) {
+      if (!videos || videos.length === 0) {
         return {};
       }
       
+      const videoIds = videos.map(v => v.id);
+
       // Now, check the status of these videos to find one that is truly available.
       const videoDetailsResponse = await youtube.videos.list({
         part: ['status'],
         id: videoIds,
       });
 
-      const embeddableVideo = videoDetailsResponse.data.items?.find(
+      const embeddableVideoId = videoDetailsResponse.data.items?.find(
         (video) => video.status?.embeddable === true && video.status?.privacyStatus === 'public'
-      );
-
-      if (embeddableVideo?.id) {
-        return { videoId: embeddableVideo.id };
+      )?.id;
+      
+      if (embeddableVideoId) {
+        const video = videos.find(v => v.id === embeddableVideoId);
+        if (video) {
+            return { videoId: video.id, videoThumbnail: video.thumbnail };
+        }
       }
 
       // If no suitable video is found after checking details, return empty.

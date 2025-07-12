@@ -3,13 +3,14 @@
 
 import { useState, useRef, useEffect, FC, useCallback } from 'react';
 import Link from 'next/link';
-import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home, Sparkles, Youtube } from 'lucide-react';
+import { Camera, RefreshCw, ScanLine, XCircle, Bot, Atom, FunctionSquare, TestTube, Dna, Zap, ZoomIn, BrainCircuit, NotebookText, Download, Loader2, LogOut, User, Check, Home, Sparkles, Youtube, PlayCircle } from 'lucide-react';
 import Image from 'next/image';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { signOut } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Logo } from '@/components/icons/logo';
@@ -409,26 +410,25 @@ interface ResultScreenProps {
   topic: string | null;
   formulas: string | null;
   youtubeVideoId: string | null;
+  youtubeVideoThumbnail: string | null;
   handleStartScanning: () => void;
   handleSaveSolution: () => void;
   isSaving: boolean;
   solutionSaved: boolean;
   router: AppRouterInstance;
 }
-const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, youtubeVideoId, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => {
-    const [youtubeUrl, setYoutubeUrl] = useState('');
+const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, youtubeVideoId, youtubeVideoThumbnail, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => {
 
-    useEffect(() => {
-        if (youtubeVideoId) {
-            // For both web and Capacitor, we must use the Vercel URL as the trusted origin.
-            // process.env.NEXT_PUBLIC_API_BASE_URL is set during the build process.
-            const origin = process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
-            const url = new URL(`https://www.youtube.com/embed/${youtubeVideoId}`);
-            url.searchParams.set('enablejsapi', '1');
-            url.searchParams.set('origin', origin);
-            setYoutubeUrl(url.toString());
+    const openVideo = async () => {
+        if (!youtubeVideoId) return;
+        const url = `https://www.youtube.com/watch?v=${youtubeVideoId}`;
+        
+        if (Capacitor.isNativePlatform()) {
+            await Browser.open({ url });
+        } else {
+            window.open(url, '_blank', 'noopener,noreferrer');
         }
-    }, [youtubeVideoId]);
+    };
 
     return (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
@@ -484,7 +484,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                             </CardContent>
                         </Card>
                     )}
-                    {youtubeVideoId && youtubeUrl && (
+                    {youtubeVideoId && youtubeVideoThumbnail && (
                       <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
                           <CardHeader>
                               <CardTitle className="flex items-center gap-2 text-slate-100">
@@ -493,14 +493,19 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                               </CardTitle>
                           </CardHeader>
                           <CardContent>
-                              <div className="aspect-video w-full">
-                                  <iframe
-                                      className="w-full h-full rounded-md"
-                                      src={youtubeUrl}
-                                      title="YouTube video player"
-                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                      allowFullScreen
-                                  ></iframe>
+                              <div
+                                onClick={openVideo}
+                                className="aspect-video w-full rounded-md overflow-hidden relative group cursor-pointer"
+                              >
+                                <Image 
+                                    src={youtubeVideoThumbnail} 
+                                    alt="Video thumbnail"
+                                    fill
+                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                    <PlayCircle className="h-16 w-16 text-white/80 group-hover:text-white drop-shadow-lg" />
+                                </div>
                               </div>
                           </CardContent>
                       </Card>
@@ -534,6 +539,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                         topic,
                         formulas,
                         youtubeVideoId,
+                        youtubeVideoThumbnail,
                         subject,
                         identifiedSubject: identifiedSubject || subject,
                         language,
@@ -559,6 +565,7 @@ export default function HomeClientPage() {
   const [topic, setTopic] = useState<string | null>(null);
   const [formulas, setFormulas] = useState<string | null>(null);
   const [youtubeVideoId, setYoutubeVideoId] = useState<string | null>(null);
+  const [youtubeVideoThumbnail, setYoutubeVideoThumbnail] = useState<string | null>(null);
   const [subject, setSubject] = useState<Subject>('Mathematics');
   const [identifiedSubject, setIdentifiedSubject] = useState<Subject | null>(null);
   const [language, setLanguage] = useState<Language>('en');
@@ -601,6 +608,7 @@ export default function HomeClientPage() {
                 setTopic(pendingSolution.topic);
                 setFormulas(pendingSolution.formulas || null);
                 setYoutubeVideoId(pendingSolution.youtubeVideoId || null);
+                setYoutubeVideoThumbnail(pendingSolution.youtubeVideoThumbnail || null);
                 setSubject(pendingSolution.subject || 'General');
                 setIdentifiedSubject(pendingSolution.identifiedSubject || null);
                 setLanguage(pendingSolution.language || 'en');
@@ -678,6 +686,7 @@ export default function HomeClientPage() {
     setTopic(null);
     setFormulas(null);
     setYoutubeVideoId(null);
+    setYoutubeVideoThumbnail(null);
     setError(null);
     setLanguage('en');
     setCrop(undefined);
@@ -732,6 +741,7 @@ export default function HomeClientPage() {
     setSolution(result.solution || null);
     setFormulas(result.formulas || null);
     setYoutubeVideoId(result.youtubeVideoId || null);
+    setYoutubeVideoThumbnail(result.youtubeVideoThumbnail || null);
     setIdentifiedSubject(result.identifiedSubject || subject);
     
     if (!result?.solution || !result?.topic || !result.identifiedSubject) {
@@ -824,6 +834,7 @@ export default function HomeClientPage() {
       setSolution(result.solution);
       setFormulas(result.formulas || null);
       setYoutubeVideoId(result.youtubeVideoId || null);
+      setYoutubeVideoThumbnail(result.youtubeVideoThumbnail || null);
 
     } catch (e) {
       console.error("Translation failed", e);
@@ -898,6 +909,7 @@ export default function HomeClientPage() {
             solution,
             formulas,
             youtubeVideoId,
+            youtubeVideoThumbnail,
             subject,
             identifiedSubject: identifiedSubject || subject,
             language,
@@ -1026,6 +1038,7 @@ export default function HomeClientPage() {
                 topic={topic}
                 formulas={formulas}
                 youtubeVideoId={youtubeVideoId}
+                youtubeVideoThumbnail={youtubeVideoThumbnail}
                 handleStartScanning={handleStartScanning}
                 handleSaveSolution={handleSaveSolution}
                 isSaving={isSaving}
