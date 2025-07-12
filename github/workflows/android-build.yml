@@ -52,21 +52,17 @@ jobs:
 
     - name: Build and Sync Capacitor App
       env:
-        # These secrets must be set in your GitHub repository settings.
-        # They provide the necessary URLs and API keys for the build.
+        # This secret must be set in your GitHub repository settings.
+        # It provides the base URL for the AI server.
         NEXT_PUBLIC_API_BASE_URL: ${{ secrets.VERCEL_URL }}
-        YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       run: |
         if [ -z "$NEXT_PUBLIC_API_BASE_URL" ]; then
           echo "Error: VERCEL_URL secret is not set."
           echo "Please add it to your repository secrets in GitHub Settings."
           exit 1
         fi
-        if [ -z "$YOUTUBE_API_KEY" ]; then
-          echo "Warning: YOUTUBE_API_KEY secret is not set."
-          echo "The YouTube video feature may not work in the built app."
-        fi
         # The cap:sync script runs the static build and syncs the native project.
+        # It MUST be run with the environment variables set.
         npm run cap:sync
 
     - name: Build Android App with stacktrace
