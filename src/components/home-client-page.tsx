@@ -500,7 +500,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                                 <Image 
                                     src={youtubeVideoThumbnail} 
                                     alt="Video thumbnail"
-                                    fill
+                                    layout="fill"
                                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
