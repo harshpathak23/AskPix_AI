@@ -763,10 +763,14 @@ export default function HomeClientPage() {
   
   const callApi = async (endpoint: string, payload: object) => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    if (!apiBaseUrl) {
-      throw new Error("App is not configured with a server URL. Please set VERCEL_URL in your GitHub repository secrets and rebuild the app.");
+    // For mobile builds, NEXT_PUBLIC_API_BASE_URL is required.
+    // For web, we can use a relative path.
+    if (Capacitor.isNativePlatform() && !apiBaseUrl) {
+      throw new Error("The app is not configured with a server URL. Please set the VERCEL_URL secret in your GitHub repository and rebuild the app.");
     }
-    const response = await fetch(`${apiBaseUrl}${endpoint}`, {
+    const fullUrl = Capacitor.isNativePlatform() ? `${apiBaseUrl}${endpoint}` : endpoint;
+
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
