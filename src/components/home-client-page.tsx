@@ -415,7 +415,23 @@ interface ResultScreenProps {
   solutionSaved: boolean;
   router: AppRouterInstance;
 }
-const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, youtubeVideoId, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => (
+const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSubject, subject, error, language, isTranslating, handleLanguageChange, solution, topic, formulas, youtubeVideoId, handleStartScanning, handleSaveSolution, isSaving, solutionSaved, router }) => {
+    const [youtubeUrl, setYoutubeUrl] = useState('');
+
+    useEffect(() => {
+        if (youtubeVideoId) {
+            const origin = window.location.origin;
+            // For Capacitor apps, the origin might be `capacitor://localhost` or similar,
+            // which YouTube doesn't allow. We use the live site URL as the origin instead.
+            // For web, it's just the current origin.
+            const effectiveOrigin = process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true'
+                ? (process.env.NEXT_PUBLIC_API_BASE_URL || origin)
+                : origin;
+            setYoutubeUrl(`https://www.youtube.com/embed/${youtubeVideoId}?enablejsapi=1&origin=${encodeURIComponent(effectiveOrigin)}`);
+        }
+    }, [youtubeVideoId]);
+
+    return (
     <div className="w-full space-y-6 animate-in fade-in-50 duration-500 p-4 text-slate-200">
         {croppedImage && (
             <div className="w-full aspect-video bg-black/20 border-slate-700/50 border rounded-lg overflow-hidden relative flex items-center justify-center">
@@ -469,7 +485,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                             </CardContent>
                         </Card>
                     )}
-                    {youtubeVideoId && (
+                    {youtubeVideoId && youtubeUrl && (
                       <Card className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-200 border-purple-900/50">
                           <CardHeader>
                               <CardTitle className="flex items-center gap-2 text-slate-100">
@@ -481,9 +497,9 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
                               <div className="aspect-video w-full">
                                   <iframe
                                       className="w-full h-full rounded-md"
-                                      src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+                                      src={youtubeUrl}
                                       title="YouTube video player"
-                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                       allowFullScreen
                                   ></iframe>
                               </div>
@@ -535,6 +551,7 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
         </div>
     </div>
 );
+}
 
 export default function HomeClientPage() {
   const [showSplash, setShowSplash] = useState(true);
@@ -733,7 +750,7 @@ export default function HomeClientPage() {
   const callApi = async (endpoint: string, payload: object) => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     if (!apiBaseUrl) {
-      throw new Error("API URL is not configured. Please set VERCEL_URL in your environment.");
+      throw new Error("App is not configured with a server URL. Please set VERCEL_URL in your GitHub repository secrets and rebuild the app.");
     }
     const response = await fetch(`${apiBaseUrl}${endpoint}`, {
       method: 'POST',
