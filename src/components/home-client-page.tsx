@@ -420,13 +420,13 @@ const ResultScreen: FC<ResultScreenProps> = ({ user, croppedImage, identifiedSub
 
     useEffect(() => {
         if (youtubeVideoId) {
-            // For Capacitor apps, the origin is capacitor://localhost, which is not a valid
-            // origin for YouTube's allowlist. The API_BASE_URL (our Vercel URL) is a valid, whitelisted origin.
-            // For web deployments, the origin is the actual website URL.
-            const effectiveOrigin = process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true'
-                ? (process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin)
-                : window.location.origin;
-            setYoutubeUrl(`https://www.youtube.com/embed/${youtubeVideoId}?enablejsapi=1&origin=${encodeURIComponent(effectiveOrigin)}`);
+            // For both web and Capacitor, we must use the Vercel URL as the trusted origin.
+            // process.env.NEXT_PUBLIC_API_BASE_URL is set during the build process.
+            const origin = process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
+            const url = new URL(`https://www.youtube.com/embed/${youtubeVideoId}`);
+            url.searchParams.set('enablejsapi', '1');
+            url.searchParams.set('origin', origin);
+            setYoutubeUrl(url.toString());
         }
     }, [youtubeVideoId]);
 
