@@ -17,7 +17,7 @@ export const searchYouTube = ai.defineTool(
     name: 'searchYouTube',
     description: 'Searches for a relevant educational YouTube video based on a query, language, and region.',
     inputSchema: z.object({
-      query: z.string().describe('The search query for the video.'),
+      query: z.string().describe('The search query for the video (e.g., "how to solve quadratic equations tutorial").'),
       language: z.enum(['en', 'hi']).describe('The language for the search results.'),
       regionCode: z.string().length(2).describe('The ISO 3166-1 alpha-2 country code (e.g., IN for India).'),
     }),
@@ -32,14 +32,18 @@ export const searchYouTube = ai.defineTool(
         return {};
       }
 
+      // Refine the query to be more specific for educational content.
+      const refinedQuery = `${query} tutorial explanation class`;
+
       const response = await youtube.search.list({
         part: ['id'],
-        q: query,
+        q: refinedQuery,
         type: ['video'],
-        maxResults: 1,
+        maxResults: 5, // Get a few results to check for embeddable ones
         relevanceLanguage: language,
         regionCode: regionCode,
         videoCategoryId: '27', // Category for Education
+        videoEmbeddable: 'true', // CRITICAL: Only search for videos that can be embedded.
       });
 
       const videoId = response.data.items?.[0]?.id?.videoId;
