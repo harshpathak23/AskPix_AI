@@ -45,45 +45,45 @@ export const searchYouTube = ai.defineTool(
         relevanceLanguage: language,
         regionCode: regionCode,
         videoCategoryId: '27', // Category for Education
-        videoEmbeddable: 'true',
       });
 
-      const videos = searchResponse.data.items?.map(item => ({
+      if (!searchResponse.data.items || searchResponse.data.items.length === 0) {
+        console.log(`YouTube search returned no results for query: "${refinedQuery}"`);
+        return {};
+      }
+
+      const videos = searchResponse.data.items.map(item => ({
         id: item.id?.videoId,
         thumbnail: item.snippet?.thumbnails?.high?.url,
       })).filter((video): video is { id: string, thumbnail: string } => !!video.id && !!video.thumbnail);
-
+      
       if (!videos || videos.length === 0) {
         return {};
       }
       
+      // Check the status of the videos to ensure they are public and embeddable.
       const videoIds = videos.map(v => v.id);
-
-      // Now, check the status of these videos to find one that is truly available.
       const videoDetailsResponse = await youtube.videos.list({
         part: ['status'],
         id: videoIds,
       });
 
-      const embeddableVideoId = videoDetailsResponse.data.items?.find(
-        (video) => video.status?.embeddable === true && video.status?.privacyStatus === 'public'
-      )?.id;
-      
-      if (embeddableVideoId) {
-        const video = videos.find(v => v.id === embeddableVideoId);
-        if (video) {
-            return { videoId: video.id, videoThumbnail: video.thumbnail };
-        }
+      const embeddableVideo = videoDetailsResponse.data.items?.find(item => item.status?.embeddable === true && item.status?.privacyStatus === 'public');
+
+      if (embeddableVideo?.id) {
+          const matchingVideo = videos.find(v => v.id === embeddableVideo.id);
+          if (matchingVideo) {
+              return { videoId: matchingVideo.id, videoThumbnail: matchingVideo.thumbnail };
+          }
       }
 
-      // If no suitable video is found after checking details, return empty.
+      // If no suitable video is found, return empty.
       return {};
-    } catch (error) {
-      console.error('Error searching YouTube:', error);
-      // Don't throw an error, just return no videoId
+
+    } catch (error: any) {
+      console.error('Error searching YouTube:', error.message);
+      // Don't throw an error to the user, just return no videoId
       return {};
     }
   }
 );
-
-    
