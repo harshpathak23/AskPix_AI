@@ -8,30 +8,51 @@ The web version of this application, which includes the AI server, can be deploy
 
 1.  **Connect to GitHub:** Push your project to a GitHub repository.
 2.  **Import to Vercel:** Go to your [Vercel dashboard](https://vercel.com/new) and import the project from your GitHub repository. Vercel will automatically detect it as a Next.js app.
-3.  **Add Environment Variables:** Before deploying, you must add two environment variables for your AI and YouTube API keys.
+3.  **Add Environment Variables:** Before deploying, you must add your API keys.
     *   In your Vercel project settings, go to "Environment Variables".
-    *   Add a variable named `GENAI_API_KEY` and paste your Google AI API key as the value.
-    *   Add another variable named `YOUTUBE_API_KEY` and paste your restricted YouTube Data API v3 key as the value.
+    *   Add a variable named `GENAI_API_KEY` and paste your Google AI API key.
+    *   Add another variable named `YOUTUBE_API_KEY` and paste your restricted YouTube Data API v3 key.
 4.  **Deploy:** Click the "Deploy" button. Vercel will build and deploy your application.
-5.  **Get URL:** Once deployed, Vercel will provide you with a public URL (e.g., `https://your-project-name.vercel.app`). You will need this for the Android app build.
+
+---
 
 ## Building the Android App (via GitHub)
 
-The Android app can be built automatically using GitHub Actions. This is the recommended method.
+The Android app is built using a GitHub Action. For the app to work, it **must** know the URL of your deployed Vercel server. You will configure this using a GitHub Secret.
 
-1.  **Deploy to Vercel:** Follow the steps above to deploy the web app and get your public URL.
-2.  **Add GitHub Secret:** You must provide your Vercel URL to the GitHub build process.
-    *   In your GitHub repository, go to "Settings" > "Secrets and variables" > "Actions".
-    *   Click "New repository secret".
-    *   Create a secret named `VERCEL_URL` and paste your full Vercel deployment URL as the value.
-3.  **Run the Build Workflow:**
-    *   Go to the "Actions" tab in your GitHub repository.
-    *   In the left sidebar, click on "Build Android APK for Testing".
-    *   Click the "Run workflow" button on the right, and then click the green "Run workflow" button in the dropdown.
-4.  **Download the APK:**
-    *   The build will take a few minutes. Once it's complete, click on the completed workflow run.
-    *   Under the "Artifacts" section, you will see `app-debug`. Click it to download the `app-debug.apk` file.
-    *   You can then transfer and install this APK file on your Android device.
+### Step 1: Get Your Vercel URL
+
+After you deploy your project to Vercel, you will be given a public URL. It will look something like this: `https://your-project-name.vercel.app`. **Copy this complete URL.**
+
+### Step 2: Configure the GitHub Secret
+
+You need to securely provide your Vercel URL to the build process.
+
+1.  In your GitHub repository, go to **Settings** > **Secrets and variables** > **Actions**.
+2.  Under "Repository secrets", click **New repository secret**.
+3.  For the **Name**, enter exactly `VERCEL_URL`.
+4.  For the **Secret**, paste the full Vercel URL you copied in Step 1.
+5.  Click **Add secret**.
+
+![GitHub Secrets Location](https://storage.googleapis.com/project-idx-assets/github-secrets-location.png)
+
+### Step 3: Run the Build Workflow
+
+Now that the secret is set, you can build the app.
+
+1.  Go to the **Actions** tab in your GitHub repository.
+2.  In the left sidebar, click on **"Build Android APK for Testing"**.
+3.  Click the **"Run workflow"** button, and then click the green "Run workflow" button in the dropdown that appears.
+
+### Step 4: Download and Install the APK
+
+1.  The build will take a few minutes. Once it's complete, click on the completed workflow run.
+2.  Under the **"Artifacts"** section, you will see `app-debug`. Click it to download the `app-debug.apk` file.
+3.  Transfer this file to your Android device and install it.
+
+The app will now be correctly configured to communicate with your server, and all features, including video search, will work.
+
+---
 
 ## Restricting Your YouTube API Key
 
