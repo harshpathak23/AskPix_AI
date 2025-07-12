@@ -752,7 +752,12 @@ export default function HomeClientPage() {
 
   const handleApiError = (e: any) => {
     console.error("Solution retrieval failed", e);
-    setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    let errorMessage = e instanceof Error ? e.message : 'An unexpected error occurred.';
+    if (!apiBaseUrl) {
+        errorMessage = "The app is not configured with a server URL. Please ensure the VERCEL_URL secret is set in your GitHub repository and rebuild the app.";
+    }
+    setError(errorMessage);
     setAppState('result');
   };
   
@@ -1052,5 +1057,3 @@ export default function HomeClientPage() {
     </>
   );
 }
-
-    
