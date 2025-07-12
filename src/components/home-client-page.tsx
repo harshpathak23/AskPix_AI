@@ -720,16 +720,32 @@ export default function HomeClientPage() {
     
     if (!result?.solution || !result?.topic || !result.identifiedSubject) {
       setError('Could not generate a solution. Please try again.');
-      setAppState('result');
-    } else {
-      setAppState('result');
     }
+    setAppState('result');
   };
 
   const handleApiError = (e: any) => {
     console.error("Solution retrieval failed", e);
     setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
     setAppState('result');
+  };
+  
+  const callApi = async (endpoint: string, payload: object) => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!apiBaseUrl) {
+      throw new Error("API URL is not configured. Please set VERCEL_URL in your environment.");
+    }
+    const response = await fetch(`${apiBaseUrl}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: `API request failed with status ${response.status}` }));
+      throw new Error(errorData.error || `API Error`);
+    }
+    return response.json();
   };
 
   const handleGetSolutionFromImage = async () => {
@@ -742,25 +758,9 @@ export default function HomeClientPage() {
     try {
       const croppedDataUri = await getCroppedImg(imgRef.current, crop);
       setCroppedImage(croppedDataUri);
-
-      const isStatic = process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true';
-      const apiBaseUrl = isStatic ? process.env.NEXT_PUBLIC_API_BASE_URL : '';
-      if (isStatic && !apiBaseUrl) {
-          throw new Error("App is not configured with a server URL. Please set VERCEL_URL in your GitHub repository secrets.");
-      }
       
       const payload = { photoDataUri: croppedDataUri, language, subject };
-      const response = await fetch(`${apiBaseUrl}/api/solve`, { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(payload) 
-      });
-
-      if (!response.ok) { 
-          const errorData = await response.json().catch(() => ({error: `API request failed with status ${response.status}`})); 
-          throw new Error(errorData.error || `API Error`); 
-      }
-      const result = await response.json();
+      const result = await callApi('/api/solve', payload);
       handleApiResponse(result);
     } catch (e) {
       handleApiError(e);
@@ -770,26 +770,10 @@ export default function HomeClientPage() {
   const handleGetSolutionFromText = async () => {
     setAppState('solving');
     setError(null);
-    setCroppedImage(null); // Ensure no image is shown for text questions
+    setCroppedImage(null);
     try {
-      const isStatic = process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true';
-      const apiBaseUrl = isStatic ? process.env.NEXT_PUBLIC_API_BASE_URL : '';
-      if (isStatic && !apiBaseUrl) {
-          throw new Error("App is not configured with a server URL. Please set VERCEL_URL in your GitHub repository secrets.");
-      }
-
       const payload = { questionText: textQuestion, language, subject };
-      const response = await fetch(`${apiBaseUrl}/api/solve-text`, { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(payload) 
-      });
-
-      if (!response.ok) { 
-          const errorData = await response.json().catch(() => ({error: `API request failed with status ${response.status}`})); 
-          throw new Error(errorData.error || `API Error`); 
-      }
-      const result = await response.json();
+      const result = await callApi('/api/solve-text', payload);
       handleApiResponse(result);
     } catch (e) {
       handleApiError(e);
@@ -809,29 +793,15 @@ export default function HomeClientPage() {
     const subjectForTranslation = identifiedSubject || subject;
     
     try {
-      const isStatic = process.env.NEXT_PUBLIC_IS_STATIC_BUILD === 'true';
-      const apiBaseUrl = isStatic ? process.env.NEXT_PUBLIC_API_BASE_URL : '';
-      if (isStatic && !apiBaseUrl) {
-          throw new Error("App is not configured with a server URL. Please set VERCEL_URL in your GitHub repository secrets.");
-      }
-
-      let response: Response;
+      let result;
       if (croppedImage) {
-          // It was an image question, re-solve with new language
           const payload = { photoDataUri: croppedImage, language: newLang, subject: subjectForTranslation };
-          response = await fetch(`${apiBaseUrl}/api/solve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          result = await callApi('/api/solve', payload);
       } else {
-          // It was a text question, re-solve with new language
           const payload = { questionText: textQuestion, language: newLang, subject: subjectForTranslation };
-          response = await fetch(`${apiBaseUrl}/api/solve-text`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          result = await callApi('/api/solve-text', payload);
       }
 
-      if (!response.ok) {
-          const errorData = await response.json().catch(() => ({error: `API request failed with status ${response.status}`})); 
-          throw new Error(errorData.error || 'Failed to translate the solution.');
-      }
-      
-      const result = await response.json();
       if (result.error) throw new Error(result.error);
       if (!result?.solution) throw new Error('Failed to translate the solution.');
 
