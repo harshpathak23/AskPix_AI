@@ -35,7 +35,7 @@ export const searchYouTube = ai.defineTool(
       // Refine the query to be more specific for educational content.
       const refinedQuery = `${query} tutorial explanation class`;
 
-      const response = await youtube.search.list({
+      const searchResponse = await youtube.search.list({
         part: ['id'],
         q: refinedQuery,
         type: ['video'],
@@ -43,13 +43,30 @@ export const searchYouTube = ai.defineTool(
         relevanceLanguage: language,
         regionCode: regionCode,
         videoCategoryId: '27', // Category for Education
-        videoEmbeddable: 'true', // CRITICAL: Only search for videos that can be embedded.
+        videoEmbeddable: 'true',
       });
 
-      const videoId = response.data.items?.[0]?.id?.videoId;
-      if (videoId) {
-        return { videoId };
+      const videoIds = searchResponse.data.items?.map(item => item.id?.videoId).filter((id): id is string => !!id);
+
+      if (!videoIds || videoIds.length === 0) {
+        return {};
       }
+      
+      // Now, check the status of these videos to find one that is truly available.
+      const videoDetailsResponse = await youtube.videos.list({
+        part: ['status'],
+        id: videoIds,
+      });
+
+      const embeddableVideo = videoDetailsResponse.data.items?.find(
+        (video) => video.status?.embeddable === true && video.status?.privacyStatus === 'public'
+      );
+
+      if (embeddableVideo?.id) {
+        return { videoId: embeddableVideo.id };
+      }
+
+      // If no suitable video is found after checking details, return empty.
       return {};
     } catch (error) {
       console.error('Error searching YouTube:', error);
