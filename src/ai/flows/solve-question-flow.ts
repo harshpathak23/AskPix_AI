@@ -23,7 +23,7 @@ Your task is to analyze the provided image of a question and generate a comprehe
 2.  **Identify the Topic:** Determine the specific topic within that subject.
 3.  **Solve the Problem:** Provide a clear, detailed, step-by-step solution.
 4.  **Find a Video:** Based on the identified topic and language, use the 'searchYouTube' tool to find a relevant educational video.
-    - The search query should be specific to the topic.
+    - The search query MUST be specific and include keywords like "tutorial", "explanation", or "class". For example, if the topic is "Quadratic Equations", a good query would be "Quadratic Equations tutorial explanation".
     - You MUST use 'IN' for the 'regionCode' parameter to ensure the video is relevant for an Indian audience.
     - You MUST use the user's selected '{{{language}}}' for the 'language' parameter.
 5.  **Language:** The entire response (solution, topic, formulas) must be in the target language: '{{{language}}}'.
@@ -35,7 +35,7 @@ Your task is to analyze the provided image of a question and generate a comprehe
 - Subject Hint: {{{subject}}}
 - Question Image: {{media url=photoDataUri}}
 
-Generate the response according to the output schema, including the 'youtubeVideoId' if a video was found.
+Generate the response according to the output schema, including the 'youtubeVideoId' and 'youtubeVideoThumbnail' if a video was found.
 `,
 });
 
