@@ -52,8 +52,8 @@ jobs:
 
     - name: Build and Sync Capacitor App
       env:
-        # This secret must be set in your GitHub repository settings.
-        # It should be the full URL of your deployed Vercel application.
+        # These secrets must be set in your GitHub repository settings.
+        # They provide the necessary URLs and API keys for the build.
         NEXT_PUBLIC_API_BASE_URL: ${{ secrets.VERCEL_URL }}
         YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       run: |
@@ -61,6 +61,10 @@ jobs:
           echo "Error: VERCEL_URL secret is not set."
           echo "Please add it to your repository secrets in GitHub Settings."
           exit 1
+        fi
+        if [ -z "$YOUTUBE_API_KEY" ]; then
+          echo "Warning: YOUTUBE_API_KEY secret is not set."
+          echo "The YouTube video feature may not work in the built app."
         fi
         # The cap:sync script runs the static build and syncs the native project.
         npm run cap:sync
