@@ -19,17 +19,21 @@ The web version of this application, which includes the AI server, can be deploy
 The Android app can be built automatically using GitHub Actions. This is the recommended method and does not require a local computer with Android Studio.
 
 1.  **Deploy to Vercel:** Follow the steps above to deploy the web app and get your public URL.
-2.  **Add GitHub Secret:** You must provide your Vercel URL to the GitHub build process.
+2.  **Create and Restrict YouTube API Key:** The app requires a YouTube API key to find related videos.
+    *   Go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and create a new API key.
+    *   **Crucially, you must restrict this key.** Click on the key name.
+    *   Under "API restrictions," select "Restrict key" and choose the **"YouTube Data API v3"**.
+    *   Save the changes.
+3.  **Add GitHub Secrets:** You must provide your Vercel URL and new YouTube API key to the GitHub build process.
     *   In your GitHub repository, go to "Settings" > "Secrets and variables" > "Actions".
     *   Click "New repository secret".
-    *   For the "Name", enter `VERCEL_URL`.
-    *   For the "Value", paste your full Vercel deployment URL (e.g., `https://ask-pix-ai.vercel.app`).
-    *   Click "Add secret".
-3.  **Run the Build Workflow:**
+    *   Create a secret named `VERCEL_URL` and paste your full Vercel deployment URL as the value.
+    *   Create another secret named `YOUTUBE_API_KEY` and paste your restricted YouTube API key as the value.
+4.  **Run the Build Workflow:**
     *   Go to the "Actions" tab in your GitHub repository.
     *   In the left sidebar, click on "Build Android APK for Testing".
     *   Click the "Run workflow" button on the right, and then click the green "Run workflow" button in the dropdown.
-4.  **Download the APK:**
+5.  **Download the APK:**
     *   The build will take a few minutes. Once it's complete, click on the completed workflow run.
     *   Under the "Artifacts" section, you will see `app-debug`. Click it to download the `app-debug.apk` file.
     *   You can then transfer and install this APK file on your Android device.
